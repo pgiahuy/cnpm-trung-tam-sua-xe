@@ -1,15 +1,31 @@
-from flask_login import UserMixin
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, ForeignKey, DOUBLE
-from sqlalchemy.orm import relationship
-from enum import Enum as RoleEnum
+from enum import Enum
 
+from flask_login import UserMixin
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DOUBLE, Enum as SQLEnum
+from sqlalchemy.orm import relationship
 from garage import db, app
 from datetime import datetime
 
-class UserRole(RoleEnum):
+class UserRole(Enum):
     USER = 1
     EMPLOYEE = 2
     ADMIN = 3
+
+class AppointmentStatus(Enum):
+    BOOKED = 1
+    CONFIRMED = 2
+    CANCELLED = 3
+    COMPLETED = 4
+
+class VehicleStatus(Enum):
+    PENDING_APPOINTMENT = 1 # đặt lịch, chưa đến gara
+    RECEIVED = 2
+    DIAGNOSING = 3  # đang kiểm tra
+    WAITING_APPROVAL = 4  # chờ khách duyệt giá
+    REPAIRING = 5
+    DONE = 6
+    DELIVERED = 7
+    CANCELLED = 8
 
 
 class Base(db.Model):
@@ -19,7 +35,7 @@ class Base(db.Model):
     created_date = Column(DateTime, default=datetime.now)
 
     def __str__(self):
-        return getattr(self, "full_name", "id")
+        return getattr(self, "full_name", str(self.id))
 
 
 class User(Base, UserMixin):
@@ -30,7 +46,7 @@ class User(Base, UserMixin):
         String(300),
         default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     )
-    role = Column(Enum(UserRole), default=UserRole.USER)
+    Column(SQLEnum(UserRole), default=UserRole.USER)
     customer = relationship("Customer", backref="user", uselist=False)
     employee = relationship("Employee", backref="user", uselist=False)
 
@@ -51,8 +67,18 @@ class Employee(Base):
 class Vehicle(db.Model):
     license_plate = Column(String(12), primary_key=True)
     vehicle_type = Column(String(50), nullable=False)
+    vehicle_status = Column(SQLEnum(VehicleStatus), default=VehicleStatus.PENDING_APPOINTMENT)
     customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
     receptions = relationship("ReceptionForm", backref="vehicle", lazy=True)
+
+class Appointment(Base):
+    customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
+    vehicle_plate = Column(String(12), ForeignKey("vehicle.license_plate"), nullable=False)
+    schedule_time = Column(DateTime, nullable=False)
+    status = Column(SQLEnum(AppointmentStatus), default=AppointmentStatus.BOOKED)
+    note = Column(String(255))
+    customer = relationship("Customer", backref="appointments", lazy=True)
+    vehicle = relationship("Vehicle", backref="appointments", lazy=True)
 
 class ReceptionForm(Base):
     error_description = Column(String(255))

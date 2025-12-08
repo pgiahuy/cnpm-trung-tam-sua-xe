@@ -1,6 +1,8 @@
 
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, redirect
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_login import login_user, logout_user
+
 from garage import app, dao, db, bcrypt
 from garage.models import UserRole, User
 
@@ -9,88 +11,61 @@ from garage.models import UserRole, User
 def index():
     return render_template("index.html")
 
-@app.route('/api/login', methods=['POST'])
+# @app.route("/register",methods=['GET','POST'])
+# def register():
+#     err_msg = None
+#     if request.method == 'POST':
+#         password = request.form.get('password')
+#         confirm = request.form.get('confirm')
+#         if password==confirm:
+#             username = request.form.get('username')
+#             name = request.form.get('name')
+#             avatar = request.files.get('avatar')
+#             file_path=None
+#             # if avatar:
+#             #     upload_result = cloudinary.uploader.upload(avatar)
+#             #     file_path = upload_result["secure_url"]
+#             try:
+#                 dao.add_user(name=name, username=username, password=password, avatar=file_path)
+#                 return redirect("/login")
+#             except:
+#                 db.session.rollback()
+#                 err_msg = "Lỗi rồi khách ơi!"
+#         else:
+#             err_msg="Mật khẩu không khớp!"
+#     return render_template('register.html', err_msg=err_msg)
+
+
+@app.route('/login', methods=['POST'])
 def login():
-    data = request.get_json()
-    if not data or not data.get('username') or not data.get('password'):
-        return jsonify({"msg": "Thiếu username hoặc password"}), 400
-    username = data['username']
-    password = data['password']
-    user = User.query.filter_by(username=username).first()
+    err_msg = None
 
-    if user and dao.auth_user(username, password):
-        access_token = create_access_token(
-            identity={
-                "id": user.id,
-                "username": user.username,
-                "full_name": user.name,
-                "user_role": user.user_role.name
-            }
-        )
-        return jsonify({
-            "success": True,
-            "access_token": access_token,
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "full_name": user.name,
-                "user_role": user.user_role.name
-            }
-        }), 200
-    else:
-        return jsonify({
-            "success": False,
-            "msg": "Sai tên đăng nhập hoặc mật khẩu!",
-        }), 401
+    if request.method.__eq__('POST'):
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = dao.auth_user(username, password)
 
-@app.route('/api/logout', methods=['POST'])
+        if user:
+            login_user(user)
+            if user.user_role == UserRole.ADMIN:
 
-@app.route('/api/profile', methods=['GET'])
-@jwt_required()
-def profile():
-    current_user = get_jwt_identity()
-    return jsonify({
-        "msg": "Đã đăng nhập thành công!",
-        "user": current_user
-    })
+                return redirect("/admin")
+            else:
+                return redirect("/")
+        else:
+            err_msg = "Tên đăng nhập hoặc mật khẩu không đúng!"
+
+    return render_template('login.html', err_msg=err_msg)
+
+@app.route("/logout")
+def logout_my_user():
+    logout_user()
+    return redirect('/login')
 
 
-@app.route('/api/register', methods=['POST'])
-def register_public():
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({"msg": "Dữ liệu không hợp lệ"}), 400
-
-    username = data.get('username')
-    password = data.get('password')
-    full_name = data.get('full_name', '').strip()
-    avatar = data.get('avatar', 'default.jpg')
-
-    if not username or not password:
-        return jsonify({"msg": "Vui lòng nhập tài khoản và mật khẩu"}), 400
-
-    if User.query.filter(
-        (User.username == username)
-    ).first():
-        return jsonify({"msg": "Số điện thoại đã được sử dụng"}), 400
-
-    try:
-        dao.add_user(
-            name=full_name or username,
-            username=username,
-            password=password,
-            avatar=avatar,
-        )
-
-        return jsonify({
-            "success": True,
-            "msg": "Đăng ký thành công! Bạn có thể đăng nhập ngay.",
-            "redirect": "/login"
-        }), 201
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"msg": "Đăng ký thất bại, vui lòng thử lại!"}), 500
+@login.user_loader
+def get_user(user_id):
+    return dao.get_user_by_id(user_id)
 
 if __name__ == '__main__':
     app.run(debug=True)

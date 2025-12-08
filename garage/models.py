@@ -5,10 +5,6 @@ from enum import Enum as RoleEnum
 from garage import db, app
 from datetime import datetime
 
-class UserRole(RoleEnum):
-    USER = 1
-    EMPLOYER = 2
-    ADMIN = 3
 
 class Base(db.Model):
     __abstract__ = True
@@ -21,7 +17,7 @@ class Base(db.Model):
         return self.name
 
 class User(Base,UserMixin):
-    username = Column(String(10), nullable=False,unique=True)
+    username = Column(String(150), nullable=False ,unique=True)
     password = Column(String(150), nullable = False)
     avatar = Column(String(300), default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png")
     user_role = Column(Enum(UserRole), default= UserRole.USER)

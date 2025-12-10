@@ -3,7 +3,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 
 from garage import app, db
-from garage.models import Service, Customer, Vehicle, User
+from garage.models import Service, Customer, Vehicle, User,Employee
 
 
 class MyAdminHome(AdminIndexView):
@@ -15,6 +15,7 @@ class MyAdminModelView(ModelView):
     edit_template = "admin/edit.html"
 
 class ServiceAdmin(MyAdminModelView):
+    column_list = ['name', 'description', 'active', 'price','created_date']
     column_labels = {
         'name': 'Tên dịch vụ',
         'description' : 'Mô tả',
@@ -43,16 +44,31 @@ class CustomerAdmin(MyAdminModelView):
         )
     }
 
+class EmployeeAdmin(MyAdminModelView):
+    column_list = ['full_name',  'phone','active', 'user']
+    column_labels = {
+        'full_name': 'Họ tên',
+        'phone' : 'Số điện thoại',
+        'active':'Trạng thái',
+        'created_date':'Ngày tạo',
+        'user': 'Tài khoản'
+
+    }
+
+    column_formatters = {
+        'user': lambda v, c, m, p: m.user.username if m.user else ''
+    }
 
 class UserAdmin(MyAdminModelView):
-    column_list = ['username', 'avatar', 'active', 'role']
+    column_list = ['username',  'active', 'role','created_date']
     column_labels = {
         'username': 'Tên đăng nhập',
-        'avatar': 'Avatar',
         'active':'Trạng thái',
         'role':'Vai trò',
         'created_date': 'Ngày tạo'
     }
+
+
 
 class VehicleAdmin(MyAdminModelView):
     column_list = ['license_plate', 'vehicle_type', 'customer_id', 'vehicle_status', 'receptions']
@@ -72,5 +88,6 @@ admin = Admin(
 )
 admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
 admin.add_view(CustomerAdmin(Customer, db.session,name='KHÁCH HÀNG'))
+admin.add_view(EmployeeAdmin(Employee, db.session,name='NHÂN VIÊN'))
 admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
 admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))

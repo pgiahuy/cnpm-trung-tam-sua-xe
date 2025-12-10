@@ -1,50 +1,79 @@
 {%extends 'layout/base.html'%}
 {%block title%}Đặt lịch sửa xe{%endblock%}
 {%block content%}
-<h2 class="text-info text-center mt-3">ĐẶT LỊCH SỬA XE HÔM NAY</h2>
-{% if err_msg%}
-<div class="alert alert-danger">{{err_msg}}</div>
-{%endif%}
-<form method="post" enctype="multipart/form-data">
 
-    <div class="form-floating mb-3 mt-3">
-        <input type="text" class="form-control" id="name" placeholder="Enter fullname" name="name">
-        <label for="name">Enter fullname</label>
-    </div>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
 
-    <div class="form-floating mt-3 mb-3">
-        <input  class="form-control" id="pwd" placeholder="Enter password" name="password" required>
-        <label for="pwd">Enter password</label>
-    </div>
+            <h1 class="text-info text-center fw-bold display-5 mb-4 border-bottom pb-2">ĐẶT LỊCH SỬA XE HÔM NAY</h1>
 
-    <div class="form-floating mt-3 mb-3">
-        <input type="tel" class="form-control" id="phone" placeholder="Enter phone number" name="phone" required>
-        <label for="phone">Phone number</label>
-    </div>
+            {% if err_msg%}
+            <div class="alert alert-danger">{{err_msg}}</div>
+            {%endif%}
 
-    <div class="form-floating mt-3 mb-3">
-        <input type="text" class="form-control" id="licensePlate" placeholder="Enter license plate" name="licensePlate" required>
-        <label for="licensePlate">License Plate</label>
-    </div>
+            <form method="post" enctype="multipart/form-data" class="p-4 border rounded shadow-sm bg-white">
 
-    <div class="form-floating mt-3 mb-3">
-        <select class="form-select" id="vehicleType" name="vehicleType" required>
-            <option value="" disabled selected>Loại xe</option>
-            <option value="motorbike">Xe máy</option>
-            <option value="car">Ô tô</option>
-        </select>
-        <label for="vehicleType">Loại xe</label>
-    </div>
-    <div class="col-12">
-        <div class="form-floating">
-            <textarea class="form-control" placeholder="Mô tả tình trạng xe"
-                      id="description" name="description"
-                      style="height: 200px"></textarea>
-            <label for="description">Mô tả tình trạng xe</label>
+                <h3 class="fw-semibold text-secondary mb-3 mt-4">Thông tin Phương tiện</h3>
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <select class="form-select" id="vehicleType" name="vehicleType" required>
+                                <option value="" disabled selected>Chọn loại xe</option>
+                                <option value="motorbike">Xe máy</option>
+                                <option value="car">Ô tô</option>
+                            </select>
+                            <label for="vehicleType">Loại xe</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="licensePlate" placeholder="Biển số xe"
+                                   name="licensePlate" required>
+                            <label for="licensePlate">Biển số xe</label>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="fw-semibold text-secondary mb-3 mt-4">Chi tiết Lịch hẹn</h3>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="date" class="form-control" id="scheduleDate" name="scheduleDate" required>
+                            <label for="scheduleDate">Chọn ngày hẹn</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select" id="scheduleTime" name="scheduleTime" required>
+                                <option value="" disabled selected>Chọn khung giờ</option>
+                                {% for slot in time_slots %}
+                                <option value="{{ slot }}">{{ slot }}</option>
+                                {% endfor %}
+                            </select>
+                            <label for="scheduleTime">Khung giờ</label>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-12">
+                    <div class="form-floating">
+                        <textarea class="form-control" placeholder="Mô tả tình trạng xe (Lỗi, hỏng hóc...)"
+                                  id="description" name="description"
+                                  style="height: 150px"></textarea>
+                        <label for="description">Mô tả tình trạng xe</label>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5">
+                    <button class="btn btn-primary btn-lg w-50" type="submit">Đăng ký Lịch Hẹn</button>
+                </div>
+            </form>
         </div>
     </div>
-    <div class="form-floating mt-3 mb-3 text-center">
-        <button class="btn btn-success" type="submit">Đăng ký</button>
-    </div>
-</form>
+</div>
+
 {%endblock%}

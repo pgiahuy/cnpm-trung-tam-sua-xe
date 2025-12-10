@@ -110,8 +110,11 @@ class Invoice(Base):
     repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False, unique=True)
 
 class SparePart(Base):
-    unit_price = Column(DOUBLE)
-    supplier = Column(String(100))
+    name = Column(String(255), nullable=False) #add
+    unit_price = Column(DOUBLE, nullable=False)
+    unit = Column(String(50), nullable=False) # add
+    supplier = Column(String(100), default=None)
+    image_url = Column(String(255), default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png")  #add
     repair_details = relationship("RepairDetail", backref="spare_part", lazy=True)
 
 class RepairDetail(Base):
@@ -126,6 +129,11 @@ class Service(Base):
     name = Column(String(255), nullable=False)
     description = Column(String(500))
     price = Column(DOUBLE, nullable=False, default=0)
+    image = Column(
+        String(300),
+        default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    )
+
 
 
 if __name__ == "__main__":
@@ -136,5 +144,12 @@ if __name__ == "__main__":
             for s in services:
                 ser = Service(**s)
                 db.session.add(ser)
+
+        with open("data/spare_parts.json", encoding="utf-8") as f:
+            spare_parts = json.load(f)
+            for sp in spare_parts:
+                each_sp = SparePart(**sp)
+                db.session.add(each_sp)
+
 
         db.session.commit()

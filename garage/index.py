@@ -1,6 +1,6 @@
 import math
-# import cloudinary
-# import cloudinary.uploader
+import cloudinary
+import cloudinary.uploader
 from flask import render_template, request, session, jsonify
 from werkzeug.utils import redirect
 from flask_login import current_user,login_user,logout_user
@@ -11,12 +11,16 @@ from garage.models import UserRole
 
 @app.route("/")
 def index():
+    items = dao.load_menu_items()
     services = dao.load_services()
-    return render_template('index.html', services=services)
+    spare_parts = dao.load_spare_parts()
+    return render_template('index.html', items = items, services = services, spare_parts = spare_parts)
 
-# @app.context_processor
-# def common_adtributes():
-#     pass
+@app.context_processor
+def common_adtributes():
+    return {
+        "items" : dao.load_menu_items()
+    }
 
 @app.route("/register",methods=['get','post'])
 def register():

@@ -1,33 +1,127 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
 
-    {% for s in services %}
-    <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow">
-        <a href="#">
-            <img class="rounded-t-lg" src="https://flowbite.com/docs/images/blog/image-1.jpg" alt="" />
-        </a>
-        <div class="p-5">
-            <a href="#">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">{{ s.name }}</h5>
-            </a>
-            <p class="mb-3 font-normal text-gray-700">{{ s.description }}</p>
-            <p class="mb-3 font-semibold text-gray-800">Giá: {{ s.price }} VNĐ</p>
+<div class="hero-section">
+    <div class="overlay">
+        <h1 class="display-4 text-white">Chăm Sóc Xe Chuyên Nghiệp 24/7</h1>
+        <p class="lead text-white-50">Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng.</p>
 
-            <a href="#"
-               class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-600
-                      rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
-                Xem chi tiết
-                <svg class="w-3.5 h-3.5 ms-2" aria-hidden="true"
-                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                          stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                </svg>
-            </a>
+        <div class="d-flex justify-content-center mt-4">
+            <a href="/?item_id=2" class="btn btn-warning btn-lg me-3">Đặt lịch ngay</a>
+
         </div>
     </div>
-    {% endfor %}
+</div>
 
+<hr>
+
+<div class="container-xxl my-5" style="max-width: 1400px;">
+    <h4 class="text-center mb-5 display-5" style="color: light-blue; font-weight: 300;">Dịch vụ của chúng tôi</h4>
+
+    <div class="row align-items-center" style="background-color: #1a1a1a; padding: 40px; border-radius: 10px;">
+
+        <div class="col-md-6">
+            <div class="row service-grid">
+                {% for s in services[:4] %}
+                <div class="col-6 p-3">
+                    <div class="service-tile text-center p-4 h-100"
+                         style="background-color: #2a2a2a; border-radius: 8px;">
+                        <img src="{{s.image}}" alt="Icon" style="width: 50px; height: 50px; margin-bottom: 10px;">
+
+                        <p class="mb-0 fw-bold text-white">{{s.name}}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-md-6 d-none d-md-block">
+            <img src="https://res.cloudinary.com/dbxtbus46/image/upload/v1737732080/cld-sample.jpg" alt="Xe hơi thể thao" class="img-fluid"
+                 style="border-radius: 8px;">
+        </div>
+
+    </div>
+</div>
+
+<div class="text-center my-5">
+    <a href="/service" class="btn btn-outline-secondary btn-lg">
+        Xem tất cả dịch vụ &raquo;
+    </a>
+</div>
+
+<hr>
+
+<div class="container-xxl my-5" style="max-width: 1400px;"> <h4 class="text-center mb-5 display-5" style="color: light-blue; font-weight: 300;">Linh kiện nổi bật </h4>
+
+    <div class="row">
+
+        {% for p in spare_parts[:4] %}
+
+
+        <div class="col-md-3 col-12 mt-3 p-2">
+            <div class="card h-100 shadow">
+                <img class="card-img-top" src="{{p.image_url}}" alt="{{p.name}}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{p.name}}</h5>
+                    <p class="card-text"> {{p.supplier | truncate(80)}}</p>
+                    <p class="card-text text-info fs-5 fw-bold">
+                        {{ "{:,.0f}".format(p.unit_price | default(0)) }} VNĐ / {{ p.unit }}
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+
+        {% endfor %}
+    </div>
+
+    <div class="text-center my-5">
+        <a href="/products" class="btn btn-success btn-lg">
+            Xem toàn bộ Linh kiện &raquo;
+        </a>
+    </div>
+</div>
+
+<hr class="my-5">
+<!-- Form nhận tư vấn -->
+
+<div class="container-fluid my-5">
+
+    <div class="row contact-form-section shadow-lg mx-auto"
+         style="max-width: 1100px; background-color: #3e3e3e; border-radius: 10px;">
+
+        <div class="col-md-5 p-0 d-none d-md-block">
+            <img src="https://res.cloudinary.com/dbxtbus46/image/upload/v1737732080/cld-sample.jpg" alt="Nhân viên bảo dưỡng" class="img-fluid" style="height: 100%; object-fit: cover; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+        </div>
+
+        <div class="col-md-7 p-5">
+            <h3 class="text-white mb-4 text-center">Nhận tư vấn miễn phí</h3>
+
+            <form action="/submit-contact" method="post">
+                <div class="mb-3">
+                    <input type="text" class="form-control form-control-custom" name="name" placeholder="Họ và tên" required>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <input type="tel" class="form-control form-control-custom" name="phone" placeholder="SĐT" required>
+                    </div>
+                    <div class="col-sm-6">
+                        <input type="email" class="form-control form-control-custom" name="email" placeholder="Email">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <textarea class="form-control form-control-custom" name="message" rows="3" placeholder="Lời nhắn"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-warning btn-lg w-100 btn-custom-gradient">
+                    Gửi
+                </button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

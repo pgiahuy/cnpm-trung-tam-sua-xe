@@ -37,7 +37,6 @@ class Base(db.Model):
     def __str__(self):
         return getattr(self, "full_name", str(self.id))
 
-
 class User(Base, UserMixin):
     username = Column(String(150), nullable=False, unique=True)
     password = Column(String(150), nullable=False)

@@ -1,0 +1,30 @@
+/* Trong file static/css/styles.css của bạn */
+
+.hero-section {
+    /* THAY THẾ DÒNG NÀY BẰNG URL CLOUDINARY CỦA BẠN */
+    background-image: url('https://res.cloudinary.com/dbxtbus46/image/upload/v1737732080/cld-sample.jpg');
+
+    background-size: cover;
+    background-position: center;
+    height: 500px; /* Điều chỉnh chiều cao theo ý muốn */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+    border-radius: 10px;
+}
+
+/* Thêm lớp phủ mờ để chữ dễ đọc hơn */
+.overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 60px;
+    border-radius: 10px;
+}
+
+/* (Thêm các style khác nếu cần) */
+/* Điều chỉnh khoảng cách và kích thước chữ */
+.hero-section h1 {
+    font-weight: 700;
+}

@@ -1,33 +1,43 @@
 {% extends 'layout/base.html' %}
 
 {% block content %}
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
 
-    {% for s in services %}
-    <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow">
-        <a href="#">
-            <img class="rounded-t-lg" src="https://flowbite.com/docs/images/blog/image-1.jpg" alt="" />
-        </a>
-        <div class="p-5">
-            <a href="#">
-                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">{{ s.name }}</h5>
-            </a>
-            <p class="mb-3 font-normal text-gray-700">{{ s.description }}</p>
-            <p class="mb-3 font-semibold text-gray-800">Giá: {{ s.price }} VNĐ</p>
+<div class="hero-section">
+    <div class="overlay">
+        <h1 class="display-4 text-white">Chăm Sóc Xe Chuyên Nghiệp 24/7</h1>
+        <p class="lead text-white-50">Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng.</p>
 
-            <a href="#"
-               class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-600
-                      rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
-                Xem chi tiết
-                <svg class="w-3.5 h-3.5 ms-2" aria-hidden="true"
-                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                          stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-                </svg>
-            </a>
+        <div class="d-flex justify-content-center mt-4">
+            <a href="/?item_id=2" class="btn btn-warning btn-lg me-3">Đặt lịch ngay</a>
+
+        </div>
+    </div>
+</div>
+
+<hr>
+
+<h2 class="text-center my-4 text-info"> DỊCH VỤ NỔI BẬT </h2>
+
+<div class="row">
+    {% for s in services[:3] %}
+    <div class="col-md-4 col-12 mt-3 p-2">
+        <div class="card h-100 shadow">
+            <img class="card-img-top" src="{{s.image}}" alt="Service image">
+            <div class="card-body">
+                <h4 class="card-title">{{s.name}}</h4>
+                <p class="card-text"> {{s.description | truncate(80)}}</p>
+                <p class="card-text text-info fw-bold">{{s.price}} VNĐ</p>
+                <a href="#" class="btn btn-primary mt-2">Đặt dịch vụ</a>
+            </div>
         </div>
     </div>
     {% endfor %}
-
 </div>
+
+<div class="text-center my-5">
+    <a href="?item_id=1" class="btn btn-outline-secondary btn-lg">
+        Xem tất cả dịch vụ &raquo;
+    </a>
+</div>
+
 {% endblock %}

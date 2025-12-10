@@ -1,10 +1,19 @@
 import hashlib
-from garage import db
+import json
+
+from garage import db, app
 from garage.models import User, Service
 
 
 def load_services():
     return Service.query.all()
+
+def load_spare_parts():
+    return Service.query.all()
+
+def load_menu_items():
+    with open("data/menu_items.json", encoding="utf-8") as f:
+        return json.load(f)
 
 def add_user(name, username, password, avatar):
     password=hashlib.md5(password.encode("utf-8")).hexdigest()
@@ -18,3 +27,11 @@ def auth_user(username,password):
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
+
+if __name__=="__main__":
+    with app.app_context():
+        print(load_menu_items())
+
+
+
+

@@ -1,0 +1,72 @@
+[
+    {
+        "name": "Lọc nhớt động cơ Bosch",
+        "unit_price": 185000.0,
+        "unit": "Cái",
+        "supplier": "Công ty TNHH Phụ tùng Bình Minh",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Dầu động cơ Castrol EDGE 5W-40",
+        "unit_price": 1150000.0,
+        "unit": "Can 4 Lít",
+        "supplier": "Đại lý dầu nhớt Á Châu",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Má phanh Ceramic trước",
+        "unit_price": 950000.0,
+        "unit": "Bộ",
+        "supplier": "Nhà cung cấp Phanh Việt",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Bugi bạch kim Denso",
+        "unit_price": 150000.0,
+        "unit": "Cái",
+        "supplier": "N/A",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Ắc quy GS 12V-60AH",
+        "unit_price": 1900000.0,
+        "unit": "Bình",
+        "supplier": "Ắc quy chính hãng Miền Nam",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Lọc gió điều hòa carbon",
+        "unit_price": 420000.0,
+        "unit": "Cái",
+        "supplier": "Tự nhập",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Cần gạt nước Silicone (2 chiếc)",
+        "unit_price": 380000.0,
+        "unit": "Bộ",
+        "supplier": "Công ty Phụ kiện xe hơi 3A",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Nước làm mát Blue (2L)",
+        "unit_price": 250000.0,
+        "unit": "Chai",
+        "supplier": "N/A",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Đèn pha Halogen H4 Philips",
+        "unit_price": 550000.0,
+        "unit": "Cái",
+        "supplier": "Nhà phân phối đèn xe Quang Phát",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    },
+    {
+        "name": "Cao su chân máy",
+        "unit_price": 1250000.0,
+        "unit": "Cái",
+        "supplier": "Phụ tùng máy Vĩnh Phát",
+        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    }
+]

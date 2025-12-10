@@ -12,12 +12,12 @@ from garage.models import UserRole
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    services = dao.load_services()
+    return render_template('index.html', services=services)
 
-@app.context_processor
-def common_adtributes():
-    a=None
-    pass
+# @app.context_processor
+# def common_adtributes():
+#     pass
 
 @app.route("/register",methods=['get','post'])
 def register():

@@ -1,3 +1,4 @@
+import json
 from enum import Enum
 
 from flask_login import UserMixin
@@ -130,4 +131,11 @@ class Service(Base):
 
 if __name__ == "__main__":
     with app.app_context():
-        db.create_all()
+        #db.create_all()
+        with open("data/service.json", encoding="utf-8") as f:
+            services = json.load(f)
+            for s in services:
+                ser = Service(**s)
+                db.session.add(ser)
+
+        db.session.commit()

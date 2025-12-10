@@ -16,6 +16,7 @@ def index():
 
 @app.context_processor
 def common_adtributes():
+    a=None
     pass
 
 @app.route("/register",methods=['get','post'])

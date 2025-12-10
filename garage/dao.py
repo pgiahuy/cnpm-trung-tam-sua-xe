@@ -2,14 +2,14 @@ import hashlib
 import json
 
 from garage import db, app
-from garage.models import User, Service
+from garage.models import User, Service, SparePart
 
 
 def load_services():
     return Service.query.all()
 
 def load_spare_parts():
-    return Service.query.all()
+    return SparePart.query.all()
 
 def load_menu_items():
     with open("data/menu_items.json", encoding="utf-8") as f:

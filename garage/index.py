@@ -9,7 +9,6 @@ import dao
 from garage.decorators import anonymous_required
 from garage.models import UserRole
 
-
 @app.route("/")
 def index():
     services = dao.load_services()

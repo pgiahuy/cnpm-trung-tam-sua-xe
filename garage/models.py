@@ -41,12 +41,11 @@ class Base(db.Model):
 class User(Base, UserMixin):
     username = Column(String(150), nullable=False, unique=True)
     password = Column(String(150), nullable=False)
-    full_name = Column(String(255))
     avatar = Column(
         String(300),
         default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     )
-    Column(SQLEnum(UserRole), default=UserRole.USER)
+    role = Column(SQLEnum(UserRole), default=UserRole.USER)
     customer = relationship("Customer", backref="user", uselist=False)
     employee = relationship("Employee", backref="user", uselist=False)
 
@@ -131,7 +130,7 @@ class Service(Base):
 
 if __name__ == "__main__":
     with app.app_context():
-        #db.create_all()
+        db.create_all()
         with open("data/service.json", encoding="utf-8") as f:
             services = json.load(f)
             for s in services:

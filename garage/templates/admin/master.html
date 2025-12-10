@@ -1,10 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <title>{{ admin_view.name or admin_view.category }} - Admin</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
 </head>
-<body>
-$END$
+
+<body id="page-top">
+<!-- Page Wrapper -->
+<div id="wrapper">
+
+    {% include 'admin/_aside.html' %}
+
+    <div id="content-wrapper" class="d-flex flex-column">
+
+        <div id="content">
+            {% include 'admin/_topbar.html' %}
+            <div class="container-fluid pt-4">
+                {% block body %}{% endblock %}
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- SB Admin 2 JS -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/4.1.4/js/sb-admin-2.min.js"></script>
+
 </body>
 </html>

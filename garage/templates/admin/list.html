@@ -1,10 +1,119 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'admin/master.html' %}
+
+{% block body %}
+
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+
+
+        {% if admin_view.can_create %}
+        <a href="{{ url_for(admin_view.endpoint + '.create_view') }}" class="btn btn-success btn-sm">
+            <i class="fa fa-plus"></i> Thêm mới
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card-body">
+
+        <!-- Search -->
+        {% if search_supported %}
+        <form method="GET" class="mb-3">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Tìm kiếm..." name="search" value="{{ search }}">
+                <button class="btn btn-primary"><i class="fa fa-search"></i></button>
+            </div>
+        </form>
+        {% endif %}
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                <tr>
+                    {% for c, name in list_columns %}
+                    <th>{{ name }}</th>
+                    {% endfor %}
+                    <th>Actions</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for row in data %}
+                <tr>
+                    {% for c, name in list_columns %}
+                    <td>
+                        {% if c == 'active' %}
+                        {% if row[c] %}
+
+                        <span class="fa fa-check-circle text-success" title="active: true"></span>
+                        {% else %}
+                        <span class="fa fa-minus-circle text-danger" title="active: false"></span>
+
+                        {% endif %}
+                        {% else %}
+                        {{ get_value(row, c) }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+
+
+                    <td class="text-center">
+                        {% if admin_view.can_edit %}
+                        <a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
+                           class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        {% endif %}
+
+                        {% if admin_view.can_delete %}
+                        <form action="{{ url_for(admin_view.endpoint + '.delete_view', id=row.id) }}" method="post"
+                              style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Xác nhận xóa?')">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if pagination %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+
+                <!-- Previous -->
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ pagination.prev() if pagination.has_prev else '#' }}">Previous</a>
+                </li>
+
+                <!-- Page numbers -->
+                {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ pagination.page_url(p) }}">{{ p }}</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% endif %}
+                {% endfor %}
+
+                <!-- Next -->
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ pagination.next() if pagination.has_next else '#' }}">Next</a>
+                </li>
+
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

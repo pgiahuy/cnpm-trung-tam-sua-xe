@@ -2,18 +2,17 @@
 
 .hero-section {
     /* THAY THẾ DÒNG NÀY BẰNG URL CLOUDINARY CỦA BẠN */
-    background-image: url('https://res.cloudinary.com/dbxtbus46/image/upload/v1737732080/cld-sample.jpg');
-
+    background-image: url('https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg');
     background-size: cover;
     background-position: center;
-    height: 500px; /* Điều chỉnh chiều cao theo ý muốn */
+    height: 500px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 30px; /* Có thể xóa nếu bạn muốn Hero Section và nội dung bên dưới liền kề */
     position: relative;
-    border-radius: 10px;
+
 }
 
 /* Thêm lớp phủ mờ để chữ dễ đọc hơn */
@@ -66,4 +65,47 @@
 
 .btn-custom-gradient:hover {
     background: linear-gradient(to right, #ff6600, #ff9933);
+}
+
+/* Trong file static/css/styles.css của bạn */
+
+/* --- STYLE CHO NAVBAR TRONG SUỐT --- */
+.navbar-transparent {
+    /* Đặt nền trong suốt */
+    background-color: transparent !important;
+
+    /* Đảm bảo chữ trắng nổi bật trên ảnh */
+    color: white !important;
+
+    /* Đảm bảo các link (a) cũng màu trắng */
+    transition: background-color 0.3s;
+}
+
+/* Định dạng riêng cho các liên kết trong navbar */
+.navbar-transparent .nav-link,
+.navbar-transparent .navbar-brand {
+    color: white !important;
+    font-weight: 500;
+    /* Có thể thêm text-shadow nếu chữ khó đọc */
+    /* text-shadow: 1px 1px 3px rgba(0,0,0,0.5); */
+}
+
+/* Hiệu ứng khi cuộn: Đặt lại nền tối khi cuộn xuống (tùy chọn) */
+.navbar-transparent.scrolled {
+    background-color: #212529 !important; /* Màu nền tối khi cuộn */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Trong file static/css/styles.css của bạn */
+
+/* Áp dụng font Open Sans cho toàn bộ Navbar */
+
+body {
+    font-family: "Open Sans", Helvetica, Arial, sans-serif;
+    font-weight: normal; /* Độ đậm thường cho toàn bộ nội dung */
+}
+
+/* Tùy chỉnh: Đảm bảo các tiêu đề (h1-h6) vẫn có độ đậm hơn (ví dụ: 700) */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
 }

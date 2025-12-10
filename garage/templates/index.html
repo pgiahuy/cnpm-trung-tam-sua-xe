@@ -3,13 +3,14 @@
 {% block content %}
 
 <div class="hero-section">
-    <div class="overlay">
-        <h1 class="display-4 text-white">Chăm Sóc Xe Chuyên Nghiệp 24/7</h1>
-        <p class="lead text-white-50">Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng.</p>
+    <div class="container">
+        <div class="overlay">
+            <h3 class="display-4 text-white">Chăm Sóc Xe Chuyên Nghiệp 24/7</h3>
+            <p class="lead text-white-50">Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng.</p>
 
-        <div class="d-flex justify-content-center mt-4">
-            <a href="/?item_id=2" class="btn btn-warning btn-lg me-3">Đặt lịch ngay</a>
-
+            <div class="d-flex justify-content-center mt-4">
+                <a href="/?item_id=2" class="btn btn-warning btn-lg me-3">Đặt lịch ngay</a>
+            </div>
         </div>
     </div>
 </div>
@@ -37,7 +38,7 @@
         </div>
 
         <div class="col-md-6 d-none d-md-block">
-            <img src="https://res.cloudinary.com/dbxtbus46/image/upload/v1737732080/cld-sample.jpg" alt="Xe hơi thể thao" class="img-fluid"
+            <img src="https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg" alt="Xe hơi thể thao" class="img-fluid"
                  style="border-radius: 8px;">
         </div>
 
@@ -61,7 +62,7 @@
 
         <div class="col-md-3 col-12 mt-3 p-2">
             <div class="card h-100 shadow">
-                <img class="card-img-top" src="{{p.image_url}}" alt="{{p.name}}" style="height: 200px; object-fit: cover;">
+                <img class="card-img-top" src="{{p.image_url}}" alt="{{p.name}}" style="height: 200px; object-fit: contain;">
                 <div class="card-body">
                     <h5 class="card-title">{{p.name}}</h5>
                     <p class="card-text"> {{p.supplier | truncate(80)}}</p>
@@ -78,22 +79,20 @@
     </div>
 
     <div class="text-center my-5">
-        <a href="/spare_parts" class="btn btn-success btn-lg">
-            Xem toàn bộ Linh kiện &raquo;
-        </a>
+       <a href="/?item_id=1" class="btn btn-outline-secondary btn-lg">
+        Xem toàn bộ linh kiện &raquo;
+    </a>
     </div>
 </div>
 
 <hr class="my-5">
-<!-- Form nhận tư vấn -->
-
 <div class="container-fluid my-5">
 
     <div class="row contact-form-section shadow-lg mx-auto"
          style="max-width: 1100px; background-color: #3e3e3e; border-radius: 10px;">
 
         <div class="col-md-5 p-0 d-none d-md-block">
-            <img src="https://res.cloudinary.com/dbxtbus46/image/upload/v1737732080/cld-sample.jpg" alt="Nhân viên bảo dưỡng" class="img-fluid" style="height: 100%; object-fit: cover; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
+            <img src="https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg" alt="Nhân viên bảo dưỡng" class="img-fluid" style="height: 100%; object-fit: cover; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
         </div>
 
         <div class="col-md-7 p-5">

@@ -1,16 +1,28 @@
-<form action="/action_page.php">
-    <div class="mb-3 mt-3">
-        <label for="email" class="form-label">Email:</label>
-        <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
-    </div>
-    <div class="mb-3">
-        <label for="pwd" class="form-label">Password:</label>
-        <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="pswd">
-    </div>
-    <div class="form-check mb-3">
-        <label class="form-check-label">
-            <input class="form-check-input" type="checkbox" name="remember"> Remember me
-        </label>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+{% extends 'layout/base.html'%}
+
+{% block tittle %} Đăng nhập {% endblock %}
+
+{% block content %}
+<div class="text-info text-center mt-3">
+    <h1> TRANG ĐĂNG NHẬP </h1>
+    {% if err_msg_html %}
+    <div class="alert alert-danger">{{err_msg_html}}</div>
+    {% endif %}
+    <form method="POST">
+        <div class="form-floating mb-3 mt-3">
+            <input type="text" class="form-control" id="email"  name="username">
+            <label >Username</label>
+        </div>
+
+        <div class="form-floating mt-3 mb-3">
+            <input type="text" class="form-control" id="pwd" p name="password">
+            <label >Password</label>
+        </div>
+         <div class="form-floating mt-3 mb-3">
+            <button class="btn btn-info" type="submit"> Đăng nhập </button>
+        </div>
+
+    </form>
+
+</div>
+{% endblock %}

@@ -32,41 +32,41 @@
         "unit_price": 1900000.0,
         "unit": "Bình",
         "supplier": "Ắc quy chính hãng Miền Nam",
-        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
         "name": "Lọc gió điều hòa carbon",
         "unit_price": 420000.0,
         "unit": "Cái",
         "supplier": "Tự nhập",
-        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
         "name": "Cần gạt nước Silicone (2 chiếc)",
         "unit_price": 380000.0,
         "unit": "Bộ",
         "supplier": "Công ty Phụ kiện xe hơi 3A",
-        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
         "name": "Nước làm mát Blue (2L)",
         "unit_price": 250000.0,
         "unit": "Chai",
         "supplier": "N/A",
-        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
         "name": "Đèn pha Halogen H4 Philips",
         "unit_price": 550000.0,
         "unit": "Cái",
         "supplier": "Nhà phân phối đèn xe Quang Phát",
-        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
         "name": "Cao su chân máy",
         "unit_price": 1250000.0,
         "unit": "Cái",
         "supplier": "Phụ tùng máy Vĩnh Phát",
-        "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     }
 ]

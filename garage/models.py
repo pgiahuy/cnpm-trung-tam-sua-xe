@@ -72,12 +72,10 @@ class Vehicle(db.Model):
     receptions = relationship("ReceptionForm", backref="vehicle", lazy=True)
 
 class Appointment(Base):
-    customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
     vehicle_plate = Column(String(12), ForeignKey("vehicle.license_plate"), nullable=False)
     schedule_time = Column(DateTime, nullable=False)
     status = Column(SQLEnum(AppointmentStatus), default=AppointmentStatus.BOOKED)
     note = Column(String(255))
-    customer = relationship("Customer", backref="appointments", lazy=True)
     vehicle = relationship("Vehicle", backref="appointments", lazy=True)
 
 class ReceptionForm(Base):
@@ -92,6 +90,18 @@ class RepairForm(Base):
     total_cost = Column(DOUBLE, nullable=False)
     details = relationship("RepairDetail", backref="repair_form", lazy=True)
     invoice = relationship("Invoice", backref="repair_form", uselist=False)
+
+    @property
+    def calculate_total(self):
+        total = 0
+        for d in self.details:
+            if d.service:
+                total += d.service.price
+            total += d.labor_cost
+            if d.spare_part:
+                total += d.spare_part.unit_price
+        return total
+
 
 class Invoice(Base):
     labor_total = Column(DOUBLE)
@@ -108,8 +118,16 @@ class SparePart(Base):
 class RepairDetail(Base):
     task = Column(String(255), nullable=False)
     labor_cost = Column(DOUBLE, nullable=False)
+
+    service_id = Column(Integer, ForeignKey("service.id"))
     spare_part_id = Column(Integer, ForeignKey("spare_part.id"))
     repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False)
+
+class Service(Base):
+    name = Column(String(255), nullable=False)
+    description = Column(String(500))
+    price = Column(DOUBLE, nullable=False, default=0)
+
 
 if __name__ == "__main__":
     with app.app_context():

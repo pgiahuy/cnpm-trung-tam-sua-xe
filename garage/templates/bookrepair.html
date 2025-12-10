@@ -1,0 +1,50 @@
+{%extends 'layout/base.html'%}
+{%block title%}Đặt lịch sửa xe{%endblock%}
+{%block content%}
+<h2 class="text-info text-center mt-3">ĐẶT LỊCH SỬA XE HÔM NAY</h2>
+{% if err_msg%}
+<div class="alert alert-danger">{{err_msg}}</div>
+{%endif%}
+<form method="post" enctype="multipart/form-data">
+
+    <div class="form-floating mb-3 mt-3">
+        <input type="text" class="form-control" id="name" placeholder="Enter fullname" name="name">
+        <label for="name">Enter fullname</label>
+    </div>
+
+    <div class="form-floating mt-3 mb-3">
+        <input  class="form-control" id="pwd" placeholder="Enter password" name="password" required>
+        <label for="pwd">Enter password</label>
+    </div>
+
+    <div class="form-floating mt-3 mb-3">
+        <input type="tel" class="form-control" id="phone" placeholder="Enter phone number" name="phone" required>
+        <label for="phone">Phone number</label>
+    </div>
+
+    <div class="form-floating mt-3 mb-3">
+        <input type="text" class="form-control" id="licensePlate" placeholder="Enter license plate" name="licensePlate" required>
+        <label for="licensePlate">License Plate</label>
+    </div>
+
+    <div class="form-floating mt-3 mb-3">
+        <select class="form-select" id="vehicleType" name="vehicleType" required>
+            <option value="" disabled selected>Loại xe</option>
+            <option value="motorbike">Xe máy</option>
+            <option value="car">Ô tô</option>
+        </select>
+        <label for="vehicleType">Loại xe</label>
+    </div>
+    <div class="col-12">
+        <div class="form-floating">
+            <textarea class="form-control" placeholder="Mô tả tình trạng xe"
+                      id="description" name="description"
+                      style="height: 200px"></textarea>
+            <label for="description">Mô tả tình trạng xe</label>
+        </div>
+    </div>
+    <div class="form-floating mt-3 mb-3 text-center">
+        <button class="btn btn-success" type="submit">Đăng ký</button>
+    </div>
+</form>
+{%endblock%}

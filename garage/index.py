@@ -62,6 +62,9 @@ def logout_my_user():
     logout_user()
     return redirect('/login')
 
+@app.route('/book repair')
+def book_repair():
+
 
 @login.user_loader
 def get_user(user_id):

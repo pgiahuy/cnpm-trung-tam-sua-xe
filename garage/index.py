@@ -1,6 +1,6 @@
 import math
-import cloudinary
-import cloudinary.uploader
+# import cloudinary
+# import cloudinary.uploader
 from flask import render_template, request, session, jsonify
 from werkzeug.utils import redirect
 from flask_login import current_user,login_user,logout_user

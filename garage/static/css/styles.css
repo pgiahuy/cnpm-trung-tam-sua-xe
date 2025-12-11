@@ -1,7 +1,5 @@
-/* Trong file static/css/styles.css của bạn */
 
 .hero-section {
-    /* THAY THẾ DÒNG NÀY BẰNG URL CLOUDINARY CỦA BẠN */
     background-image: url('https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg');
     background-size: cover;
     background-position: center;
@@ -10,51 +8,42 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    margin-bottom: 30px; /* Có thể xóa nếu bạn muốn Hero Section và nội dung bên dưới liền kề */
+    margin-bottom: 30px;
     position: relative;
 
 }
-
-/* Thêm lớp phủ mờ để chữ dễ đọc hơn */
+/* Lớp phủ mờ */
 .overlay {
     background-color: rgba(0, 0, 0, 0.4);
     padding: 60px;
     border-radius: 10px;
 }
 
-/* (Thêm các style khác nếu cần) */
-/* Điều chỉnh khoảng cách và kích thước chữ */
+
+/* Khoảng cách và kích thước chữ */
 .hero-section h1 {
     font-weight: 700;
-
 }
 
-
-/* Trong file static/css/styles.css của bạn */
-
-/* --- STYLE CHUNG CHO FORM --- */
 .contact-form-section {
-    max-width: 900px; /* Giới hạn chiều rộng của form tổng thể */
+    max-width: 900px;
     margin: 0 auto;
 }
 
-/* --- STYLE CHO INPUTS (Tương tự mẫu: màu nền đậm hơn, không viền) --- */
 .form-control-custom {
-    background-color: #555555; /* Màu nền xám đậm */
-    border: none; /* Bỏ viền */
-    color: white; /* Màu chữ trắng */
-    padding: 15px; /* Tăng padding để input trông lớn hơn */
+    background-color: #555555;
+    border: none;
+    color: white;
+    padding: 15px;
     border-radius: 6px;
 }
 
-/* Giữ màu chữ trắng khi người dùng nhập */
+
 .form-control-custom::placeholder {
     color: #cccccc;
 }
 
-/* --- STYLE CHO NÚT GỬI (Gradient theo mẫu) --- */
 .btn-custom-gradient {
-    /* Gradient từ cam nhạt đến cam đậm */
     background: linear-gradient(to right, #ff9933, #ff6600);
     border: none;
     color: white;
@@ -67,45 +56,131 @@
     background: linear-gradient(to right, #ff6600, #ff9933);
 }
 
-/* Trong file static/css/styles.css của bạn */
 
-/* --- STYLE CHO NAVBAR TRONG SUỐT --- */
 .navbar-transparent {
-    /* Đặt nền trong suốt */
     background-color: transparent !important;
-
-    /* Đảm bảo chữ trắng nổi bật trên ảnh */
     color: white !important;
-
-    /* Đảm bảo các link (a) cũng màu trắng */
     transition: background-color 0.3s;
 }
 
-/* Định dạng riêng cho các liên kết trong navbar */
 .navbar-transparent .nav-link,
 .navbar-transparent .navbar-brand {
     color: white !important;
     font-weight: 500;
-    /* Có thể thêm text-shadow nếu chữ khó đọc */
-    /* text-shadow: 1px 1px 3px rgba(0,0,0,0.5); */
-}
+    }
 
 /* Hiệu ứng khi cuộn: Đặt lại nền tối khi cuộn xuống (tùy chọn) */
 .navbar-transparent.scrolled {
-    background-color: #212529 !important; /* Màu nền tối khi cuộn */
+    background-color: #212529 !important;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
-/* Trong file static/css/styles.css của bạn */
-
-/* Áp dụng font Open Sans cho toàn bộ Navbar */
 
 body {
     font-family: "Open Sans", Helvetica, Arial, sans-serif;
     font-weight: normal; /* Độ đậm thường cho toàn bộ nội dung */
 }
 
-/* Tùy chỉnh: Đảm bảo các tiêu đề (h1-h6) vẫn có độ đậm hơn (ví dụ: 700) */
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
+}
+
+
+
+@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,600&display=swap");
+:root {
+  --red: #ee596f;
+  --yellow: #feb800;
+  --green: #07a787;
+  --purple: #c765d0;
+  --gray: #787878;
+  --gray-light: #eee;
+  --gray-dark: #2e3c54;
+  --font: "Montserrat", sans-serif;
+}
+a {
+  text-decoration: none;
+}
+a,
+button {
+  cursor: pointer;
+  outline: none;
+}
+.sign-up {
+  font-family: var(--font);
+  width: 100%;
+  max-width: 800px;
+  height: 600px;
+  background-color: var(--gray-light);
+  margin: 25px auto;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sign-up__form {
+  background-color: white;
+  width: 50%;
+  height: 70%;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 20px 20px 10px rgba(0,0,0,.15);
+}
+.sign-up__content {
+  padding: 40px;
+  display: flex;
+  flex-flow: column nowrap;
+}
+.sign-up__title {
+  color: var(--gray-dark);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 25px;
+  margin-bottom: 30px;
+}
+.sign-up__inp {
+  outline: none;
+  margin-bottom: 15px;
+  padding: 20px 20px 20px 0;
+  border: 0;
+  border-bottom: 1px solid var(--gray-light);
+
+  font-size: 16px;
+  font-weight: 400;
+  font-family: var(--font);
+}
+.sign-up__buttons {
+  display: flex;
+  justify-content: space-between;
+}
+.sign-up__buttons > * {
+  width: 50%;
+  padding: 20px 15px;
+  border: 0;
+  text-transform: uppercase;
+  font-size: 16px;
+}
+
+.forgot__password {
+  text-align: center;
+  text-transform: uppercase;
+  color: var(--gray);
+  display: inline-block;
+  margin-top: 20px;
+}
+.btn--register {
+  background-color: var(--gray-light);
+  color: var(--gray);
+}
+.btn--signin {
+  background-color: var(--gray-dark);
+  color: white;
+  text-align: right;
 }

@@ -6,6 +6,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, D
 from sqlalchemy.orm import relationship
 from garage import db, app
 from datetime import datetime
+import hashlib
 
 class UserRole(Enum):
     USER = 1
@@ -173,18 +174,21 @@ class Invoice(Base):
 
 if __name__ == "__main__":
     with app.app_context():
-        #db.create_all()
-        with open("data/service.json", encoding="utf-8") as f:
-            services = json.load(f)
-            for s in services:
-                ser = Service(**s)
-                db.session.add(ser)
+        # db.create_all()
+        # with open("data/service.json", encoding="utf-8") as f:
+        #     services = json.load(f)
+        #     for s in services:
+        #         ser = Service(**s)
+        #         db.session.add(ser)
+        #
+        # with open("data/spare_parts.json", encoding="utf-8") as f:
+        #     spare_parts = json.load(f)
+        #     for sp in spare_parts:
+        #         each_sp = SparePart(**sp)
+        #         db.session.add(each_sp)
 
-        with open("data/spare_parts.json", encoding="utf-8") as f:
-            spare_parts = json.load(f)
-            for sp in spare_parts:
-                each_sp = SparePart(**sp)
-                db.session.add(each_sp)
-
-
+        password = hashlib.md5("123".encode("utf-8")).hexdigest()
+        u1 = User(username="user", password=password)
+        db.session.add(u1)
         db.session.commit()
+

@@ -151,6 +151,14 @@ def booking():
         form_data=form_data
     )
 
+
+@app.route("/services/<int:service_id>")
+def site_service_detail(service_id):
+    service = dao.get_service_by_id(service_id)
+    if service:
+        return render_template('detail-services.html', service=service)
+    else:
+        return "Không tìm thấy dịch vụ."
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True,port=5000)
 

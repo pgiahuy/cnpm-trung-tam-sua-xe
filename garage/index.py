@@ -22,7 +22,7 @@ def common_adtributes():
         "items" : dao.load_menu_items()
     }
 
-@app.route("/register",methods=['get','post'])
+@app.route("/register",methods=['GET','POST'])
 def register():
     err_msg=None
     if request.method == 'POST':
@@ -61,7 +61,6 @@ def login_my_user():
         if user:
             login_user(user)
             if user.user_role == UserRole.ADMIN:
-
                 return redirect("/admin")
             else:
                 return redirect("/")

@@ -28,9 +28,7 @@ def auth_user(username,password):
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
-if __name__=="__main__":
-    with app.app_context():
-        print(load_menu_items())
+
 
 
 

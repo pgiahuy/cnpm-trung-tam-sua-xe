@@ -1,18 +1,25 @@
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
+from flask_login import current_user
 from wtforms import DateTimeLocalField
 
 from garage import app, db
-from garage.models import Service, Customer, Vehicle, User,Employee,Appointment,RepairForm,ReceptionForm,SparePart
+from garage.models import Service, Customer, Vehicle, User, Employee, Appointment, RepairForm, ReceptionForm, SparePart, \
+    UserRole
+
 
 class MyAdminHome(AdminIndexView):
     template = "admin/master.html"
+    # def is_accessible(self) -> bool:
+    #     return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
 class MyAdminModelView(ModelView):
     list_template = "admin/list.html"
     create_template = "admin/create.html"
     edit_template = "admin/edit.html"
+    # def is_accessible(self) -> bool:
+    #     return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
 
 
 class ServiceAdmin(MyAdminModelView):
@@ -74,7 +81,7 @@ class VehicleAdmin(MyAdminModelView):
     column_labels = {
         'license_plate': 'Biển số xe',
         'vehicle_type': 'Loại xe',
-        'vehicle_status': 'Trạng thái',
+        #'vehicle_status': 'Trạng thái',
         'customer_id': 'Khách hàng',
         'receptions': 'Phiếu tiếp nhận'
     }

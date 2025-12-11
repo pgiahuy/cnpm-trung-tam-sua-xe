@@ -1,6 +1,50 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
+{% macro render_status(v) %}
+    {% set value = v.value if v is not number else v %}
+    {% if value == 1 %}
+        <span class="badge text-white p-2 badge-light-text bg-info">Đã đặt lịch</span>
+    {% elif value == 2 %}
+        <span class="badge text-white p-2 badge-light-text bg-primary">Đã xác nhận</span>
+    {% elif value == 3 %}
+        <span class="badge text-white p-2 badge-light-text bg-danger">Đã hủy</span>
+    {% elif value == 4 %}
+        <span class="badge text-white p-2 badge-light-text bg-success">Đã tiếp nhận</span>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_vehicle_status(v) %}
+    {% set value = v.value if v is not number else v %}
+
+    {% if value == 1 %}
+        <span class="badge text-dark p-2 bg-warning">Chờ đến gara</span>
+
+    {% elif value == 2 %}
+        <span class="badge text-white p-2  bg-info">Đã nhận xe</span>
+
+    {% elif value == 3 %}
+        <span class="badge text-white p-2  bg-primary">Đang kiểm tra</span>
+
+    {% elif value == 4 %}
+        <span class="badge text-dark p-2 bg-warning">Chờ khách duyệt</span>
+
+    {% elif value == 5 %}
+        <span class="badge text-white p-2 bg-secondary">Đang sửa chữa</span>
+
+    {% elif value == 6 %}
+        <span class="badge text-white p-2 bg-success">Đã xong</span>
+
+    {% elif value == 7 %}
+        <span class="badge text-white p-2 bg-success">Đã giao xe</span>
+
+    {% elif value == 8 %}
+        <span class="badge text-white p-2 badge-light-text bg-danger">Đã hủy</span>
+
+    {% else %}
+        <span class="badge bg-secondary">{{ value }}</span>
+    {% endif %}
+{% endmacro %}
 
 <div class="card shadow mb-4">
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -43,15 +87,17 @@
                     {% for c, name in list_columns %}
                     <td>
                         {% if c == 'active' %}
-                        {% if row[c] %}
-
-                        <span class="fa fa-check-circle text-success" title="active: true"></span>
+                            {% if row[c] %}
+                                <span class="fa fa-check-circle text-success" title="active: true"></span>
+                            {% else %}
+                                <span class="fa fa-minus-circle text-danger" title="active: false"></span>
+                            {% endif %}
+                        {% elif c == 'status' %}
+                            {{ render_status(row[c]) }}
+                        {% elif c == 'vehicle_status' %}
+                            {{ render_vehicle_status(row[c]) }}
                         {% else %}
-                        <span class="fa fa-minus-circle text-danger" title="active: false"></span>
-
-                        {% endif %}
-                        {% else %}
-                        {{ get_value(row, c) }}
+                            {{ get_value(row, c) }}
                         {% endif %}
                     </td>
                     {% endfor %}

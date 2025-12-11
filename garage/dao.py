@@ -2,7 +2,7 @@ import hashlib
 import json
 
 from garage import db, app
-from garage.models import User, Service, SparePart
+from garage.models import User, Service, SparePart, Customer, UserRole
 
 
 def load_services():
@@ -15,11 +15,18 @@ def load_menu_items():
     with open("data/menu_items.json", encoding="utf-8") as f:
         return json.load(f)
 
-def add_user(name, username, password, avatar):
-    password=hashlib.md5(password.encode("utf-8")).hexdigest()
-    u = User(name=name,username=username,password=password,avatar=avatar)
-    db.session.add(u)
-    db.session.commit()
+
+def add_user(username, password, avatar, full_name, phone):
+    password = hashlib.md5(password.encode("utf-8")).hexdigest()
+    u = User(username=username, password=password, avatar=avatar, role=UserRole.USER)
+    c = Customer(full_name=full_name, phone=phone, user=u)
+    try:
+        db.session.add(u)
+        db.session.add(c)
+        db.session.commit()
+    except Exception as ex:
+        db.session.rollback()
+        # raise ex
 
 def auth_user(username,password):
     password = hashlib.md5(password.encode("utf-8")).hexdigest()

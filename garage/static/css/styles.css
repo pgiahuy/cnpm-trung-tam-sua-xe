@@ -1,5 +1,6 @@
 
 .hero-section {
+    position: relative;
     background-image: url('https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg');
     background-size: cover;
     background-position: center;
@@ -9,16 +10,36 @@
     justify-content: center;
     text-align: center;
     margin-bottom: 30px;
-    position: relative;
-
 }
-/* Lớp phủ mờ */
-.overlay {
-    background-color: rgba(0, 0, 0, 0.4);
-    padding: 60px;
+
+/* Lớp phủ đen toàn bộ ảnh */
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1;
     border-radius: 10px;
 }
 
+/* Nội dung nằm trên lớp phủ */
+.hero-section .overlay {
+    position: relative;
+    z-index: 2;
+    color: white;
+    padding: 20px;
+}
+
+/* Lớp phủ mờ */
+.overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+    padding: 100px;
+    width:100%;
+    border-radius: 10px;
+}
 
 /* Khoảng cách và kích thước chữ */
 .hero-section h1 {
@@ -122,8 +143,9 @@ button {
 .sign-up__form {
   background-color: white;
   width: 50%;
-  height: 70%;
+
   margin: 0 auto;
+  margin-bottom: 10px;
   position: relative;
   z-index: 10;
   border-radius: 8px;
@@ -157,16 +179,18 @@ button {
   font-family: var(--font);
 }
 .sign-up__buttons {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: center;
 }
+
 .sign-up__buttons > * {
-  width: 50%;
-  padding: 20px 15px;
-  border: 0;
-  text-transform: uppercase;
-  font-size: 16px;
+    width: 100%;
+    padding: 20px 15px;
+    border: 0;
+    text-transform: uppercase;
+    font-size: 16px;
 }
+
 
 .forgot__password {
   text-align: center;
@@ -183,4 +207,12 @@ button {
   background-color: var(--gray-dark);
   color: white;
   text-align: right;
+}
+.custom-file {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #3498db;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
 }

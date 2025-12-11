@@ -30,18 +30,19 @@ def register():
         confirm = request.form.get('confirm')
         if password==confirm:
             username = request.form.get('username')
-            name = request.form.get('name')
             avatar = request.files.get('avatar')
             file_path=None
+            full_name = request.form.get('full_name')
+            phone = request.form.get('phone')
             if avatar:
                 upload_result = cloudinary.uploader.upload(avatar)
                 file_path = upload_result["secure_url"]
             try:
-                dao.add_user(name=name, username=username, password=password, avatar=file_path)
-                return redirect("/login")
+                dao.add_user( username=username, password=password, avatar=file_path, full_name=full_name,   phone=phone )
+                return render_template("register.html", success=True)
             except:
                 db.session.rollback()
-                err_msg = "Lỗi rồi khách ơi!"
+                err_msg = "Hệ thống đang lỗi!"
         else:
             err_msg="Mật khẩu không khớp!"
 
@@ -81,6 +82,11 @@ def logout_my_user():
 @login.user_loader
 def get_user(user_id):
     return dao.get_user_by_id(user_id)
+
+@app.route("/services")
+def site_services():
+    services = dao.load_services()
+    return render_template('services.html', services=services)
 
 if __name__ == "__main__":
     app.run(debug=True)

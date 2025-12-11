@@ -106,7 +106,7 @@ class ReceptionForm(Base):
 class RepairForm(Base):
     reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False)
     employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
-    details = relationship("RepairDetail", backref="repair_form", lazy=True,cascade="all, delete-orphan")
+    details = db.relationship('RepairDetail', backref='repair_form', lazy='select', cascade='all, delete-orphan')
     invoice = relationship("Invoice", backref="repair_form", uselist=False)
 
     @property
@@ -119,18 +119,15 @@ class RepairDetail(Base):
     service_id = Column(Integer, ForeignKey("service.id"))
     spare_part_id = Column(Integer, ForeignKey("spare_part.id"))
     quantity = Column(Integer, nullable=False, default=1)
-
     repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False)
-
     service = relationship("Service", lazy=True)
-
     @property
     def total_cost(self):
         total = 0
 
         if self.service:
             total += self.service.price
-        total += self.labor_cost or 0
+        # total += self.labor_cost or 0
         if self.spare_part:
             total += (self.spare_part.unit_price or 0) * self.quantity
         return total
@@ -173,7 +170,7 @@ class Invoice(Base):
 
 if __name__ == "__main__":
     with app.app_context():
-        #db.create_all()
+        db.create_all()
         with open("data/service.json", encoding="utf-8") as f:
             services = json.load(f)
             for s in services:

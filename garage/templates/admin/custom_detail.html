@@ -1,0 +1,112 @@
+{% extends admin_base_template %}
+
+{% block body %}
+<div class="container-fluid mt-3">
+
+    <div class="card mb-3">
+        <div class="print-header text-center mt-4">
+            <h2 style="margin: 0; padding: 10px 0;">GARAGE CENTER</h2>
+        </div>
+
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">Phiếu sửa chữa {{ repair.id }}</h4>
+            <button class="btn btn-primary no-print" onclick="window.print()">
+                <i class="fa fa-print"></i> In
+            </button>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <td style="width: 20%;"><b>Khách hàng:</b></td>
+                        <td>
+
+                                {{ repair.reception_form.vehicle.customer
+                                    if repair.reception_form and repair.reception_form.vehicle
+                                    else '-' }}
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Biển số xe:</b></td>
+                        <td>
+
+                                {{ repair.reception_form.vehicle.license_plate
+                                    if repair.reception_form and repair.reception_form.vehicle
+                                    else '-' }}
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td><b>Nhân viên lập phiếu:</b></td>
+                        <td>{{ repair.employee.full_name if repair.employee else '-' }}</td>
+                    </tr>
+
+                    <tr>
+                        <td><b>Ngày lập:</b></td>
+                        <td>{{ repair.created_date }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table table-bordered">
+                <thead class="thead-light">
+                    <tr>
+                        <th>STT</th>
+                        <th>Sửa</th>
+                        <th>Hạng mục</th>
+                        <th>Linh kiện</th>
+                        <th>SL</th>
+                        <th>Đơn giá</th>
+                        <th>Tiền công</th>
+                        <th>Tổng</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for d in repair.details %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ d.task }}</td>
+                        <td>{{ d.service }}</td>
+                        <td>{{ d.spare_part.name if d.spare_part else "" }}</td>
+                        <td>{{ d.quantity if d.quantity else "" }}</td>
+                        <td>{{ d.spare_part.unit_price if d.spare_part else "" }}</td>
+                        <td>{{ "{:,.0f}".format(d.service.price) if d.service else "" }}</td>
+                        <td>{{ "{:,.0f}".format(d.total_cost) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p><b>Tổng tiền:</b> {{ "{:,.0f}".format(repair.calculate_total) }} ₫</p>
+        </div>
+    </div>
+</div>
+<style>
+.print-header {
+    display: none;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .print-header {
+        display: block !important;
+    }
+
+    .container-fluid, .card {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
+
+</style>
+
+{% endblock %}

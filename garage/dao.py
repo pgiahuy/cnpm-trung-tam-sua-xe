@@ -35,8 +35,11 @@ def auth_user(username,password):
 def get_user_by_id(user_id):
     return User.query.get(user_id)
 
-
-
-
+def get_service_by_id(service_id):
+    return Service.query.get(service_id)
+#
+# if __name__ == '__main__':
+#     with app.app_context():
+#         print(get_service_by_id(1))
 
 

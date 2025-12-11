@@ -60,7 +60,7 @@ def login_my_user():
 
         if user:
             login_user(user)
-            if user.user_role == UserRole.ADMIN:
+            if user.role == UserRole.ADMIN:
                 return redirect("/admin")
             else:
                 return redirect("/")

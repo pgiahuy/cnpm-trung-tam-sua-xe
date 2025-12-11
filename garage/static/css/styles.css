@@ -1,3 +1,13 @@
+@font-face {
+    font-family: 'Dosis';
+    src: url('/static/fonts/dosis.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+    font-family: 'Dosis', sans-serif;
+}
 
 .hero-section {
     position: relative;

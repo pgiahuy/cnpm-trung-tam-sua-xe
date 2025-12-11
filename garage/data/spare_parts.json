@@ -4,6 +4,7 @@
         "unit_price": 185000.0,
         "unit": "Cái",
         "supplier": "Công ty TNHH Phụ tùng Bình Minh",
+        "inventory": 5,
         "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     },
     {
@@ -11,6 +12,7 @@
         "unit_price": 1150000.0,
         "unit": "Can 4 Lít",
         "supplier": "Đại lý dầu nhớt Á Châu",
+        "inventory": 5,
         "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     },
     {
@@ -18,6 +20,7 @@
         "unit_price": 950000.0,
         "unit": "Bộ",
         "supplier": "Nhà cung cấp Phanh Việt",
+        "inventory": 11,
         "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     },
     {
@@ -25,6 +28,7 @@
         "unit_price": 150000.0,
         "unit": "Cái",
         "supplier": "N/A",
+        "inventory": 56,
         "image_url": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     },
     {
@@ -32,13 +36,7 @@
         "unit_price": 1900000.0,
         "unit": "Bình",
         "supplier": "Ắc quy chính hãng Miền Nam",
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Lọc gió điều hòa carbon",
-        "unit_price": 420000.0,
-        "unit": "Cái",
-        "supplier": "Tự nhập",
+        "inventory": 16,
         "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
@@ -46,6 +44,7 @@
         "unit_price": 380000.0,
         "unit": "Bộ",
         "supplier": "Công ty Phụ kiện xe hơi 3A",
+        "inventory": 56,
         "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
@@ -53,6 +52,7 @@
         "unit_price": 250000.0,
         "unit": "Chai",
         "supplier": "N/A",
+        "inventory": 56,
         "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
@@ -60,6 +60,7 @@
         "unit_price": 550000.0,
         "unit": "Cái",
         "supplier": "Nhà phân phối đèn xe Quang Phát",
+        "inventory": 526,
         "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     },
     {
@@ -67,6 +68,7 @@
         "unit_price": 1250000.0,
         "unit": "Cái",
         "supplier": "Phụ tùng máy Vĩnh Phát",
+        "inventory": 5116,
         "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
     }
 ]

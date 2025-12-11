@@ -141,6 +141,7 @@ class SparePart(Base):
     unit_price = Column(DOUBLE, nullable=False)
     unit = Column(String(50), nullable=False)
     supplier = Column(String(100), default=None)
+    inventory = Column(Integer, default=None)
     image_url = Column(String(255),
         default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     )

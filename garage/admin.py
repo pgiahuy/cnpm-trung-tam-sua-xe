@@ -1,10 +1,10 @@
 from flask_admin import Admin, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
+from wtforms import DateTimeLocalField
 
 from garage import app, db
-from garage.models import Service, Customer, Vehicle, User,Employee
-
+from garage.models import Service, Customer, Vehicle, User,Employee,Appointment,RepairForm,ReceptionForm,SparePart
 
 class MyAdminHome(AdminIndexView):
     template = "admin/master.html"
@@ -13,6 +13,7 @@ class MyAdminModelView(ModelView):
     list_template = "admin/list.html"
     create_template = "admin/create.html"
     edit_template = "admin/edit.html"
+
 
 class ServiceAdmin(MyAdminModelView):
     column_list = ['name', 'description', 'active', 'price','created_date']
@@ -68,8 +69,6 @@ class UserAdmin(MyAdminModelView):
         'created_date': 'Ngày tạo'
     }
 
-
-
 class VehicleAdmin(MyAdminModelView):
     column_list = ['license_plate', 'vehicle_type', 'customer_id', 'vehicle_status', 'receptions']
     column_labels = {
@@ -79,15 +78,64 @@ class VehicleAdmin(MyAdminModelView):
         'customer_id': 'Khách hàng',
         'receptions': 'Phiếu tiếp nhận'
     }
+class AppointmentAdmin(MyAdminModelView):
+    column_list = ['customer', 'vehicle', 'schedule_time', 'status', 'note']
+    column_labels = {
+        'customer': 'Khách',
+        'vehicle': 'Xe',
+        'schedule_time': 'Ngày hẹn',
+        'status': 'Trạng thái',
+        'note': 'Ghi chú'
+    }
+
+    form_overrides = {
+        'schedule_time': DateTimeLocalField,
+    }
+    form_args = {
+        'schedule_time': {
+            'format': '%Y-%m-%dT%H:%M'
+        }
+    }
+
+class RepairFormAdmin(MyAdminModelView):
+    column_list = ['employee', 'reception_form', 'details', 'invoice']
+    column_labels = {
+        'employee': 'Nhân viên lập',
+        'reception_form': 'Phiếu tiếp nhận',
+        'details': 'Mô tả',
+        'invoice': 'Hoá đơn',
+
+    }
+
+class ReceptionFormAdmin(MyAdminModelView):
+    column_list = ['id','employee', 'vehicle','error_description',  'repair_form']
+    column_labels = {
+        'id' : 'ID',
+        'error_description': 'Lỗi',
+        'employee': 'Nhân viên',
+        'vehicle': 'Xe',
+        'repair_form': 'Phiếu sửa chữa',
+    }
 
 
-admin = Admin(
-    app=app,
-    name="GARAGE ADMIN",
-    index_view=MyAdminHome(name="QUẢN TRỊ"),
-)
+class SparePartAdmin(MyAdminModelView):
+    column_list = ['name','unit_price', 'unit','supplier','inventory']
+    column_labels = {
+        'name' : 'Tên',
+        'unit_price': 'Giá',
+        'unit': 'Đơn vị',
+        'supplier': 'Nhà cung cấp',
+        'inventory': 'Tồn kho'
+    }
+
+admin = Admin(app=app,name="GARAGE ADMIN",index_view=MyAdminHome(name="QUẢN TRỊ"))
+
 admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
 admin.add_view(CustomerAdmin(Customer, db.session,name='KHÁCH HÀNG'))
 admin.add_view(EmployeeAdmin(Employee, db.session,name='NHÂN VIÊN'))
 admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
 admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
+admin.add_view(AppointmentAdmin(Appointment, db.session,name='LỊCH HẸN'))
+admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN'))
+admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA'))
+admin.add_view(SparePartAdmin(SparePart, db.session,name='PHỤ TÙNG'))

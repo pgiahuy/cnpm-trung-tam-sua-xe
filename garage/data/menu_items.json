@@ -1,14 +1,17 @@
 [
   {
     "id": 1,
-    "name": "Dịch vụ"
+    "name": "Dịch vụ",
+     "url_name": "services"
   },
   {
     "id": 2,
-    "name": "Đặt lịch"
+    "name": "Đặt lịch",
+    "url_name": "bookrepair"
   },
    {
     "id": 3,
-    "name": "Liên hệ"
+    "name": "Liên hệ",
+     "url_name": "contact"
   }
 ]

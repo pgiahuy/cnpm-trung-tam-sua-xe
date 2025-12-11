@@ -1,0 +1,40 @@
+{% extends 'layout/base.html'%}
+
+{% block title %} Đăng ký {% endblock %}
+
+{% block content %}
+<div class="text-info text-center mt-3">
+    {% if err_msg %}
+    <div class="alert alert-danger">{{err_msg}}</div>
+    {% endif %}
+    {% if success %}
+    <script>
+        alert("Đăng ký tài khoản thành công! Nhấn ok để đăng nhập ngay!");
+       window.location.href = "/login";
+    </script>
+    {% endif %}
+    <form class="sign-up__form" method="POST" enctype="multipart/form-data">
+
+        <div class="sign-up__content">
+            <h2 class="sign-up__title">Sign up</h2>
+            <input class="sign-up__inp" type="text" placeholder="Họ và tên" name="full_name" required="required"/>
+            <input class="sign-up__inp" type="text" placeholder="Số điện thoại" name="phone" required="required"/>
+            <input class="sign-up__inp" type="text" placeholder="Username" name="username" required="required"/>
+            <input class="sign-up__inp" type="password" placeholder="Password" name="password" required="required"/>
+            <input class="sign-up__inp" type="password" placeholder="Confirm" name="confirm" required="required"/>
+            <label for="avatar" class="custom-file">
+                Upload a picture as your avatar
+            </label>
+            <input id="avatar" type="file" name="avatar" hidden>
+
+
+        </div>
+        <div class="sign-up__buttons">
+            <button class="btn btn--signin" type="submit">Sign up</button>
+        </div>
+
+    </form>
+
+
+</div>
+{% endblock %}

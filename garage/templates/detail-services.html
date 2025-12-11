@@ -1,0 +1,67 @@
+{% extends 'layout/base.html' %}
+
+{% block title %} Chi tiết dịch vụ: {{ service.name }} {% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-5 py-4 bg-dark text-white rounded shadow-lg">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-1" style="color: #ff9933;">{{ service.name }}</h1>
+            <p class="lead">Chi tiết dịch vụ và bảng giá tham khảo</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card bg-dark text-white h-100 shadow-lg border-0">
+                <img src="{{ service.image | default('https://via.placeholder.com/600x400/333333/FFFFFF?text=Hình+ảnh+dịch+vụ') }}" 
+                     alt="{{ service.name }}" 
+                     class="img-fluid rounded-top" 
+                     style="object-fit: cover; max-height: 400px; width: 100%;">
+                
+                <div class="card-body">
+                    <h3 class="card-title text-warning fw-bold">Tổng quan</h3>
+                    <p class="card-text">{{ service.description }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card bg-dark text-white h-100 shadow-lg border-0">
+                <div class="card-body">
+                    
+                    <h3 class="fw-bold mb-4" style="color: #0d6efd;">Chi tiết dịch vụ</h3>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-secondary rounded">
+                        <span class="fs-5 fw-bold text-light">Giá tham khảo từ:</span>
+                        <span class="fs-3 fw-bolder" style="color: #ff9933;">
+                            {{ "{:,.0f} VNĐ".format(service.price | default(0)) }}
+                        </span>
+                    </div>
+
+                    <h4 class="mt-4 text-info">Quy trình thực hiện:</h4>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-success me-2"></i> Kiểm tra sơ bộ tình trạng xe.</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i> Tiến hành công việc {{ service.name }} theo tiêu chuẩn.</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i> Kiểm tra chất lượng cuối cùng.</li>
+                        <li><i class="fas fa-check-circle text-success me-2"></i> Bàn giao và tư vấn bảo dưỡng.</li>
+                    </ul>
+                    
+                    <div class="mt-5 text-center">
+                        <a href="/dat-lich-ngay?service_id={{service.id}}" class="btn btn-warning btn-lg btn-custom-gradient w-75">
+                            <i class="fas fa-calendar-alt me-2"></i> Đặt lịch ngay
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="text-center mt-5 p-4 bg-dark rounded shadow-lg">
+        <h3 class="text-white">Cần tư vấn thêm?</h3>
+        <p class="text-light">Liên hệ với đội ngũ kỹ thuật của chúng tôi ngay!</p>
+        <a href="#contact-section" class="btn btn-primary btn-lg">Liên hệ</a>
+    </div>
+
+</div>
+{% endblock %}

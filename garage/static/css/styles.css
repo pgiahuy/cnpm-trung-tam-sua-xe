@@ -226,3 +226,22 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
+
+
+.btn-custom-gradient {
+    background: linear-gradient(to right, #ff9933, #ff6600);
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 12px 0;
+    transition: background 0.3s ease;
+}
+
+.btn-custom-gradient:hover {
+    background: linear-gradient(to right, #ff6600, #ff9933);
+}
+
+/* Tùy chọn: Thêm hiệu ứng cho card tối */
+.card.bg-dark {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}

@@ -1,13 +1,14 @@
 import math
 import cloudinary
 import cloudinary.uploader
-from flask import render_template, request, session, jsonify
+from flask import render_template, request, session, jsonify, url_for, flash
 from werkzeug.utils import redirect
-from flask_login import current_user,login_user,logout_user
+from flask_login import current_user,login_user,logout_user, login_required
 from garage import app, login, admin, db
 import dao
 from garage.decorators import anonymous_required
 from garage.models import UserRole
+from datetime import date
 
 @app.route("/")
 def index():
@@ -53,7 +54,7 @@ def register():
 @anonymous_required
 def login_my_user():
     err_msg = None
-
+    next_page = request.args.get('next') or request.form.get('next')
     if request.method.__eq__('POST'):
         username = request.form.get('username')
         password = request.form.get('password')
@@ -61,6 +62,8 @@ def login_my_user():
 
         if user:
             login_user(user)
+            if next_page:
+                return redirect(next_page)
             if user.role == UserRole.ADMIN:
                 return redirect("/admin")
             else:
@@ -88,6 +91,74 @@ def site_services():
     services = dao.load_services()
     return render_template('services.html', services=services)
 
+@login.unauthorized_handler
+def unauthorized_callback():
+    flash("Bạn cần đăng nhập để tiếp tục!", "warning")
+    return redirect('/login?next=' + request.path)
+
+@app.route("/bookrepair", methods=["GET", "POST"])
+@login_required
+def booking():
+    err_msg = None
+    selected_date = date.today()
+
+    form_data = {
+        'vehicleType': request.form.get("vehicleType", ''),
+        'licensePlate': request.form.get("licensePlate", ''),
+        'description': request.form.get("description", ''),
+        'scheduleTime': '',
+    }
+
+    if request.method == "POST":
+        if "scheduleDate" in request.form:
+            try:
+                selected_date = date.fromisoformat(request.form["scheduleDate"])
+            except ValueError:
+                pass
+
+        if "scheduleTime" in request.form and request.form.get("scheduleTime"):
+
+            form_data['scheduleTime'] = request.form.get("scheduleTime")
+
+            vehicle_type = form_data['vehicleType']
+            license_plate = form_data['licensePlate']
+            description = form_data['description']
+            time_slot = form_data['scheduleTime']
+
+            if not vehicle_type or not license_plate:
+                err_msg = "Vui lòng nhập đầy đủ thông tin loại xe và biển số."
+            else:
+                ok = dao.add_appointment(
+                    vehicle_type=vehicle_type,
+                    license_plate=license_plate,
+                    description=description,
+                    time_slot=time_slot,
+                    selected_date=selected_date
+                )
+
+                if ok:
+                    return redirect(url_for("index"))
+                else:
+                    err_msg = "Đặt lịch thất bại. Vui lòng thử lại!"
+
+    time_slots = dao.get_time_slots_for_date(selected_date)
+
+    return render_template(
+        "bookrepair.html",
+        err_msg=err_msg,
+        selected_date=selected_date,
+        time_slots=time_slots,
+        form_data=form_data
+    )
+
+
+@app.route("/services/<int:service_id>")
+def site_service_detail(service_id):
+    service = dao.get_service_by_id(service_id)
+    if service:
+        return render_template('detail-services.html', service=service)
+    else:
+        return "Không tìm thấy dịch vụ."
 if __name__ == "__main__":
     app.run(debug=True,port=5000)
 

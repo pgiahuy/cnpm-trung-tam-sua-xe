@@ -5,6 +5,21 @@
 {% endblock %}
 
 {% block body %}
+{% macro render_repair_status(v) %}
+    {% if v == "QUOTED" %}
+        <span class="badge text-white p-2 bg-info">Đã báo giá</span>
+    {% elif v == "APPROVED" %}
+        <span class="badge text-white p-2 bg-primary">Đã duyệt</span>
+    {% elif v == "REPAIRING" %}
+        <span class="badge text-white p-2 bg-warning">Đang sửa</span>
+    {% elif v == "DONE" %}
+        <span class="badge text-white p-2 bg-success">Hoàn tất</span>
+    {% else %}
+        <span class="badge text-white p-2 bg-secondary">Unknown</span>
+    {% endif %}
+{% endmacro %}
+
+
 {% macro render_status(v) %}
     {% set value = v.value if v is not number else v %}
     {% if value == 1 %}
@@ -100,6 +115,8 @@
                             {{ render_status(row[c]) }}
                         {% elif c == 'vehicle_status' %}
                             {{ render_vehicle_status(row[c]) }}
+                        {% elif c == 'repair_status' %}
+                            {{ render_repair_status(row[c]) }}
                         {% else %}
                             {{ get_value(row, c) }}
                         {% endif %}

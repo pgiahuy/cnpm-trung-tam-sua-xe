@@ -73,14 +73,15 @@
                         <td>{{ d.service }}</td>
                         <td>{{ d.spare_part.name if d.spare_part else "" }}</td>
                         <td>{{ d.quantity if d.quantity else "" }}</td>
-                        <td>{{ d.spare_part.unit_price if d.spare_part else "" }}</td>
+                        <td>{{ "{:,.0f}".format(d.spare_part.unit_price if d.spare_part else "") }}</td>
                         <td>{{ "{:,.0f}".format(d.service.price) if d.service else "" }}</td>
                         <td>{{ "{:,.0f}".format(d.total_cost) }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <p><b>Tổng tiền:</b> {{ "{:,.0f}".format(repair.calculate_total) }} ₫</p>
+            <p><b>Tổng tiền:</b> {{ "{:,.0f}".format(repair.total_before_vat) }} ₫</p>
+            <span><i>Giá trên chưa bao gồm VAT</i></span>
         </div>
     </div>
 </div>

@@ -1,0 +1,17 @@
+[
+  {
+    "error_description": "Đèn báo lỗi động cơ sáng",
+    "vehicle_id": 1,
+    "employee_id": 1
+  },
+  {
+    "error_description": "Má phanh kêu",
+    "vehicle_id": 2,
+    "employee_id": 2
+  },
+  {
+    "error_description": "Động cơ rung khi chạy",
+    "vehicle_id": 3,
+    "employee_id": 3
+  }
+]

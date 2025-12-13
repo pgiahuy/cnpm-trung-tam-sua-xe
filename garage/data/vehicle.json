@@ -1,0 +1,20 @@
+[
+  {
+    "license_plate": "51A-12345",
+    "vehicle_type": "Xe máy",
+    "vehicle_status": "PENDING_APPOINTMENT",
+    "customer_id": 1
+  },
+  {
+    "license_plate": "50B-54321",
+    "vehicle_type": "Ô tô",
+    "vehicle_status": "RECEIVED",
+    "customer_id": 2
+  },
+  {
+    "license_plate": "52C-67890",
+    "vehicle_type": "Xe tải",
+    "vehicle_status": "DIAGNOSING",
+    "customer_id": 3
+  }
+]

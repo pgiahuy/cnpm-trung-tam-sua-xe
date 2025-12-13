@@ -1,0 +1,20 @@
+[
+  {
+    "username": "user01",
+    "password": "123456",
+    "avatar": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png",
+    "role": "USER"
+  },
+  {
+    "username": "tech01",
+    "password": "123456",
+    "avatar": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png",
+    "role": "TECHNICIAN"
+  },
+  {
+    "username": "admin01",
+    "password": "123456",
+    "avatar": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png",
+    "role": "ADMIN"
+  }
+]

@@ -1,0 +1,17 @@
+[
+  {
+    "reception_id": 1,
+    "employee_id": 1,
+    "repair_status": "QUOTED"
+  },
+  {
+    "reception_id": 2,
+    "employee_id": 2,
+    "repair_status": "APPROVED"
+  },
+  {
+    "reception_id": 3,
+    "employee_id": 3,
+    "repair_status": "REPAIRING"
+  }
+]

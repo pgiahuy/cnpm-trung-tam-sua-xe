@@ -10,6 +10,14 @@ from flask_login import current_user
 def load_services():
     return Service.query.all()
 
+def load_customers():
+    return Customer.query.all()
+
+
+def load_confirmed_appointments():
+    query = db.session.query(Appointment).filter(Appointment.status == AppointmentStatus.CONFIRMED)
+    return query.all()
+
 def load_spare_parts():
     return SparePart.query.all()
 
@@ -116,3 +124,52 @@ def add_appointment(vehicle_type, license_plate, description, time_slot, selecte
         print("DAO ERROR:", e)
         db.session.rollback()
         return False
+
+
+def add_customer(full_name, phone, address, email):
+    customer = Customer(
+        full_name=full_name,
+        phone=phone,
+        address=address,
+        email=email,
+    )
+    db.session.add(customer)
+    db.session.commit()
+    return customer
+
+
+def add_vehicle(license_plate, vehicle_type, vehicle_status, customer_id):
+    vehicle = Vehicle(
+        license_plate=license_plate,
+        vehicle_type=vehicle_type,
+        vehicle_status=vehicle_status,
+        customer_id=customer_id
+    )
+    db.session.add(vehicle)
+    db.session.commit()
+    return vehicle
+
+
+def add_reception_form(vehicle_type, license_plate, error_description, time_slot, selected_date):
+    from garage import db
+    from garage.models import ReceptionForm, Vehicle
+
+    # tìm xe theo license_plate, nếu chưa có có thể tạo mới
+    vehicle = Vehicle.query.filter_by(license_plate=license_plate).first()
+    if not vehicle:
+        vehicle = add_vehicle(license_plate, vehicle_type, "new", None)
+
+    reception = ReceptionForm(
+        vehicle_id=vehicle.id,
+        error_description=error_description,
+        time_slot=time_slot,
+        date=selected_date
+    )
+    db.session.add(reception)
+    db.session.commit()
+    return reception
+
+
+if __name__ == "__main__":
+    with app.app_context():
+        print(load_customers())

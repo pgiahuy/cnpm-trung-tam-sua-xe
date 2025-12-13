@@ -1,0 +1,29 @@
+[
+  {
+    "task": "Thay dầu nhớt",
+    "service_id": 1,
+    "spare_part_id": 1,
+    "quantity": 1,
+    "repair_id": 1,
+    "service_price": 150000,
+    "spare_part_price": 50000
+  },
+  {
+    "task": "Bảo dưỡng phanh",
+    "service_id": 2,
+    "spare_part_id": 2,
+    "quantity": 1,
+    "repair_id": 2,
+    "service_price": 250000,
+    "spare_part_price": 200000
+  },
+  {
+    "task": "Vệ sinh kim phun",
+    "service_id": 3,
+    "spare_part_id": 3,
+    "quantity": 1,
+    "repair_id": 3,
+    "service_price": 400000,
+    "spare_part_price": 350000
+  }
+]

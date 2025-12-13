@@ -7,8 +7,17 @@ from datetime import datetime, date, time
 from flask_login import current_user
 
 
-def load_services():
-    return Service.query.all()
+def load_services(page=None):
+    query = Service.query
+
+    if page is not None and page > 0:
+        page_size = app.config["PAGE_SIZE"]
+        start = (page - 1) * page_size
+        end = start + page_size
+        return query.slice(start, end).all()
+
+    return query.all()
+
 
 def load_customers():
     return Customer.query.all()
@@ -44,6 +53,9 @@ def auth_user(username,password):
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
+
+def get_service_by_id(service_id):
+    return Service.query.get(service_id)
 
 def get_customer_by_user_id(user_id):
     return Customer.query.filter_by(user_id=user_id).first()
@@ -125,6 +137,8 @@ def add_appointment(vehicle_type, license_plate, description, time_slot, selecte
         db.session.rollback()
         return False
 
+def count_services():
+    return Service.query.count()
 
 def add_customer(full_name, phone, address, email):
     customer = Customer(

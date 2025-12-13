@@ -216,7 +216,7 @@ button {
 .btn--signin {
   background-color: var(--gray-dark);
   color: white;
-  text-align: right;
+
 }
 .custom-file {
   display: inline-block;
@@ -244,4 +244,39 @@ button {
 /* Tùy chọn: Thêm hiệu ứng cho card tối */
 .card.bg-dark {
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+
+.user-greeting {
+    font-weight: 600;
+    color: #f8f9fa;
+}
+
+.user-greeting i {
+    color: #ffc107;
+}
+.search-box {
+    position: relative;
+    width: 220px;
+}
+
+.search-input {
+    padding-right: 42px;
+    border-radius: 20px;
+}
+
+.search-btn {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #adb5bd;
+}
+
+.search-btn:hover {
+    color: #ffc107;
 }

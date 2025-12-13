@@ -4,8 +4,19 @@
 
 <hr>
 <br>
+
 <div class="container">
     <h4 class="text-center mb-5 display-5" style="color: light-blue; font-weight: 300;"> Dịch vụ </h4>
+    {%if page_of_services > 1%}
+    <ul class="pagination">
+        {% for i in range (1, page_of_services+1) %}
+        <li class="page-item"> <a class="page-link" href="/services?page={{i}}">{{i}}</a></li>
+        {% endfor %}
+
+    </ul>
+
+    {% endif %}
+
     <div class="row">
         {% for s in services %}
         <div class="col-md-4 col-12 mt-3 d-flex align-items-stretch">

@@ -1,0 +1,117 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Liên hệ{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="container-fluid py-5 text-center"
+     style="background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)),
+            url('https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg')
+            center/cover no-repeat;">
+    <h2 class="text-white display-5 fw-light">Liên hệ với chúng tôi</h2>
+    <p class="text-white-50 mt-2">
+        Garage Center – Chăm sóc xe chuyên nghiệp 24/7
+    </p>
+</div>
+
+<!-- CONTENT -->
+<div class="container my-5">
+
+    <div class="row g-5 align-items-stretch">
+
+        <!-- THÔNG TIN LIÊN HỆ -->
+        <div class="col-lg-5">
+            <div class="p-4 h-100 shadow rounded"
+                 style="background-color:#2a2a2a;">
+                <h4 class="text-white mb-4">Thông tin liên hệ</h4>
+
+                <p class="text-white-50 mb-3">
+                    <i class="fa-solid fa-location-dot text-warning me-2"></i>
+                    123 Nguyễn Văn Linh, Quận 7, TP.HCM
+                </p>
+
+                <p class="text-white-50 mb-3">
+                    <i class="fa-solid fa-phone text-warning me-2"></i>
+                    0909 123 456
+                </p>
+
+                <p class="text-white-50 mb-3">
+                    <i class="fa-solid fa-envelope text-warning me-2"></i>
+                    garagecenter@gmail.com
+                </p>
+
+                <p class="text-white-50">
+                    <i class="fa-solid fa-clock text-warning me-2"></i>
+                    Thứ 2 – Chủ nhật: 7:00 – 21:00
+                </p>
+
+                <hr class="border-secondary">
+
+                <!-- MAP -->
+                <div class="ratio ratio-16x9 rounded overflow-hidden">
+                    <iframe
+                        src="https://www.google.com/maps?q=ho%20chi%20minh&output=embed"
+                        style="border:0;"
+                        allowfullscreen=""
+                        loading="lazy">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM LIÊN HỆ -->
+        <div class="col-lg-7">
+            <div class="p-5 shadow rounded"
+                 style="background-color:#3e3e3e;">
+                <h4 class="text-white mb-4 text-center">
+                    Gửi yêu cầu tư vấn
+                </h4>
+
+                <form action="/submit-contact" method="post">
+
+                    <div class="mb-3">
+                        <input type="text"
+                               class="form-control form-control-lg"
+                               name="name"
+                               placeholder="Họ và tên"
+                               required>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <input type="tel"
+                                   class="form-control form-control-lg"
+                                   name="phone"
+                                   placeholder="Số điện thoại"
+                                   required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="email"
+                                   class="form-control form-control-lg"
+                                   name="email"
+                                   placeholder="Email">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <textarea class="form-control form-control-lg"
+                                  name="message"
+                                  rows="4"
+                                  placeholder="Nội dung liên hệ"></textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-warning btn-lg w-100">
+                        Gửi liên hệ
+                    </button>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -88,8 +88,10 @@ def get_user(user_id):
 
 @app.route("/services")
 def site_services():
-    services = dao.load_services()
-    return render_template('services.html', services=services)
+    page = request.args.get('page', type=int)
+    services = dao.load_services(page = page)
+    page_of_services = math.ceil(dao.count_services()/app.config["PAGE_SIZE"])
+    return render_template('services.html', services=services, page_of_services=page_of_services)
 
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -159,6 +161,10 @@ def site_service_detail(service_id):
         return render_template('detail-services.html', service=service)
     else:
         return "Không tìm thấy dịch vụ."
+
+@app.route("/contact")
+def contact():
+    return render_template("contact.html")
 if __name__ == "__main__":
     app.run(debug=True,port=5000)
 

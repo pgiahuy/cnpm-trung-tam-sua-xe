@@ -103,34 +103,6 @@ class ReceptionForm(Base):
     repair_form = relationship("RepairForm", backref="reception_form", uselist=False)
 
 
-class RepairForm(Base):
-    reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False)
-    employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
-    details = db.relationship('RepairDetail', backref='repair_form', lazy='select', cascade='all, delete-orphan')
-    invoice = relationship("Invoice", backref="repair_form", uselist=False)
-
-    @property
-    def calculate_total(self):
-        return sum(d.total_cost for d in self.details)
-
-class RepairDetail(Base):
-    task = Column(String(255), nullable=False)
-    labor_cost = Column(DOUBLE, nullable=False, default=0)
-    service_id = Column(Integer, ForeignKey("service.id"))
-    spare_part_id = Column(Integer, ForeignKey("spare_part.id"))
-    quantity = Column(Integer, nullable=False, default=1)
-    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False)
-    service = relationship("Service", lazy=True)
-    @property
-    def total_cost(self):
-        total = 0
-
-        if self.service:
-            total += self.service.price
-        # total += self.labor_cost or 0
-        if self.spare_part:
-            total += (self.spare_part.unit_price or 0) * self.quantity
-        return total
 
 
 class SparePart(Base):
@@ -160,13 +132,67 @@ class Service(Base):
         return f"{self.name}"
 
 
+class RepairForm(Base):
+    reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False)
+    employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
+    status = Column(SQLEnum("QUOTED", "APPROVED", "REPAIRING", "DONE", name="repair_status"),default="QUOTED")
+    details = relationship("RepairDetail",backref="repair_form",cascade="all, delete-orphan")
+    receipt = relationship("Receipt", backref="repair_form", uselist=False)
+
+    @property
+    def total_before_vat(self):
+        return sum(d.total_cost for d in self.details)
+
+
+class RepairDetail(Base):
+    task = Column(String(255), nullable=False)
+    service_id = Column(Integer, ForeignKey("service.id"))
+    spare_part_id = Column(Integer, ForeignKey("spare_part.id"))
+    quantity = Column(Integer, nullable=False, default=1)
+    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False)
+    service = relationship("Service", lazy=True)
+    service_price = Column(DOUBLE, nullable=True)
+    spare_part_price = Column(DOUBLE, nullable=True)
+    @property
+    def total_cost(self):
+        total = 0
+        if self.service_price_at_time:
+            total += self.service_price_at_time
+        if self.spare_part_price_at_time:
+            total += self.spare_part_price_at_time * self.quantity
+        return total
+
+    @classmethod
+    def create(cls, task, service=None, spare_part=None, quantity=1, repair_id=None):
+        service_price = service.price if service else 0
+        spare_part_price = spare_part.unit_price if spare_part else 0
+        return cls(task=task,service=service,spare_part=spare_part,quantity=quantity,repair_id=repair_id,
+                   service_price_at_time=service_price, spare_part_price_at_time=spare_part_price)
+
+class Receipt(Base):
+    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False, unique=True)
+
+    subtotal = Column(DOUBLE, nullable=False)
+    vat_rate = Column(DOUBLE, default=0)   # 0 hoặc 0.1
+    vat_amount = Column(DOUBLE, nullable=False)
+    total_paid = Column(DOUBLE, nullable=False)
+
+    payment_method = Column(String(50))  # CASH / TRANSFER
+    paid_at = Column(DateTime, default=datetime.now)
+
+    invoice = relationship("Invoice", backref="receipt", uselist=False)
 
 class Invoice(Base):
-    labor_total = Column(DOUBLE)
-    parts_total = Column(DOUBLE)
-    vat = Column(DOUBLE)
-    total_payment = Column(DOUBLE)
-    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False, unique=True)
+    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False, unique=True)
+
+    invoice_number = Column(String(50), unique=True)
+    company_name = Column(String(255))
+    tax_code = Column(String(20))
+    company_address = Column(String(255))
+
+    issued_date = Column(DateTime, default=datetime.now)
+
+
 
 if __name__ == "__main__":
     with app.app_context():

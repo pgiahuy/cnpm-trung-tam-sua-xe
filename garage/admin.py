@@ -117,10 +117,7 @@ class RepairFormAdmin(MyAdminModelView):
         'total_money': 'Tổng tiền',
     }
 
-    # Chỉ hiển thị các trường cần thiết trong form
     form_columns = ['employee', 'reception_form', 'details']
-
-    # Inline model RepairDetail
     inline_models = [
         (RepairDetail, dict(
             form_columns=['id', 'task', 'service', 'spare_part', 'quantity', 'labor_cost'],
@@ -158,7 +155,6 @@ class RepairDetailView(MyAdminHome):
     @expose('/<int:repair_id>')
     def detail(self, repair_id):
         repair = RepairForm.query.get_or_404(repair_id)
-        # self.render() sẽ tự truyền admin_base_template và các biến cần thiết
         return self.render('admin/custom_detail.html', repair=repair, enumerate=enumerate)
 
 class RepairDetailFormAdmin(MyAdminModelView):

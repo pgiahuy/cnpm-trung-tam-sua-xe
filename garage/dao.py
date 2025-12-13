@@ -183,6 +183,18 @@ def add_reception_form(vehicle_type, license_plate, error_description, time_slot
     db.session.commit()
     return reception
 
+def get_appointments_by_user(user_id):
+    customer = get_customer_by_user_id(user_id)
+
+    if not customer:
+        return []
+
+    return (
+        Appointment.query
+        .filter(Appointment.customer_id == customer.id)
+        .order_by(Appointment.schedule_time.desc())
+        .all()
+    )
 
 if __name__ == "__main__":
     with app.app_context():

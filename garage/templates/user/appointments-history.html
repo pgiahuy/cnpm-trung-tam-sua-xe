@@ -1,0 +1,42 @@
+{% extends "layout/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h4 class="mb-4">
+        Lịch sử đặt lịch
+    </h4>
+
+    {% if appointments %}
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-primary">
+            <tr>
+                <th>Ngày hẹn</th>
+                <th>Xe</th>
+                <th>Biển số</th>
+                <th>Trạng thái</th>
+                <th>Ghi chú</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for a in appointments %}
+            <tr>
+                <td>{{ a.schedule_time.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>{{ a.vehicle.vehicle_type }}</td>
+                <td>{{ a.vehicle.license_plate }}</td>
+                <td>
+                    <span class="badge bg-secondary">
+                        {{ a.status.name }}
+                    </span>
+                </td>
+                <td>{{ a.note or "-" }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <div class="alert alert-info">
+            Bạn chưa có lịch hẹn nào.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

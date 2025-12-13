@@ -165,6 +165,18 @@ def site_service_detail(service_id):
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
+
+@app.route("/user/profile")
+@login_required
+def user_profile():
+    return render_template("user/profile.html",user=current_user)
+
+@app.route("/user/appointments")
+@login_required
+def user_appointment_history():
+    appointments = dao.get_appointments_by_user(current_user.id)
+    return render_template("user/appointments-history.html",appointments=appointments)
+
 if __name__ == "__main__":
     app.run(debug=True,port=5000)
 

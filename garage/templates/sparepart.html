@@ -1,0 +1,72 @@
+{% extends 'layout/base.html' %}
+{% block content %}
+
+<div class="hero-section">
+    <div class="overlay">
+        <h3 class="display-5 text-white">LINH KIỆN Ô TÔ</h3>
+        <p class="text-white-50">Chính hãng – Giá tốt – Dễ đặt hàng</p>
+    </div>
+</div>
+
+<div class="sparepart-wrapper">
+    <div id="sparepart-list" class="container my-5">
+
+        <div class="row g-4 justify-content-center">
+            {% for p in spare_parts %}
+            <div class="col-lg-3 col-md-4 col-sm-6 d-flex">
+                <div class="sparepart-card w-100">
+
+                    <div class="sparepart-img-wrapper">
+                        <img src="{{ p.image_url }}" alt="{{ p.name }}">
+                    </div>
+
+                    <div class="sparepart-body d-flex flex-column p-3">
+                        <h6>{{ p.name }}</h6>
+
+                        <p class="text-muted small">
+                            {{ p.supplier | truncate(40) }}
+                        </p>
+
+                        <div class="fw-bold text-warning mb-3">
+                            {{ "{:,.0f}".format(p.unit_price | default(0)) }} đ / {{ p.unit }}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-auto">
+                            <a href="/sparepart/{{ p.id }}" class="btn btn-outline-warning">
+                                Xem chi tiết
+                            </a>
+                            <a href="/cart/add/{{ p.id }}" class="btn btn-warning">
+                                🛒 Thêm vào giỏ hàng
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_of_spareparts > 1 %}
+        <nav class="mt-5">
+            <ul class="pagination justify-content-center">
+                <li class="page-item {% if page == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="/sparepart?page={{ page - 1 }}#sparepart-list">«</a>
+                </li>
+
+                {% for i in range(1, page_of_spareparts + 1) %}
+                <li class="page-item {% if page == i %}active{% endif %}">
+                    <a class="page-link" href="/sparepart?page={{ i }}#sparepart-list">{{ i }}</a>
+                </li>
+                {% endfor %}
+
+                <li class="page-item {% if page == page_of_spareparts %}disabled{% endif %}">
+                    <a class="page-link" href="/sparepart?page={{ page + 1 }}#sparepart-list">»</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

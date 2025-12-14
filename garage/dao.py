@@ -225,6 +225,19 @@ def index_receipts_by_user(user_id):
         .all()
     )
 
+
+def load_sparepart(page=None):
+    query = SparePart.query
+    if page is not None and page > 0:
+        page_size = app.config["PAGE_SIZE"]
+        start = (page - 1) * page_size
+        end = start + page_size
+        return query.slice(start, end).all()
+
+    return query.all()
+def count_sparepart():
+    return SparePart.query.count()
+
 if __name__ == "__main__":
     with app.app_context():
         print(load_customers())

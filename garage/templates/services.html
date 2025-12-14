@@ -1,39 +1,56 @@
 {% extends 'layout/base.html' %}
-
 {% block content %}
 
-<hr>
-<br>
+<div class="container-lg service-wrapper">
+    <h2 class="text-center section-title">DỊCH VỤ SỬA XE</h2>
+    <p class="text-center text-muted mb-5">
+        Chúng tôi cung cấp các dịch vụ bảo dưỡng và sửa chữa chuyên nghiệp
+    </p>
 
-<div class="container">
-    <h4 class="text-center mb-5 display-5" style="color: light-blue; font-weight: 300;"> Dịch vụ </h4>
-    {%if page_of_services > 1%}
-    <ul class="pagination">
-        {% for i in range (1, page_of_services+1) %}
-        <li class="page-item"> <a class="page-link" href="/services?page={{i}}">{{i}}</a></li>
-        {% endfor %}
-
-    </ul>
-
-    {% endif %}
-
-    <div class="row">
+    <div class="row g-4">
         {% for s in services %}
-        <div class="col-md-4 col-12 mt-3 d-flex align-items-stretch">
-            <div class="card h-100 shadow" style="width:100%">
-                <img class="card-img-top" src="{{s.image}}" alt="{{s.name}}">
-                <div class="card-body d-flex flex-column bg-dark text-white">
-                    <h4 class="card-title text-warning">{{s.name}}</h4>
-                    <p class="card-text">{{s.description | truncate(80)}}</p>
-                    <div class="mt-auto">
-                        <a href="/services/{{s.id}}" class="btn btn-primary">Xem chi tiết</a>
-                    </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="service-card">
+                <img src="{{ s.image }}" alt="{{ s.name }}">
+                <div class="service-card-body">
+                    <h5>{{ s.name }}</h5>
+                    <p>{{ s.description | truncate(90) }}</p>
+                    <a href="/services/{{ s.id }}" class="btn btn-outline-primary btn-sm">
+                        Xem chi tiết
+                    </a>
                 </div>
             </div>
-
         </div>
         {% endfor %}
     </div>
+
+    {% if page_of_services > 1 %}
+    {% set current = request.args.get('page', 1)|int %}
+
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center">
+
+            <!-- Nút Previous -->
+            <li class="page-item {% if current == 1 %}disabled{% endif %}">
+                <a class="page-link" href="/services?page={{ current - 1 }}">«</a>
+            </li>
+
+            <!-- Danh sách số trang -->
+            {% for i in range(1, page_of_services + 1) %}
+            <li class="page-item {% if current == i %}active{% endif %}">
+                <a class="page-link" href="/services?page={{ i }}">{{ i }}</a>
+            </li>
+            {% endfor %}
+
+            <!-- Nút Next -->
+            <li class="page-item {% if current == page_of_services %}disabled{% endif %}">
+                <a class="page-link" href="/services?page={{ current + 1 }}">»</a>
+            </li>
+
+        </ul>
+    </nav>
+    {% endif %}
+
 
 </div>
 

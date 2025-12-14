@@ -38,6 +38,7 @@
                 </li>
                 {% endfor %}
 
+
                 {% if current_user.is_authenticated %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle fw-semibold"
@@ -115,6 +116,16 @@
                        name="kw"
                        placeholder="Tìm kiếm...">
             </form>
+            <li class="nav-item position-relative me-3">
+                <a class="nav-link d-flex align-items-center" href="#">
+                    <i class="fa-solid fa-cart-shopping fs-5"></i>
+
+                    <!-- số lượng tạm (UI) -->
+                    <span class="cart-badge">
+            3
+        </span>
+                </a>
+            </li>
 
 
         </div>

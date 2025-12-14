@@ -2,35 +2,38 @@
 
 {% block content %}
 <div class="container mt-5" style="max-width: 600px;">
-    <h3 class="mb-4 text-center">Hồ sơ cá nhân</h3>
+    <h2 class="text-center mb-4 fw-bold">Hồ sơ cá nhân</h2>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
-
+    <div class="card shadow-sm border-1">
+        <div class="card-body text-center">
+            <!-- Avatar -->
             <div class="mb-3">
+                <img src="{{ user.avatar or url_for('static', filename='images/default-avatar.png') }}"
+                     class="rounded-circle shadow-sm"
+                     width="130"
+                     height="130"
+                     style="object-fit: cover; border: 3px solid #0d6efd;">
+            </div>
+
+            <!-- Thông tin -->
+            <div class="mb-3 text-start px-4">
                 <label class="form-label fw-semibold">Họ và tên</label>
-                <input type="text"
-                       class="form-control"
-                       value="{{ user.customer.full_name }}"
-                       disabled>
+                <input type="text" class="form-control" value="{{ user.customer.full_name }}" disabled>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 text-start px-4">
                 <label class="form-label fw-semibold">Số điện thoại</label>
-                <input type="text"
-                       class="form-control"
-                       value="{{ user.customer.phone }}"
-                       disabled>
+                <input type="text" class="form-control" value="{{ user.customer.phone }}" disabled>
             </div>
 
-            <div class="mb-3">
+            <div class="mb-3 text-start px-4">
                 <label class="form-label fw-semibold">Địa chỉ</label>
-                <input type="text"
-                       class="form-control"
-                       value="{{ user.customer.address or 'Chưa cập nhật'}}"
-                       disabled>
+                <input type="text" class="form-control" value="{{ user.customer.address or 'Chưa cập nhật' }}" disabled>
             </div>
 
+            <a href="{{ url_for('user_edit_profile') }}" class="btn btn-primary btn-sm mt-3">
+                <i class="fa-solid fa-pen me-1"></i> Chỉnh sửa
+            </a>
         </div>
     </div>
 </div>

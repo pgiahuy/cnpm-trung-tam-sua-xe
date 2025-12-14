@@ -2,7 +2,8 @@ import hashlib
 import json
 
 from garage import db, app
-from garage.models import User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus
+from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus,
+                           Receipt, ReceptionForm, RepairForm)
 from datetime import datetime, date, time
 from flask_login import current_user
 
@@ -193,6 +194,34 @@ def get_appointments_by_user(user_id):
         Appointment.query
         .filter(Appointment.customer_id == customer.id)
         .order_by(Appointment.schedule_time.desc())
+        .all()
+    )
+
+def index_vehicles_by_user(user_id):
+    customer = get_customer_by_user_id(user_id)
+    if not customer:
+        return []
+
+    return (
+        Vehicle.query
+        .filter(Vehicle.customer_id == customer.id)
+        .order_by(Vehicle.created_date.desc())
+        .all()
+    )
+
+def index_receipts_by_user(user_id):
+    customer = get_customer_by_user_id(user_id)
+
+    if not customer:
+        return []
+
+    return (
+        Receipt.query
+        .join(RepairForm)
+        .join(ReceptionForm)
+        .join(Vehicle)
+        .filter(Vehicle.customer_id == customer.id)
+        .order_by(Receipt.paid_at.desc())
         .all()
     )
 

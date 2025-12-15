@@ -2,6 +2,7 @@ import math
 import cloudinary
 import cloudinary.uploader
 from flask import render_template, request, session, jsonify, url_for, flash
+from flask_admin import Admin
 from werkzeug.utils import redirect
 from flask_login import current_user,login_user,logout_user, login_required
 from garage import app, login, admin, db
@@ -62,6 +63,7 @@ def login_my_user():
 
         if user:
             login_user(user)
+            print(current_user.role)
             if next_page:
                 return redirect(next_page)
             if user.role == UserRole.ADMIN:
@@ -169,6 +171,7 @@ def contact():
 @app.route("/user/profile")
 @login_required
 def user_profile():
+
     return render_template("user/profile.html",user=current_user)
 
 @app.route("/user/appointments")
@@ -176,6 +179,12 @@ def user_profile():
 def user_appointment_history():
     appointments = dao.get_appointments_by_user(current_user.id)
     return render_template("user/appointments-history.html",appointments=appointments)
+
+
+@app.errorhandler(403)
+def forbidden_error(e):
+    return render_template('errors/403.html'), 403
+
 
 if __name__ == "__main__":
     app.run(debug=True,port=5000)

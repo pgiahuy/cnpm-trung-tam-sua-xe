@@ -15,16 +15,34 @@ from garage.models import (Service, Customer, Vehicle, User, Employee,
 
 
 class MyAdminHome(AdminIndexView):
-    template = "admin/custom_master.html"
-    # def is_accessible(self) -> bool:
-    #     return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
+    @expose('/')
+    def index(self):
+        return self.render('admin/index.html')
+
+
+    #template = 'admin/custom_master.html'
+    #base_template = 'admin/custom_base.html'
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role in (
+            UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.TECHNICIAN
+        )
+
+    def inaccessible_callback(self, name, **kwargs):
+        # Nếu không có quyền, trả về trang 403
+        return render_template('errors/403.html'), 403
+
 
 class MyAdminModelView(ModelView):
     list_template = "admin/list.html"
-    # create_template = "admin/create1.html"
-    #edit_template = "admin/edit1.html"
-    # def is_accessible(self) -> bool:
-    #     return current_user.is_authenticated and current_user.user_role == UserRole.ADMIN
+
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role in (
+            UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.TECHNICIAN
+        )
+
+    def inaccessible_callback(self, name, **kwargs):
+        # Nếu không có quyền, trả về trang 403
+        return render_template('errors/403.html'), 403
 
 
 class ServiceAdmin(MyAdminModelView):
@@ -283,9 +301,12 @@ class SparePartAdmin(MyAdminModelView):
         'inventory': 'Tồn kho'
     }
 
-admin = Admin(app=app,name="GARAGE ADMIN",index_view=MyAdminHome(name="QUẢN TRỊ"))
 
-admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
+
+admin = Admin(app, name='GARAGE ADMIN',index_view=MyAdminHome(name="TRANG CHỦ"))
+
+
+
 
 
 admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
@@ -297,4 +318,6 @@ admin.add_view(AppointmentAdmin(Appointment, db.session,name='LỊCH HẸN'))
 admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN'))
 admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA'))
 admin.add_view(SparePartAdmin(SparePart, db.session,name='PHỤ TÙNG'))
+
+admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
 

@@ -1,0 +1,42 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+
+<div class="quick-actions d-flex flex-wrap mt-4">
+    <a href="{{ url_for('receptionform.create_view') }}" class="quick-action btn btn-primary m-2">
+        <i class="fa fa-file-medical"></i> Thêm Phiếu Tiếp Nhận
+    </a>
+    <a href="{{ url_for('repairform.create_view') }}" class="quick-action btn btn-success m-2">
+        <i class="fa fa-wrench"></i> Thêm Phiếu Sửa Chữa
+    </a>
+    <a href="{{ url_for('customer.create_view') }}" class="quick-action btn btn-info m-2">
+        <i class="fa fa-user-plus"></i> Thêm Khách Hàng
+    </a>
+    <a href="{{ url_for('vehicle.create_view') }}" class="quick-action btn btn-warning m-2">
+        <i class="fa fa-car"></i> Thêm Xe
+    </a>
+</div>
+
+<style>
+.quick-actions a.quick-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 80px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    transition: all 0.3s;
+}
+.quick-actions a.quick-action i {
+    margin-right: 10px;
+    font-size: 1.3rem;
+}
+.quick-actions a.quick-action:hover {
+    transform: scale(1.05);
+    text-decoration: none;
+    color: #fff;
+}
+</style>
+{% endblock %}

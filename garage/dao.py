@@ -22,6 +22,8 @@ def load_services(page=None):
 def load_customers():
     return Customer.query.all()
 
+def load_customer_by_id(id):
+    return Customer.query.filter_by(id=id).first()
 
 def load_confirmed_appointments():
     query = db.session.query(Appointment).filter(Appointment.status == AppointmentStatus.CONFIRMED)

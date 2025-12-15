@@ -1,0 +1,66 @@
+<body>
+    <div class="error-wrapper">
+        <div class="error-content">
+            <div class="error-icon">⚠️</div>
+            <p>Bạn không có quyền truy cập trang này !</p>
+            <a href="{{ url_for('index') }}" class="btn-home">Về Trang Chủ</a>
+        </div>
+    </div>
+</body>
+
+<style>
+
+
+@font-face {
+    font-family: 'Dosis';
+    src: url('/static/fonts/dosis.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+body {
+
+    font-family: 'Dosis', sans-serif;
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+}
+
+.error-wrapper {
+    text-align: center;
+}
+
+.error-content {
+    padding: 40px;
+}
+
+.error-icon {
+    font-size: 6rem;
+    color: #e63946;
+    margin-bottom: 15px;
+}
+
+
+.error-content p {
+    font-size: 1.5rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.btn-home {
+    display: inline-block;
+    padding: 10px 24px;
+    background: #457b9d;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.btn-home:hover {
+    background: #1d3557;
+}
+</style>

@@ -38,6 +38,7 @@
                 </li>
                 {% endfor %}
 
+
                 {% if current_user.is_authenticated %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle fw-semibold"
@@ -53,8 +54,14 @@
 
                         <li>
                             <a class="dropdown-item" href="/user/profile">
-                               <i class="fa-solid fa-id-card fa-fw me-2"></i>
+                                <i class="fa-solid fa-id-card fa-fw me-2"></i>
                                 Hồ sơ cá nhân
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('user_vehicles') }}">
+                                <i class="fa-solid fa-car fa-fw me-2"></i>
+                                Xe của tôi
                             </a>
                         </li>
 
@@ -64,7 +71,12 @@
                                 Lịch sử đặt lịch
                             </a>
                         </li>
-
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('user_orders_history') }}">
+                                <i class="fa-solid fa-receipt fa-fw me-2"></i>
+                                Lịch sử mua hàng
+                            </a>
+                        </li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -104,6 +116,16 @@
                        name="kw"
                        placeholder="Tìm kiếm...">
             </form>
+            <li class="nav-item position-relative me-3">
+                <a class="nav-link d-flex align-items-center" href="#">
+                    <i class="fa-solid fa-cart-shopping fs-5"></i>
+
+                    <!-- số lượng tạm (UI) -->
+                    <span class="cart-badge">
+            3
+        </span>
+                </a>
+            </li>
 
 
         </div>

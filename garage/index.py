@@ -1,4 +1,6 @@
 import math
+from datetime import date
+
 import cloudinary
 import cloudinary.uploader
 from flask import render_template, request, session, jsonify, url_for, flash
@@ -90,10 +92,11 @@ def get_user(user_id):
 
 @app.route("/services")
 def site_services():
-    page = request.args.get('page', type=int)
-    services = dao.load_services(page = page)
-    page_of_services = math.ceil(dao.count_services()/app.config["PAGE_SIZE"])
-    return render_template('services.html', services=services, page_of_services=page_of_services)
+    page = request.args.get('page', 1, type=int)
+    services = dao.load_services(page=page)
+    page_of_services = math.ceil(dao.count_services() / app.config["PAGE_SIZE"])
+    return render_template('services.html', services=services, page_of_services=page_of_services, page=page)
+
 
 @login.unauthorized_handler
 def unauthorized_callback():
@@ -171,8 +174,7 @@ def contact():
 @app.route("/user/profile")
 @login_required
 def user_profile():
-
-    return render_template("user/profile.html",user=current_user)
+    return render_template("user/profile.html", user=current_user)
 
 @app.route("/user/appointments")
 @login_required
@@ -184,6 +186,39 @@ def user_appointment_history():
 @app.errorhandler(403)
 def forbidden_error(e):
     return render_template('errors/403.html'), 403
+
+
+
+@app.route("/sparepart")
+def site_spareparts():
+    page = request.args.get('page', 1, type=int)
+
+    spare_parts = dao.load_sparepart(page=page)
+
+    page_of_spareparts = math.ceil(
+        dao.count_sparepart() / app.config["PAGE_SIZE"]
+    )
+
+    return render_template(
+        "sparepart.html",
+        spare_parts=spare_parts,
+        page_of_spareparts=page_of_spareparts,
+        page=page
+    )
+
+
+app.run(debug=True, port=5000)
+@app.route("/user/vehicles")
+@login_required
+def user_vehicles():
+    vehicles = dao.index_vehicles_by_user(current_user.id)
+    return render_template("user/vehicles.html", vehicles=vehicles)
+
+@app.route("/user/orders")
+@login_required
+def user_orders_history():
+    receipts = dao.index_receipts_by_user(current_user.id)
+    return render_template("user/orders.html", receipts=receipts)
 
 
 if __name__ == "__main__":

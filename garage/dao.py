@@ -2,7 +2,8 @@ import hashlib
 import json
 
 from garage import db, app
-from garage.models import User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus
+from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus,
+                           Receipt, ReceptionForm, RepairForm)
 from datetime import datetime, date, time
 from flask_login import current_user
 
@@ -197,6 +198,47 @@ def get_appointments_by_user(user_id):
         .order_by(Appointment.schedule_time.desc())
         .all()
     )
+
+def index_vehicles_by_user(user_id):
+    customer = get_customer_by_user_id(user_id)
+    if not customer:
+        return []
+
+    return (
+        Vehicle.query
+        .filter(Vehicle.customer_id == customer.id)
+        .order_by(Vehicle.created_date.desc())
+        .all()
+    )
+
+def index_receipts_by_user(user_id):
+    customer = get_customer_by_user_id(user_id)
+
+    if not customer:
+        return []
+
+    return (
+        Receipt.query
+        .join(RepairForm)
+        .join(ReceptionForm)
+        .join(Vehicle)
+        .filter(Vehicle.customer_id == customer.id)
+        .order_by(Receipt.paid_at.desc())
+        .all()
+    )
+
+
+def load_sparepart(page=None):
+    query = SparePart.query
+    if page is not None and page > 0:
+        page_size = app.config["PAGE_SIZE"]
+        start = (page - 1) * page_size
+        end = start + page_size
+        return query.slice(start, end).all()
+
+    return query.all()
+def count_sparepart():
+    return SparePart.query.count()
 
 if __name__ == "__main__":
     with app.app_context():

@@ -1,0 +1,45 @@
+{% extends "layout/base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h4 class="mb-4">
+        Xe của tôi
+    </h4>
+
+    {% if vehicles %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>Biển số</th>
+                    <th>Loại xe</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày đăng ký</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vehicles %}
+                <tr>
+                    <td class="fw-semibold">{{ v.license_plate }}</td>
+                    <td>{{ v.vehicle_type }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-info">
+                            {{ v.vehicle_status.name.replace("_", " ") }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {{ v.created_date.strftime('%d/%m/%Y') }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-warning text-center">
+            Bạn chưa có xe nào 🚗
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

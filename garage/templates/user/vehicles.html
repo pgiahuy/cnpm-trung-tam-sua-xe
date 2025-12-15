@@ -28,7 +28,7 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        {{ v.created_date.strftime('%d/%m/%Y') }}
+                        {{ v.created_date.strftime('%d/%m/%Y %H:%M') }}
                     </td>
                 </tr>
                 {% endfor %}
@@ -37,7 +37,7 @@
     </div>
     {% else %}
         <div class="alert alert-warning text-center">
-            Bạn chưa có xe nào 🚗
+            Bạn chưa có xe nào
         </div>
     {% endif %}
 </div>

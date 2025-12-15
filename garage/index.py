@@ -12,6 +12,7 @@ import dao
 from garage.decorators import anonymous_required
 from garage.models import UserRole
 from datetime import date
+from werkzeug.security import check_password_hash, generate_password_hash
 
 @app.route("/")
 def index():
@@ -250,7 +251,32 @@ def user_vehicles():
 def user_orders_history():
     receipts = dao.index_receipts_by_user(current_user.id)
     return render_template("user/orders.html", receipts=receipts)
+@app.route("/user/change-password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    if request.method == "POST":
+        old_password = request.form.get("old_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
 
+        # 1. Kiểm tra mật khẩu cũ
+        if not check_password_hash(current_user.password, old_password):
+            flash("Mật khẩu hiện tại không đúng!", "danger")
+            return redirect(url_for("change_password"))
+
+        # 2. Kiểm tra mật khẩu mới
+        if new_password != confirm_password:
+            flash("Mật khẩu mới không khớp!", "warning")
+            return redirect(url_for("change_password"))
+
+        # 3. Lưu mật khẩu mới (HASH)
+        current_user.password = generate_password_hash(new_password)
+        db.session.commit()
+
+        flash("Đổi mật khẩu thành công!", "success")
+        return redirect(url_for("user_profile"))
+
+    return render_template("user/change-password.html")
 
 if __name__ == "__main__":
     app.run(debug=True,port=5000)

@@ -176,6 +176,38 @@ def contact():
 def user_profile():
     return render_template("user/profile.html", user=current_user)
 
+@app.route("/user/profile/edit", methods=["GET", "POST"])
+@login_required
+def user_edit_profile():
+    customer = dao.get_customer_by_user_id(current_user.id)
+    user = current_user  # avatar nằm ở user
+
+    if not customer:
+        flash("Không tìm thấy thông tin khách hàng!", "danger")
+        return redirect(url_for("user_profile"))
+
+    if request.method == "POST":
+
+        customer.full_name = request.form.get("full_name")
+        customer.phone = request.form.get("phone")
+        customer.address = request.form.get("address")
+
+        avatar_file = request.files.get("avatar")
+        if avatar_file and avatar_file.filename:
+            upload_result = cloudinary.uploader.upload(avatar_file)
+            user.avatar = upload_result["secure_url"]
+
+        try:
+            db.session.commit()
+            flash("Cập nhật hồ sơ thành công!", "success")
+            return redirect(url_for("user_profile"))
+        except Exception as ex:
+            db.session.rollback()
+            flash("Có lỗi xảy ra khi cập nhật!", "danger")
+            print(ex)
+
+    return render_template("user/edit-profile.html", customer=customer, user=user)
+
 @app.route("/user/appointments")
 @login_required
 def user_appointment_history():
@@ -207,7 +239,6 @@ def site_spareparts():
     )
 
 
-app.run(debug=True, port=5000)
 @app.route("/user/vehicles")
 @login_required
 def user_vehicles():

@@ -173,7 +173,7 @@ class RepairDetail(Base):
                    service_price_at_time=service_price, spare_part_price_at_time=spare_part_price)
 
 class Receipt(Base):
-    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False, unique=True)
+    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True, unique=True)
 
     subtotal = Column(DOUBLE, nullable=False)
     vat_rate = Column(DOUBLE, default=0)
@@ -184,6 +184,11 @@ class Receipt(Base):
     paid_at = Column(DateTime, default=datetime.now)
 
     invoice = relationship("Invoice", backref="receipt", uselist=False)
+    items = relationship(
+        "ReceiptItem",
+        backref="receipt",
+        cascade="all, delete-orphan"
+    )
 
 class Invoice(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False, unique=True)
@@ -195,6 +200,16 @@ class Invoice(Base):
 
     issued_date = Column(DateTime, default=datetime.now)
 
+
+class ReceiptItem(Base):
+    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False)
+    spare_part_id = Column(Integer, ForeignKey("spare_part.id"), nullable=False)
+
+    quantity = Column(Integer, nullable=False, default=1)
+    unit_price = Column(DOUBLE, nullable=False)
+    total_price = Column(DOUBLE, nullable=False)
+
+    spare_part = relationship("SparePart")
 
 
 if __name__ == "__main__":

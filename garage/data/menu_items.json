@@ -4,13 +4,18 @@
     "name": "Dịch vụ",
      "url_name": "services"
   },
-  {
+   {
     "id": 2,
+    "name": "Linh kiện",
+    "url_name": "sparepart"
+  },
+  {
+    "id": 3,
     "name": "Đặt lịch",
     "url_name": "bookrepair"
   },
    {
-    "id": 3,
+    "id": 4,
     "name": "Liên hệ",
      "url_name": "contact"
   }

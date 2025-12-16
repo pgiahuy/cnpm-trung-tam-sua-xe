@@ -30,15 +30,18 @@
                         <div class="fw-bold text-warning mb-3">
                             {{ "{:,.0f}".format(p.unit_price | default(0)) }} đ / {{ p.unit }}
                         </div>
-
-                        <div class="d-grid gap-2 mt-auto">
-                            <a href="/sparepart/{{ p.id }}" class="btn btn-outline-warning">
+                        <div class="d-flex gap-2 mt-auto">
+                            <a href="/sparepart/{{ p.id }}" class="btn btn-outline-warning flex-fill">
                                 Xem chi tiết
                             </a>
-                            <a href="/cart/add/{{ p.id }}" class="btn btn-warning">
-                                🛒 Thêm vào giỏ hàng
+                            <a href="#"
+                               class="btn btn-warning"
+                               onclick="addToCart( {{ p.id }}, '{{ p.name }}', {{ p.unit_price }})">
+                                🛒
                             </a>
+
                         </div>
+
                     </div>
 
                 </div>

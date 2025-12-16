@@ -1,13 +1,11 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.getElementById('mainNav');
+    if (!nav || !nav.classList.contains('navbar-transparent')) return;
 
-    document.addEventListener('DOMContentLoaded', function() {
-        var navbar = document.getElementById('mainNav');
-        if (navbar) {
-            window.addEventListener('scroll', function() {
-                if (window.scrollY > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-            });
-        }
-    });
+    const toggle = () => {
+        nav.classList.toggle('scrolled', window.scrollY > 50);
+    };
+
+    toggle();
+    window.addEventListener('scroll', toggle);
+});

@@ -1,13 +1,14 @@
 import math
+import pdb
 from datetime import date
 
 import cloudinary
 import cloudinary.uploader
-from flask import render_template, request, session, jsonify, url_for, flash
+from flask import render_template, request, session, jsonify, url_for, flash, jsonify
 from flask_admin import Admin
 from werkzeug.utils import redirect
 from flask_login import current_user,login_user,logout_user, login_required
-from garage import app, login, admin, db
+from garage import app, login, admin, db, utils
 import dao
 from garage.decorators import anonymous_required
 from garage.models import UserRole
@@ -24,7 +25,9 @@ def index():
 @app.context_processor
 def common_adtributes():
     return {
-        "items" : dao.load_menu_items()
+        "items" : dao.load_menu_items(),
+        "stats_cart": utils.count_cart(session.get('cart'))
+
     }
 
 @app.route("/register",methods=['GET','POST'])
@@ -84,6 +87,7 @@ def admin_login_process():
 
 @app.route("/logout")
 def logout_my_user():
+    session.pop('cart',None)
     logout_user()
     return redirect('/login')
 
@@ -278,6 +282,75 @@ def change_password():
 
     return render_template("user/change-password.html")
 
+@app.route("/api/carts", methods=['post'])
+def add_to_cart():
+    cart = session.get('cart')
+
+    if not cart:
+        cart = {}
+
+    id = str(request.json.get('id'))
+
+    if id in cart:
+        cart[id]["quantity"] += 1
+    else:
+        cart[id] = {
+            "id": id,
+            "name": request.json.get('name'),
+            "unit_price": request.json.get('unit_price'),
+            "quantity": 1
+        }
+
+    session['cart'] = cart
+
+    print(session['cart'])
+
+
+    return jsonify(utils.count_cart(cart=cart))
+
+@app.route('/cart')
+def cart():
+    return render_template("cart.html")
+
+@app.route('/api/update-cart', methods=['put'])
+def update_cart():
+    data = request.json
+    id = str(data.get('id'))
+    quantity = data.get('quantity')
+
+    cart = session.get('cart')
+
+    if cart and id in cart:
+        cart[id]['quantity'] = quantity
+        session['cart'] = cart
+
+
+    return jsonify(utils.count_cart(cart=cart))
+
+@app.route('/api/delete-cart/<product_id>',methods=['delete'])
+def delete_cart(product_id):
+    cart = session.get('cart')
+
+    if cart and product_id in cart:
+        del cart[product_id]
+        session['cart'] = cart
+
+    return jsonify(utils.count_cart(cart=cart))
+
+
+# Thanh toán
+@app.route('/api/pay', methods=['POST'])
+@login_required
+def pay():
+    try:
+        utils.add_receipt(session.get('cart'))
+        session.pop('cart', None)
+        return jsonify({'code': 200})
+    except Exception as e:
+        print(e)
+        return jsonify({'code': 400})
+
+# Xong thanh toán
 if __name__ == "__main__":
     app.run(debug=True,port=5000)
 

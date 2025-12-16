@@ -1,31 +1,38 @@
 <head>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 
 {% set current_path = request.path %}
-<nav id="mainNav" class="navbar navbar-expand-lg navbar-dark
-    {% if current_path == '/' %}
-        fixed-top navbar-transparent
-    {% else %}
+{% set transparent_nav = current_path == '/' or current_path.startswith('/sparepart') %}
+
+<nav id="mainNav"
+     class="navbar navbar-expand-lg navbar-dark fixed-top
+     {% if transparent_nav %}
+        navbar-transparent
+     {% else %}
         bg-dark
-    {% endif %}">
+     {% endif %}">
+
     <div class="container-fluid px-4">
-        <a class="navbar-brand" href="/">GARAGE CENTER</a>
 
+        <!-- LOGO -->
+        <a class="navbar-brand fw-bold" href="/">GARAGE CENTER</a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
-
+        <!-- TOGGLER -->
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mynavbar">
             <span class="navbar-toggler-icon"></span>
-
         </button>
 
-
+        <!-- NAVBAR -->
         <div class="collapse navbar-collapse" id="mynavbar">
 
             <!-- MENU GIỮA -->
-            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center">
+
                 <li class="nav-item">
                     <a class="nav-link {% if current_path == '/' %}active{% endif %}" href="/">
                         Trang chủ
@@ -34,104 +41,90 @@
 
                 {% for i in items %}
                 <li class="nav-item">
-                    <a class="nav-link" href="/{{ i.url_name }}">{{ i.name }}</a>
+                    <a class="nav-link {% if current_path.startswith('/' ~ i.url_name) %}active{% endif %}"
+                       href="/{{ i.url_name }}">
+                        {{ i.name }}
+                    </a>
                 </li>
                 {% endfor %}
-
 
                 {% if current_user.is_authenticated %}
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle fw-semibold"
                        href="#"
                        role="button"
-                       data-bs-toggle="dropdown"
-                       aria-expanded="false">
+                       data-bs-toggle="dropdown">
                         <i class="fa-regular fa-circle-user me-1"></i>
                         {{ current_user.customer.full_name }}
                     </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end">
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
 
                         <li>
                             <a class="dropdown-item" href="/user/profile">
-                                <i class="fa-solid fa-id-card fa-fw me-2"></i>
-                                Hồ sơ cá nhân
+                                <i class="fa-solid fa-id-card me-2"></i> Hồ sơ cá nhân
                             </a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{ url_for('user_vehicles') }}">
-                                <i class="fa-solid fa-car fa-fw me-2"></i>
-                                Xe của tôi
+                                <i class="fa-solid fa-car me-2"></i> Xe của tôi
                             </a>
                         </li>
-
                         <li>
                             <a class="dropdown-item" href="/user/appointments">
-                                <i class="fa-solid fa-calendar-check fa-fw me-2"></i>
-                                Lịch sử đặt lịch
+                                <i class="fa-solid fa-calendar-check me-2"></i> Lịch sử đặt lịch
                             </a>
                         </li>
                         <li>
                             <a class="dropdown-item" href="{{ url_for('user_orders_history') }}">
-                                <i class="fa-solid fa-receipt fa-fw me-2"></i>
-                                Lịch sử mua hàng
+                                <i class="fa-solid fa-receipt me-2"></i> Lịch sử mua hàng
                             </a>
                         </li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
 
                         <li>
                             <a class="dropdown-item text-danger" href="{{ url_for('logout_my_user') }}">
-                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>
-                                Đăng xuất
+                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Đăng xuất
                             </a>
                         </li>
                     </ul>
                 </li>
-
                 {% else %}
                 <li class="nav-item">
                     <a class="nav-link" href="/login">
-                        <i class="fa-regular fa-user"></i> Đăng nhập
+                        <i class="fa-regular fa-user me-1"></i> Đăng nhập
                     </a>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" href="/register">
-                        Đăng ký
-                    </a>
+                    <a class="nav-link" href="/register">Đăng ký</a>
                 </li>
                 {% endif %}
             </ul>
 
-            <!-- SEARCH PHẢI -->
-            <form class="search-box d-flex" method="get">
-                <button type="submit" class="search-btn">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
+            <!-- SEARCH + CART (PHẢI) -->
+            <div class="d-flex align-items-center gap-3">
 
-                <input class="form-control search-input"
-                       type="text"
-                       name="kw"
-                       placeholder="Tìm kiếm...">
-            </form>
-            <li class="nav-item position-relative me-3">
-                <a class="nav-link d-flex align-items-center" href="#">
-                    <i class="fa-solid fa-cart-shopping fs-5"></i>
+                <form class="search-box d-flex" method="get">
+                    <button type="submit" class="search-btn">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                    <input class="form-control search-input"
+                           type="text"
+                           name="kw"
+                           placeholder="Tìm kiếm...">
+                </form>
 
-                    <!-- số lượng tạm (UI) -->
-                    <span class="cart-badge">
-            3
-        </span>
-                </a>
-            </li>
+                <div class="position-relative">
+                    <a class="nav-link d-flex align-items-center" href="/cart">
+                        <i class="fa-solid fa-cart-shopping fs-5"></i>
+                        <span class="cart-badge cart-counter" > {{stats_cart.total_quantity}}</span>
 
+                    </a>
+                </div>
+
+            </div>
 
         </div>
-
-
     </div>
-
-
 </nav>

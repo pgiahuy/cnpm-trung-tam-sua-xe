@@ -1,4 +1,12 @@
 function addToCart(id,name,price){
+    if (!isAuthenticated) {
+        fetch('/flash-login-required', { method: 'POST' })
+            .then(() => {
+                window.location.href = '/login';
+            });
+        return;
+    }
+
     event.preventDefault()
     fetch('/api/carts',{
         method: 'post',
@@ -89,3 +97,18 @@ function pay(repairFormId){
    }
 }
 //Xong thanh toán
+
+
+document.querySelectorAll('.cart-icon').forEach(icon => {
+    icon.addEventListener('click', function(e) {
+        if (!isAuthenticated) {
+            e.preventDefault(); // ngăn redirect tới /cart
+            // Gửi POST để set flash
+            fetch('/flash-login-required', { method: 'POST' })
+                .then(() => {
+                    // reload để flash xuất hiện ngay chỗ template đã include
+                    location.reload();
+                });
+        }
+    });
+});

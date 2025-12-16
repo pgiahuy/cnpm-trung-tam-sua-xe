@@ -548,6 +548,14 @@ def sparepart_detail(id):
 
     return render_template("sparepart-detail.html", sparepart=sparepart)
 
+@app.route('/flash-login-required', methods=['POST'])
+def flash_login_required():
+    # Lấy URL hiện tại
+    next_url = request.referrer or '/'
+    flash(f'Bạn cần <a href="/login?next={next_url}" class="text-warning fw-bold">đăng nhập</a> để tiếp tục', 'warning')
+    return '', 204
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

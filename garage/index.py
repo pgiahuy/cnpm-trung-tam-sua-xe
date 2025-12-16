@@ -1,6 +1,7 @@
 import math
 import pdb
 from datetime import date
+from flask_mail import Message
 
 import cloudinary
 import cloudinary.uploader
@@ -8,7 +9,7 @@ from flask import render_template, request, session, jsonify, url_for, flash, js
 from flask_admin import Admin
 from werkzeug.utils import redirect
 from flask_login import current_user,login_user,logout_user, login_required
-from garage import app, login, admin, db, utils
+from garage import app, login, admin, db, utils, mail
 import dao
 from garage.decorators import anonymous_required
 from garage.models import UserRole, AppointmentStatus
@@ -460,6 +461,39 @@ def edit_appointment(appointment_id):
         time_slots=time_slots,
         current_slot=current_slot
     )
+
+
+from flask_mail import Message
+
+@app.route('/submit-contact', methods=['POST'])
+def submit_contact():
+    name = request.form.get('name')
+    phone = request.form.get('phone')
+    email = request.form.get('email')
+    message = request.form.get('message')
+
+    content = f"""
+YÊU CẦU TƯ VẤN MỚI
+
+Họ tên: {name}
+SĐT: {phone}
+Email: {email}
+
+Nội dung:
+{message}
+"""
+
+    msg = Message(
+        subject="Yêu cầu tư vấn từ website Garage",
+        recipients=["nguyenlyminuong1234567890@gmail.com"],
+        body=content
+    )
+
+    mail.send(msg)
+
+    flash("Gửi yêu cầu thành công! Chúng tôi sẽ liên hệ sớm.", "success")
+    return redirect('/')
+
 
 if __name__ == "__main__":
     app.run(debug=True,port=5000)

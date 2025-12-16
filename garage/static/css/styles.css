@@ -106,7 +106,7 @@ body {
     font-weight: normal; /* Độ đậm thường cho toàn bộ nội dung */
 }
 #mainNav:not(.navbar-transparent) + * {
-    margin-top: 50px;
+    margin-top: 70px;
 }
 
 h1, h2, h3, h4, h5, h6 {

@@ -105,15 +105,24 @@
 
             <div class="d-flex align-items-center gap-3">
 
-                <form class="search-box d-flex" method="get">
-                    <button type="submit" class="search-btn">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                    <input class="form-control search-input"
+                <form class="nav-search-glass" onsubmit="return searchAndScroll()">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input id="searchInput"
                            type="text"
-                           name="kw"
-                           placeholder="Tìm kiếm...">
+                           placeholder="Tìm trên trang…">
+
+                    <span id="searchCounter"></span>
+
+                    <button type="button" onclick="prevResult()" title="Trước">
+                        <i class="fa-solid fa-chevron-up"></i>
+                    </button>
+
+                    <button type="button" onclick="nextResult()" title="Sau">
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
                 </form>
+
 
                 <div class="position-relative">
                     <a class="nav-link d-flex align-items-center" href="/cart">

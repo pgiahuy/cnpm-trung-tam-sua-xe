@@ -484,3 +484,89 @@ button {
     padding-top: 50px; /* chiều cao navbar */
 }
 
+main {
+    scroll-margin-top: 90px;
+}
+
+
+/*SEARCH*/
+.nav-search-glass {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 6px 12px;
+    height: 38px;
+
+    background: rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    border-radius: 999px;
+
+    border: 1px solid rgba(255,255,255,0.25);
+}
+
+
+.nav-search-glass > i {
+    color: rgba(255,255,255,0.85);
+    font-size: 14px;
+}
+
+
+.nav-search-glass input {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #fff;
+
+    width: 160px;
+    font-size: 14px;
+}
+
+.nav-search-glass input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+
+
+#searchCounter {
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    min-width: 30px;
+    text-align: center;
+}
+
+.search-btn:hover {
+    color: #ffc107;
+}
+
+
+.nav-search-glass button {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+
+    border: none;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: all 0.2s ease;
+}
+
+.nav-search-glass button:hover {
+    background: rgba(255,255,255,0.35);
+}
+
+/*SEARCH HIGHLIGHT*/
+mark.search-highlight {
+    background: #ffd54f;
+    padding: 1px 3px;
+    border-radius: 4px;
+}
+
+mark.active-search {
+    background: #ff9800;
+    color: #000;
+}

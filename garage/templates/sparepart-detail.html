@@ -1,0 +1,140 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Chi tiết linh kiện {{ sparepart.name }}{% endblock %}
+
+{% block content %}
+<div class="container sparepart-detail-container my-5">
+
+    <!-- Header -->
+
+    <div class="text-center mt-5 p-5 bg-dark rounded shadow-lg" >
+        <h2 class="display-4 fw-bold text-warning">Chi tiết linh kiện</h2>
+        <p class="lead" style="color: #f8f9fa;">Thông tin sản phẩm và bảng giá tham khảo</p>
+    </div>
+
+<br>
+
+    <!-- Nội dung chính: ảnh + thông tin -->
+    <div class="row g-4 justify-content-center align-items-start">
+
+        <!-- Ảnh linh kiện -->
+        <div class="col-md-5">
+            <div class="card sparepart-card h-100 border-0 shadow-lg">
+                <div class="sparepart-img-wrapper">
+                    <img src="{{ sparepart.image_url | default('https://via.placeholder.com/600x400/333333/FFFFFF?text=Hình+ảnh+dịch+vụ') }}"
+                         alt="{{ sparepart.name }}">
+                </div>
+                <div class="card-body text-center bg-dark text-white">
+                    <h5 class="fw-bold text-warning mb-2">Nhà cung cấp</h5>
+                    <p class="mb-0">{{ sparepart.supplier | default('Đang cập nhật') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin linh kiện -->
+        <div class="col-md-6">
+            <div class="card sparepart-card h-100 border-0 shadow-lg bg-dark text-white p-3">
+                <h3 class="fw-bold mb-4 text-warning">{{ sparepart.name }}</h3>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 p-3 bg-dark rounded shadow-sm border border-secondary">
+                    <span class="fs-5 fw-bold text-light">Giá tham khảo:</span>
+                    <span class="fs-3 fw-bolder text-warning">
+                        {{ "{:,.0f} VNĐ".format(sparepart.unit_price | default(0)) }}
+                    </span>
+                </div>
+
+                <ul class="list-unstyled mb-4">
+                    <li><strong>Tình trạng:</strong> <span class="text-success">Còn hàng</span></li>
+                    <li><strong>Bảo hành:</strong> 6 tháng</li>
+                </ul>
+
+                <div class="d-flex justify-content-between flex-wrap">
+    <a href="/services" class="btn btn-outline-warning px-4 py-2 fw-bold">
+        Xem sản phẩm linh kiện khác &raquo;
+    </a>
+    <button class="btn btn-warning px-4 py-2 fw-bold"
+            onclick="addToCart({{ sparepart.id }}, '{{ sparepart.name }}', {{ sparepart.unit_price }})">
+        <i class="fa-solid fa-cart-plus me-2"></i> Thêm vào giỏ
+    </button>
+</div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer / tư vấn -->
+    <div class="text-center mt-5 p-5 bg-dark rounded shadow-lg" style="background: pink">
+        <h3 class="text-warning">Cần tư vấn thêm?</h3>
+        <p class="text-light">Liên hệ ngay với đội ngũ kỹ thuật để được hỗ trợ nhanh chóng!</p>
+        <a href="/contact" class="btn btn-outline-warning btn-lg fw-bold">Liên hệ</a>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Container gom giữa */
+    .sparepart-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    /* Card linh kiện */
+    .sparepart-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #1a1a1a !important; /* background tối */
+        color: #fff;
+    }
+
+    .sparepart-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    /* Ảnh linh kiện */
+    .sparepart-img-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-height: 400px;
+        overflow: hidden;
+        background: #111;
+    }
+
+    .sparepart-img-wrapper img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 12px;
+    }
+
+    /* Text */
+    .sparepart-card h3, .sparepart-card h5 {
+        font-weight: 700;
+    }
+
+    .sparepart-card p, .sparepart-card li {
+        font-size: 16px;
+        color: #ddd;
+    }
+
+    /* Button */
+    .sparepart-card .btn {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .sparepart-card .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(255,193,7,0.4);
+    }
+
+
+</style>
+{% endblock %}

@@ -76,9 +76,6 @@
     transition: background 0.3s ease;
 }
 
-.btn-custom-gradient:hover {
-    background: linear-gradient(to right, #ff6600, #ff9933);
-}
 
 
 .navbar-transparent {
@@ -104,9 +101,6 @@
 body {
     font-family: "Open Sans", Helvetica, Arial, sans-serif;
     font-weight: normal; /* Độ đậm thường cho toàn bộ nội dung */
-}
-#mainNav:not(.navbar-transparent) + * {
-    margin-top: 70px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -234,9 +228,6 @@ button {
     transition: background 0.3s ease;
 }
 
-.btn-custom-gradient:hover {
-    background: linear-gradient(to right, #ff6600, #ff9933);
-}
 
 /* Tùy chọn: Thêm hiệu ứng cho card tối */
 .card.bg-dark {
@@ -387,19 +378,6 @@ button {
     border-radius: 12px;
 }
 /* ===== LINH KIỆN NỔI BẬT – HOVER MƯỢT ===== */
-/* ===== SPAREPART PAGE ===== */
-
-.sparepart-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-}
-
-.sparepart-wrapper .container {
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-}
 
 /* Card linh kiện */
 .sparepart-card {
@@ -467,9 +445,7 @@ button {
     max-width: 1200px;
 }
 
-.sparepart-card {
-    height: 100%;
-}
+
 .cart-badge {
     position: absolute;
     top: 0px;
@@ -504,3 +480,7 @@ button {
 .navbar li::marker {
     content: "" !important;
 }
+.pt-nav {
+    padding-top: 50px; /* chiều cao navbar */
+}
+

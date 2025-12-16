@@ -270,6 +270,8 @@ def validate_license_plate(plate, vehicle_type):
 
     return False
 
+def get_sparepart_by_id(sparepart_id):
+    return SparePart.query.get(sparepart_id)
 
 if __name__ == "__main__":
     with app.app_context():

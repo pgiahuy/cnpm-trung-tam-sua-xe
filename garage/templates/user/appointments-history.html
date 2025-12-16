@@ -15,6 +15,7 @@
                 <th>Biển số</th>
                 <th>Trạng thái</th>
                 <th>Ghi chú</th>
+                <th>Thao tác</th> <!-- THÊM -->
             </tr>
         </thead>
         <tbody>
@@ -29,6 +30,27 @@
                     </span>
                 </td>
                 <td>{{ a.note or "-" }}</td>
+                <td>
+                    {% if a.status.name == "BOOKED" %}
+                        <!-- Nút chỉnh sửa -->
+                        <a href="{{ url_for('edit_appointment', appointment_id=a.id) }}"
+                           class="btn btn-sm btn-warning">
+                            Chỉnh sửa
+                        </a>
+
+                        <!-- Nút hủy -->
+                        <form action="{{ url_for('cancel_appointment', appointment_id=a.id) }}"
+                              method="post"
+                              style="display:inline;"
+                              onsubmit="return confirm('Bạn có chắc muốn hủy lịch này không?');">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                Hủy
+                            </button>
+                        </form>
+                    {% else %}
+                        <em>—</em>
+                    {% endif %}
+                </td>
             </tr>
         {% endfor %}
         </tbody>

@@ -6,6 +6,7 @@ from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle
                            Receipt, ReceptionForm, RepairForm)
 from datetime import datetime, date, time
 from flask_login import current_user
+from flask import flash
 
 
 def load_services(page=None):
@@ -239,6 +240,17 @@ def load_sparepart(page=None):
     return query.all()
 def count_sparepart():
     return SparePart.query.count()
+
+def get_appointment_by_id(appointment_id):
+    return Appointment.query.get(appointment_id)
+
+def cancel_appointment(appointment: Appointment):
+    appointment.status = AppointmentStatus.CANCELLED
+    db.session.commit()
+def update_appointment_note(appointment: Appointment, note: str):
+    appointment.note = note
+    db.session.commit()
+
 
 if __name__ == "__main__":
     with app.app_context():

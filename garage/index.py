@@ -11,9 +11,8 @@ from flask_login import current_user,login_user,logout_user, login_required
 from garage import app, login, admin, db, utils
 import dao
 from garage.decorators import anonymous_required
-from garage.models import UserRole
-from datetime import date
-from werkzeug.security import check_password_hash, generate_password_hash
+from garage.models import UserRole, AppointmentStatus
+from datetime import date, timedelta
 
 @app.route("/")
 def index():
@@ -111,7 +110,6 @@ def unauthorized_callback():
 @app.route("/bookrepair", methods=["GET", "POST"])
 @login_required
 def booking():
-    err_msg = None
     selected_date = date.today()
 
     form_data = {
@@ -128,8 +126,7 @@ def booking():
             except ValueError:
                 pass
 
-        if "scheduleTime" in request.form and request.form.get("scheduleTime"):
-
+        if request.form.get("scheduleTime"):
             form_data['scheduleTime'] = request.form.get("scheduleTime")
 
             vehicle_type = form_data['vehicleType']
@@ -138,7 +135,7 @@ def booking():
             time_slot = form_data['scheduleTime']
 
             if not vehicle_type or not license_plate:
-                err_msg = "Vui lòng nhập đầy đủ thông tin loại xe và biển số."
+                flash("Vui lòng nhập đầy đủ loại xe và biển số!", "warning")
             else:
                 ok = dao.add_appointment(
                     vehicle_type=vehicle_type,
@@ -151,17 +148,20 @@ def booking():
                 if ok:
                     return redirect(url_for("index"))
                 else:
-                    err_msg = "Đặt lịch thất bại. Vui lòng thử lại!"
+                    flash(
+                        "Biển số xe không hợp lệ. VD: 59X2-123.45 (xe máy), 30A-123.45 (ô tô)",
+                        "danger"
+                    )
 
     time_slots = dao.get_time_slots_for_date(selected_date)
 
     return render_template(
         "bookrepair.html",
-        err_msg=err_msg,
         selected_date=selected_date,
         time_slots=time_slots,
         form_data=form_data
     )
+
 
 
 @app.route("/services/<int:service_id>")
@@ -185,22 +185,42 @@ def user_profile():
 @login_required
 def user_edit_profile():
     customer = dao.get_customer_by_user_id(current_user.id)
-    user = current_user  # avatar nằm ở user
+    user = current_user
 
     if not customer:
         flash("Không tìm thấy thông tin khách hàng!", "danger")
         return redirect(url_for("user_profile"))
 
     if request.method == "POST":
+        has_changed = False
 
-        customer.full_name = request.form.get("full_name")
-        customer.phone = request.form.get("phone")
-        customer.address = request.form.get("address")
+        full_name = request.form.get("full_name")
+        if (customer.full_name or "") != (full_name or ""):
+            customer.full_name = full_name
+            has_changed = True
+
+        phone = request.form.get("phone")
+        if (customer.phone or "") != (phone or ""):
+            customer.phone = phone
+            has_changed = True
+
+        address = request.form.get("address")
+        if (customer.address or "") != (address or ""):
+            customer.address = address
+            has_changed = True
 
         avatar_file = request.files.get("avatar")
         if avatar_file and avatar_file.filename:
             upload_result = cloudinary.uploader.upload(avatar_file)
-            user.avatar = upload_result["secure_url"]
+            new_avatar = upload_result["secure_url"]
+
+            if user.avatar != new_avatar:
+                user.avatar = new_avatar
+                has_changed = True
+
+        if not has_changed:
+            flash("Không có thay đổi nào để cập nhật.", "warning")
+            return redirect(url_for("user_edit_profile"))
 
         try:
             db.session.commit()
@@ -211,7 +231,11 @@ def user_edit_profile():
             flash("Có lỗi xảy ra khi cập nhật!", "danger")
             print(ex)
 
-    return render_template("user/edit-profile.html", customer=customer, user=user)
+    return render_template(
+        "user/edit-profile.html",
+        customer=customer,
+        user=user
+    )
 
 @app.route("/user/appointments")
 @login_required
@@ -263,18 +287,22 @@ def change_password():
         new_password = request.form.get("new_password")
         confirm_password = request.form.get("confirm_password")
 
-        # 1. Kiểm tra mật khẩu cũ
-        if not check_password_hash(current_user.password, old_password):
+        old_hash = dao.md5_hash(old_password)
+        new_hash = dao.md5_hash(new_password)
+
+        if old_hash != current_user.password:
             flash("Mật khẩu hiện tại không đúng!", "danger")
             return redirect(url_for("change_password"))
 
-        # 2. Kiểm tra mật khẩu mới
         if new_password != confirm_password:
             flash("Mật khẩu mới không khớp!", "warning")
             return redirect(url_for("change_password"))
 
-        # 3. Lưu mật khẩu mới (HASH)
-        current_user.password = generate_password_hash(new_password)
+        if new_hash == current_user.password:
+            flash("Mật khẩu mới không được trùng với mật khẩu cũ!", "warning")
+            return redirect(url_for("change_password"))
+
+        current_user.password = new_hash
         db.session.commit()
 
         flash("Đổi mật khẩu thành công!", "success")
@@ -351,6 +379,88 @@ def pay():
         return jsonify({'code': 400})
 
 # Xong thanh toán
+
+@app.route("/user/appointments/<int:appointment_id>/cancel", methods=["POST"])
+@login_required
+def cancel_appointment(appointment_id):
+    appointment = dao.get_appointment_by_id(appointment_id)
+
+    if not appointment or appointment.customer.user_id != current_user.id:
+        flash("Không tìm thấy lịch hẹn!", "danger")
+        return redirect(url_for("user_appointment_history"))
+
+    if appointment.status != AppointmentStatus.BOOKED:
+        flash("Không thể hủy lịch này!", "warning")
+        return redirect(url_for("user_appointment_history"))
+
+    dao.cancel_appointment(appointment)
+
+    flash("Hủy lịch hẹn thành công!", "success")
+    return redirect(url_for("user_appointment_history"))
+
+@app.route("/user/appointments/<int:appointment_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_appointment(appointment_id):
+    appointment = dao.get_appointment_by_id(appointment_id)
+
+    if not appointment or appointment.customer.user_id != current_user.id:
+        flash("Không tìm thấy lịch hẹn!", "danger")
+        return redirect(url_for("user_appointment_history"))
+
+    if appointment.status != AppointmentStatus.BOOKED:
+        flash("Không thể chỉnh sửa lịch này!", "warning")
+        return redirect(url_for("user_appointment_history"))
+
+    selected_date = appointment.schedule_time.date()
+    current_slot = appointment.schedule_time.strftime("%H:%M") + " - " + (
+        appointment.schedule_time + timedelta(hours=1)
+    ).strftime("%H:%M")
+
+    time_slots = dao.get_time_slots_for_date(selected_date)
+
+    if request.method == "POST":
+        action = request.form.get("action_type")
+
+        if action == "update_slots":
+            selected_date = date.fromisoformat(request.form.get("scheduleDate"))
+            time_slots = dao.get_time_slots_for_date(selected_date)
+
+        elif action == "save":
+            selected_date = date.fromisoformat(request.form.get("scheduleDate"))
+            time_slot = request.form.get("scheduleTime")
+            note = request.form.get("description")
+
+            new_schedule_time = dao.parse_time_slot(time_slot, selected_date)
+
+            has_changed = False
+
+            if appointment.schedule_time != new_schedule_time:
+                appointment.schedule_time = new_schedule_time
+                has_changed = True
+
+            if (appointment.note or "") != (note or ""):
+                appointment.note = note
+                has_changed = True
+
+            if not has_changed:
+                flash("Không có thay đổi nào để cập nhật.", "warning")
+                return redirect(url_for(
+                    "edit_appointment",
+                    appointment_id=appointment.id
+                ))
+
+            db.session.commit()
+            flash("Cập nhật lịch hẹn thành công!", "success")
+            return redirect(url_for("user_appointment_history"))
+
+    return render_template(
+        "user/edit-appointment.html",
+        appointment=appointment,
+        selected_date=selected_date,
+        time_slots=time_slots,
+        current_slot=current_slot
+    )
+
 if __name__ == "__main__":
     app.run(debug=True,port=5000)
 

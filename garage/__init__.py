@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import cloudinary
+from flask_mail import Mail
 
 app = Flask(__name__, template_folder='templates')
 
@@ -10,6 +11,12 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:root@localhost/gar
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 3
 app.config["VAT_RATE"] = 0.1
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'nguyenlyminuong1234567890@gmail.com'
+app.config['MAIL_PASSWORD'] = 'APP_PASSWORD_GMAIL'
+
 
 #==============================
 
@@ -19,4 +26,5 @@ cloudinary.config(  cloud_name='dslzjm9y1',
 
 db=SQLAlchemy(app)
 login = LoginManager(app)
+mail = Mail(app)
 

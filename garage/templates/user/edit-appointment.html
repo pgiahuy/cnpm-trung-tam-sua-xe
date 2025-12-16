@@ -1,0 +1,136 @@
+{% extends 'layout/base.html' %}
+{% block title %}Chỉnh sửa lịch hẹn{% endblock %}
+{% block content %}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <h1 class="text-warning text-center fw-bold display-6 mb-4 border-bottom pb-2">
+                CHỈNH SỬA LỊCH HẸN
+            </h1>
+
+            {% if err_msg %}
+            <div class="alert alert-danger">{{ err_msg }}</div>
+            {% endif %}
+
+            <form method="post"
+                  class="p-4 border rounded shadow-sm bg-white"
+                  id="editForm">
+
+                <!-- ================= VEHICLE INFO ================= -->
+                <h3 class="fw-semibold text-secondary mb-3 mt-4">
+                    Thông tin Phương tiện
+                </h3>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input type="text"
+                                   class="form-control"
+                                   value="{{ appointment.vehicle.vehicle_type }}"
+                                   disabled>
+                            <label>Loại xe</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="form-floating">
+                            <input type="text"
+                                   class="form-control"
+                                   value="{{ appointment.vehicle.license_plate }}"
+                                   disabled>
+                            <label>Biển số xe</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= APPOINTMENT DETAILS ================= -->
+                <h3 class="fw-semibold text-secondary mb-3 mt-4">
+                    Chi tiết Lịch hẹn
+                </h3>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <input type="date"
+                                   class="form-control"
+                                   id="scheduleDate"
+                                   name="scheduleDate"
+                                   required
+                                   value="{{ selected_date.isoformat() }}">
+                            <label for="scheduleDate">Chọn ngày hẹn</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-floating">
+                            <select class="form-select"
+                                    id="scheduleTime"
+                                    name="scheduleTime"
+                                    required>
+                                <option value="">Chọn khung giờ</option>
+                                {% for slot in time_slots %}
+                                    <option value="{{ slot }}"
+                                        {% if slot == current_slot %}selected{% endif %}>
+                                        {{ slot }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <label for="scheduleTime">Khung giờ</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= NOTE ================= -->
+                <div class="col-12">
+                    <div class="form-floating">
+                        <textarea class="form-control"
+                                  id="description"
+                                  name="description"
+                                  style="height: 150px"
+                                  placeholder="Mô tả tình trạng xe">{{ appointment.note or '' }}</textarea>
+                        <label for="description">Mô tả tình trạng xe</label>
+                    </div>
+                </div>
+
+                <input type="hidden" name="action_type" id="actionType" value="save">
+
+                <!-- ================= ACTIONS ================= -->
+                <div class="text-center mt-5">
+                    <a href="{{ url_for('user_appointment_history') }}"
+                       class="btn btn-secondary me-3">
+                        Quay lại
+                    </a>
+
+                    <button class="btn btn-warning btn-lg w-50"
+                            type="submit">
+                        Lưu thay đổi
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dateInput = document.getElementById('scheduleDate');
+    const form = document.getElementById('editForm');
+    const actionType = document.getElementById('actionType');
+
+    dateInput.addEventListener('change', function () {
+        actionType.value = 'update_slots';
+        form.submit();
+    });
+
+    form.addEventListener('submit', function () {
+        if (actionType.value !== 'update_slots') {
+            actionType.value = 'save';
+        }
+    });
+});
+</script>
+
+{% endblock %}

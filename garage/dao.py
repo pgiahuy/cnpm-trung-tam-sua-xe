@@ -6,8 +6,11 @@ from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle
                            Receipt, ReceptionForm, RepairForm)
 from datetime import datetime, date, time
 from flask_login import current_user
+import re
 from flask import flash
 
+def md5_hash(password: str):
+    return hashlib.md5(password.encode("utf-8")).hexdigest()
 
 def load_services(page=None):
     query = Service.query
@@ -40,7 +43,7 @@ def load_menu_items():
 
 
 def add_user(username, password, avatar, full_name, phone):
-    password = hashlib.md5(password.encode("utf-8")).hexdigest()
+    password = md5_hash(password)
     u = User(username=username, password=password, avatar=avatar, role=UserRole.USER)
     c = Customer(full_name=full_name, phone=phone, user=u)
     try:
@@ -52,7 +55,7 @@ def add_user(username, password, avatar, full_name, phone):
         # raise ex
 
 def auth_user(username,password):
-    password = hashlib.md5(password.encode("utf-8")).hexdigest()
+    password = md5_hash(password)
     return User.query.filter(User.username.__eq__(username), User.password.__eq__(password)).first()
 
 def get_user_by_id(user_id):
@@ -98,6 +101,8 @@ def parse_time_slot(time_slot: str, selected_date: date):
 
 def add_appointment(vehicle_type, license_plate, description, time_slot, selected_date):
     try:
+        if not validate_license_plate(license_plate, vehicle_type):
+            return False
 
         customer_obj = Customer.query.filter_by(user_id=current_user.id).first()
         if not customer_obj:
@@ -247,9 +252,23 @@ def get_appointment_by_id(appointment_id):
 def cancel_appointment(appointment: Appointment):
     appointment.status = AppointmentStatus.CANCELLED
     db.session.commit()
+
 def update_appointment_note(appointment: Appointment, note: str):
     appointment.note = note
     db.session.commit()
+
+CAR_PLATE_REGEX = r"^\d{2}[A-Z]-\d{5}$"
+MOTOR_PLATE_REGEX = r"^\d{2}[A-Z][0-9]-\d{5}$"
+
+def validate_license_plate(plate, vehicle_type):
+    plate = plate.upper().strip()
+
+    if vehicle_type == "car":
+        return re.match(CAR_PLATE_REGEX, plate)
+    elif vehicle_type == "motorbike":
+        return re.match(MOTOR_PLATE_REGEX, plate)
+
+    return False
 
 
 if __name__ == "__main__":

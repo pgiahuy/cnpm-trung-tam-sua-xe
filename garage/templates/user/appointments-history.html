@@ -32,13 +32,13 @@
                 <td>{{ a.note or "-" }}</td>
                 <td>
                     {% if a.status.name == "BOOKED" %}
-                        <!-- Nút chỉnh sửa -->
+
                         <a href="{{ url_for('edit_appointment', appointment_id=a.id) }}"
                            class="btn btn-sm btn-warning">
                             Chỉnh sửa
                         </a>
 
-                        <!-- Nút hủy -->
+
                         <form action="{{ url_for('cancel_appointment', appointment_id=a.id) }}"
                               method="post"
                               style="display:inline;"

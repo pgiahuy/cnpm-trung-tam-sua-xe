@@ -12,7 +12,6 @@ import dao
 from garage.decorators import anonymous_required
 from garage.models import UserRole, AppointmentStatus
 from datetime import date, timedelta
-from werkzeug.security import check_password_hash, generate_password_hash
 
 @app.route("/")
 def index():
@@ -107,7 +106,6 @@ def unauthorized_callback():
 @app.route("/bookrepair", methods=["GET", "POST"])
 @login_required
 def booking():
-    err_msg = None
     selected_date = date.today()
 
     form_data = {
@@ -124,8 +122,7 @@ def booking():
             except ValueError:
                 pass
 
-        if "scheduleTime" in request.form and request.form.get("scheduleTime"):
-
+        if request.form.get("scheduleTime"):
             form_data['scheduleTime'] = request.form.get("scheduleTime")
 
             vehicle_type = form_data['vehicleType']
@@ -134,7 +131,7 @@ def booking():
             time_slot = form_data['scheduleTime']
 
             if not vehicle_type or not license_plate:
-                err_msg = "Vui lòng nhập đầy đủ thông tin loại xe và biển số."
+                flash("Vui lòng nhập đầy đủ loại xe và biển số!", "warning")
             else:
                 ok = dao.add_appointment(
                     vehicle_type=vehicle_type,
@@ -147,17 +144,20 @@ def booking():
                 if ok:
                     return redirect(url_for("index"))
                 else:
-                    err_msg = "Đặt lịch thất bại. Vui lòng thử lại!"
+                    flash(
+                        "Biển số xe không hợp lệ. VD: 59X2-123.45 (xe máy), 30A-123.45 (ô tô)",
+                        "danger"
+                    )
 
     time_slots = dao.get_time_slots_for_date(selected_date)
 
     return render_template(
         "bookrepair.html",
-        err_msg=err_msg,
         selected_date=selected_date,
         time_slots=time_slots,
         form_data=form_data
     )
+
 
 
 @app.route("/services/<int:service_id>")
@@ -283,7 +283,10 @@ def change_password():
         new_password = request.form.get("new_password")
         confirm_password = request.form.get("confirm_password")
 
-        if not check_password_hash(current_user.password, old_password):
+        old_hash = dao.md5_hash(old_password)
+        new_hash = dao.md5_hash(new_password)
+
+        if old_hash != current_user.password:
             flash("Mật khẩu hiện tại không đúng!", "danger")
             return redirect(url_for("change_password"))
 
@@ -291,13 +294,19 @@ def change_password():
             flash("Mật khẩu mới không khớp!", "warning")
             return redirect(url_for("change_password"))
 
-        current_user.password = generate_password_hash(new_password)
+        if new_hash == current_user.password:
+            flash("Mật khẩu mới không được trùng với mật khẩu cũ!", "warning")
+            return redirect(url_for("change_password"))
+
+        current_user.password = new_hash
         db.session.commit()
 
         flash("Đổi mật khẩu thành công!", "success")
         return redirect(url_for("user_profile"))
 
     return render_template("user/change-password.html")
+
+
 @app.route("/user/appointments/<int:appointment_id>/cancel", methods=["POST"])
 @login_required
 def cancel_appointment(appointment_id):

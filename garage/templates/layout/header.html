@@ -81,7 +81,9 @@
                             </a>
                         </li>
 
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
 
                         <li>
                             <a class="dropdown-item text-danger" href="{{ url_for('logout_my_user') }}">
@@ -108,21 +110,24 @@
 
             <div class="d-flex align-items-center gap-3">
 
-                <form class="nav-search-glass" onsubmit="return searchAndScroll()">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                <form action="{{ url_for('search') }}" method="get" class="nav-search-glass">
+                    <i class="fas fa-search"></i>
 
-                    <input id="searchInput"
-                           type="text"
-                           placeholder="Tìm trên trang…">
+                    {% if current_path == '/services' %}
+                    {% set search_placeholder = "Tìm dịch vụ..." %}
+                    <input type="hidden" name="scope" value="service">
+                    {% elif current_path == '/sparepart' %}
+                    {% set search_placeholder = "Tìm linh kiện..." %}
+                    <input type="hidden" name="scope" value="sparepart">
+                    {% else %}
+                    {% set search_placeholder = "Tìm dịch vụ, linh kiện..." %}
+                    <input type="hidden" name="scope" value="all">
+                    {% endif %}
 
-                    <span id="searchCounter"></span>
+                    <input type="text" name="kw" placeholder="{{ search_placeholder }}" value="{{ kw or '' }}" required>
 
-                    <button type="button" onclick="prevResult()" title="Trước">
-                        <i class="fa-solid fa-chevron-up"></i>
-                    </button>
-
-                    <button type="button" onclick="nextResult()" title="Sau">
-                        <i class="fa-solid fa-chevron-down"></i>
+                    <button type="submit">
+                        <i class="fas fa-arrow-right"></i>
                     </button>
                 </form>
 
@@ -130,7 +135,7 @@
                 <div class="position-relative">
                     <a class="nav-link d-flex align-items-center cart-icon" href="/cart">
                         <i class="fa-solid fa-cart-shopping fs-5"></i>
-                        <span class="cart-badge cart-counter" > {{stats_cart.total_quantity}}</span>
+                        <span class="cart-badge cart-counter"> {{stats_cart.total_quantity}}</span>
 
                     </a>
                 </div>

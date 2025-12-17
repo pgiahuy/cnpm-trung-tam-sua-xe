@@ -33,3 +33,4 @@ login = LoginManager(app)
 from garage import admin
 
 
+from garage import admin

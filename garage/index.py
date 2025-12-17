@@ -11,7 +11,7 @@ from werkzeug.utils import redirect
 import dao
 from garage import app, login, db, utils, mail
 from garage.decorators import anonymous_required
-from garage.models import UserRole, AppointmentStatus
+from garage.models import UserRole, AppointmentStatus, Comment
 
 
 @app.route("/")
@@ -538,16 +538,23 @@ Garage24h – Chăm sóc xe chuyên nghiệp 24/7
 
     flash("Gửi yêu cầu tư vấn thành công! Chúng tôi sẽ liên hệ sớm.", "success")
     return redirect('/')
-
-
 @app.route("/sparepart/<int:id>")
 def sparepart_detail(id):
     sparepart = dao.get_sparepart_by_id(id)
     if not sparepart:
         abort(404)
 
-    return render_template("sparepart-detail.html", sparepart=sparepart)
+    page = request.args.get('page', 1, type=int)
+    comments = utils.get_comments(sparepart_id=id, page=page)
+    pagination = utils.get_comment_pagination(sparepart_id=id, current_page=page)
 
+    return render_template(
+        "sparepart-detail.html",
+        sparepart=sparepart,
+        comments=comments,
+        pagination=pagination,
+        current_page=page
+    )
 @app.route('/flash-login-required', methods=['POST'])
 def flash_login_required():
     # Lấy URL hiện tại
@@ -557,5 +564,31 @@ def flash_login_required():
 
 
 
+@app.route('/api/comments', methods=['POST'])
+@login_required
+def add_comment():
+    try:
+        data = request.get_json()
+        content = data.get('content')
+        sparepart_id = data.get('sparepart_id')
+
+        if not content or not sparepart_id:
+            return jsonify({'status': 400, 'err_msg': 'Thiếu dữ liệu'}), 400
+
+        comment = utils.add_comment(content=content.strip(), sparepart_id=sparepart_id)
+
+        return jsonify({
+            'status': 201,
+            'comment': {
+                'id': comment.id,
+                'content': comment.content,
+                'username': current_user.username,
+                'created_date': comment.created_date.strftime('%d/%m/%Y %H:%M')
+            }
+        })
+    except Exception as e:
+        print(e)
+        db.session.rollback()
+        return jsonify({'status': 500, 'err_msg': 'Lỗi hệ thống'}), 500
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

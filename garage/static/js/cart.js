@@ -78,7 +78,7 @@ function deleteCart(id){
 
 }
 
-//Thanh toán
+
 function pay(repairFormId){
    if(confirm("Bạn chắc chắn thanh toán không?")){
     fetch('/api/pay',{
@@ -96,7 +96,7 @@ function pay(repairFormId){
     })
    }
 }
-//Xong thanh toán
+
 
 
 document.querySelectorAll('.cart-icon').forEach(icon => {
@@ -106,9 +106,47 @@ document.querySelectorAll('.cart-icon').forEach(icon => {
             // Gửi POST để set flash
             fetch('/flash-login-required', { method: 'POST' })
                 .then(() => {
-                    // reload để flash xuất hiện ngay chỗ template đã include
                     location.reload();
                 });
         }
     });
 });
+
+
+function addComment(sparepartId) {
+    const textarea = document.getElementById('commentId');
+    if (!textarea) return;
+
+    const content = textarea.value.trim();
+    if (!content) {
+        alert("Vui lòng nhập nội dung bình luận!");
+        return;
+    }
+
+
+    event.preventDefault();
+
+    fetch('/api/comments', {
+        method: 'POST',
+        body: JSON.stringify({
+            sparepart_id: sparepartId,
+            content: content
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 201) {
+
+            location.reload();
+        } else {
+            alert(data.err_msg || "Không thể gửi bình luận. Vui lòng thử lại!");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Lỗi kết nối. Vui lòng kiểm tra mạng!");
+    });
+}

@@ -1,0 +1,101 @@
+{% extends "layout/base.html" %}
+{% block content %}
+
+<div class="container my-5">
+
+    <h4 class="mb-4">
+        Kết quả tìm kiếm cho:
+        <span class="text-warning">"{{ kw }}"</span>
+    </h4>
+
+    {% if kw and services|length == 0 and spare_parts|length == 0 %}
+        <p class="text-muted">Không tìm thấy kết quả phù hợp.</p>
+    {% endif %}
+
+    <div class="row g-4 justify-content-center">
+
+        {# ================= DỊCH VỤ ================= #}
+        {% for s in services %}
+        <div class="col-lg-3 col-md-4 col-sm-6 d-flex" id="service-{{ s.id }}">
+            <div class="sparepart-card w-100">
+
+                <div class="sparepart-img-wrapper">
+                    <img src="{{ s.image }}" alt="{{ s.name }}">
+                </div>
+
+                <div class="sparepart-body d-flex flex-column p-3">
+
+                    <span class="badge bg-primary mb-2 align-self-start">
+                        Dịch vụ
+                    </span>
+
+                    <h6 class="fw-semibold">{{ s.name }}</h6>
+
+                    <p class="text-muted small">
+                        {{ s.description | truncate(60) }}
+                    </p>
+
+                    <div class="fw-bold text-warning mb-3">
+                        {{ "{:,.0f}".format(s.price | default(0)) }} đ / lần
+                    </div>
+
+                    <a href="/services/{{ s.id }}"
+                       class="btn btn-outline-primary btn-sm mt-auto">
+                        Xem chi tiết
+                    </a>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {# ================= LINH KIỆN ================= #}
+        {% for p in spare_parts %}
+        <div class="col-lg-3 col-md-4 col-sm-6 d-flex" id="sparepart-{{ p.id }}">
+            <div class="sparepart-card w-100">
+
+                <div class="sparepart-img-wrapper">
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}">
+                </div>
+
+                <div class="sparepart-body d-flex flex-column p-3">
+
+                    <span class="badge bg-warning text-dark mb-2 align-self-start">
+                        Linh kiện
+                    </span>
+
+                    <h6 class="fw-semibold">{{ p.name }}</h6>
+
+                    <p class="text-muted small">
+                        {{ p.supplier | truncate(40) }}
+                    </p>
+
+                    <div class="fw-bold text-warning mb-3">
+                        {{ "{:,.0f}".format(p.unit_price | default(0)) }} đ / {{ p.unit }}
+                    </div>
+
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="/sparepart/{{ p.id }}"
+                           class="btn btn-outline-warning btn-sm flex-fill">
+                            Xem chi tiết
+                        </a>
+
+                        <button class="btn btn-warning btn-sm"
+                                onclick="addToCart(
+                                    'sparepart-{{ p.id }}',
+                                    '{{ p.name }}',
+                                    {{ p.unit_price | default(0) }}
+                                )">
+                            🛒
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

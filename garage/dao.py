@@ -273,6 +273,15 @@ def validate_license_plate(plate, vehicle_type):
 def get_sparepart_by_id(sparepart_id):
     return SparePart.query.get(sparepart_id)
 
+def unique_by_name(items):
+    seen = set()
+    unique_items = []
+    for item in items:
+        if item.name not in seen:
+            unique_items.append(item)
+            seen.add(item.name)
+    return unique_items
+
 if __name__ == "__main__":
     with app.app_context():
         print(load_customers())

@@ -211,6 +211,10 @@ class ReceiptItem(Base):
 
     spare_part = relationship("SparePart")
 
+class SystemConfig(db.Model):
+    key = db.Column(db.String(50), primary_key=True)
+    value = db.Column(db.String(100), nullable=False)
+
 
 if __name__ == "__main__":
     with app.app_context():

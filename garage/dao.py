@@ -3,7 +3,7 @@ import json
 
 from garage import db, app
 from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus,
-                           Receipt, ReceptionForm, RepairForm)
+                           Receipt, ReceptionForm, RepairForm, SystemConfig)
 from datetime import datetime, date, time
 from flask_login import current_user
 import re
@@ -272,6 +272,21 @@ def validate_license_plate(plate, vehicle_type):
 
 def get_sparepart_by_id(sparepart_id):
     return SparePart.query.get(sparepart_id)
+
+def load_system_config(app):
+    configs = SystemConfig.query.all()
+    for c in configs:
+        try:
+            value = int(c.value)
+        except:
+            try:
+                value = float(c.value)
+            except:
+                value = c.value
+
+        app.config[c.key] = value
+
+
 
 if __name__ == "__main__":
     with app.app_context():

@@ -16,6 +16,7 @@ from garage.models import UserRole, AppointmentStatus
 
 @app.route("/")
 def index():
+
     items = dao.load_menu_items()
     services = dao.load_services()
     spare_parts = dao.load_spare_parts()
@@ -24,6 +25,7 @@ def index():
 
 @app.context_processor
 def common_adtributes():
+
     return {
         "items": dao.load_menu_items(),
         "stats_cart": utils.count_cart(session.get('cart'))
@@ -550,7 +552,7 @@ def sparepart_detail(id):
 
 @app.route('/flash-login-required', methods=['POST'])
 def flash_login_required():
-    # Lấy URL hiện tại
+
     next_url = request.referrer or '/'
     flash(f'Bạn cần <a href="/login?next={next_url}" class="text-warning fw-bold">đăng nhập</a> để tiếp tục', 'warning')
     return '', 204

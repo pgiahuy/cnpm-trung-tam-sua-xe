@@ -26,8 +26,10 @@ app.config['MAIL_DEFAULT_SENDER'] = (
 cloudinary.config(  cloud_name='dslzjm9y1',
                     api_key='378681865892523',
                     api_secret='JoV-kP2mQAXaW3dfDlQAuuqP7pA')
-
+mail = Mail(app)
 db=SQLAlchemy(app)
 login = LoginManager(app)
-mail = Mail(app)
+
+from garage import admin
+
 

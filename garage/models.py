@@ -217,6 +217,22 @@ class Comment(Base):
     content = Column(String(255), nullable=False)
     sparepart_id = Column(Integer, ForeignKey("spare_part.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+class SystemConfig(db.Model):
+    key = db.Column(db.String(50), primary_key=True)
+    value = db.Column(db.String(100), nullable=False)
+
+
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+        # --- Services ---
+        with open("data/service.json", encoding="utf-8") as f:
+            services = []
+            for s in json.load(f):
+                service = Service(**s)
+                db.session.add(service)
+                services.append(service)
+        db.session.commit()  # commit để có id thực tế
 
     def __str__(self):
         return self.content

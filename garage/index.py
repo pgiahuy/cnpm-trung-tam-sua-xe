@@ -11,11 +11,12 @@ from werkzeug.utils import redirect
 import dao
 from garage import app, login, db, utils, mail
 from garage.decorators import anonymous_required
-from garage.models import UserRole, AppointmentStatus, Comment
+from garage.models import UserRole, AppointmentStatus, Service, SparePart, Comment
 
 
 @app.route("/")
 def index():
+
     items = dao.load_menu_items()
     services = dao.load_services()
     spare_parts = dao.load_spare_parts()
@@ -24,6 +25,7 @@ def index():
 
 @app.context_processor
 def common_adtributes():
+
     return {
         "items": dao.load_menu_items(),
         "stats_cart": utils.count_cart(session.get('cart'))
@@ -557,10 +559,35 @@ def sparepart_detail(id):
     )
 @app.route('/flash-login-required', methods=['POST'])
 def flash_login_required():
-    # Lấy URL hiện tại
+
     next_url = request.referrer or '/'
     flash(f'Bạn cần <a href="/login?next={next_url}" class="text-warning fw-bold">đăng nhập</a> để tiếp tục', 'warning')
     return '', 204
+
+@app.route("/search")
+def search():
+    kw = request.args.get("kw", "").strip()
+    scope = request.args.get("scope", "all")  # all, service, sparepart
+
+    services = []
+    spare_parts = []
+
+    if kw:
+        if scope in ["all", "service"]:
+            services = Service.query.filter(Service.name.ilike(f"%{kw}%")).all()
+            services = dao.unique_by_name(services)
+
+        if scope in ["all", "sparepart"]:
+            spare_parts = SparePart.query.filter(SparePart.name.ilike(f"%{kw}%")).all()
+            spare_parts = dao.unique_by_name(spare_parts)
+
+    return render_template(
+        "search.html",
+        kw=kw,
+        services=services,
+        spare_parts=spare_parts,
+        scope=scope
+    )
 
 
 

@@ -1,14 +1,13 @@
-from flask import url_for, render_template, session
+from flask import url_for, render_template
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
-from flask_admin.form import Select2Widget
-from flask_admin.helpers import get_url
+
 from flask_login import current_user
 from markupsafe import Markup
-from wtforms import DateTimeLocalField, IntegerField, DecimalField, Form, SelectField, StringField, RadioField
+from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField
 from wtforms.validators import DataRequired, NumberRange, Optional
-from garage import app, db, dao
+from garage import db, app
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
                            VehicleStatus)
@@ -301,12 +300,7 @@ class SparePartAdmin(MyAdminModelView):
         'inventory': 'Tồn kho'
     }
 
-
-
-admin = Admin(app, name='GARAGE ADMIN',index_view=MyAdminHome(name="TRANG CHỦ"))
-
-
-
+admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name="TRANG CHỦ"))
 
 
 admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))

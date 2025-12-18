@@ -145,6 +145,9 @@ class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
         }
     }
 
+
+
+
 class RepairFormAdmin(MyAdminModelView):
     column_list = ['id', 'employee', 'reception_form', 'repair_status','vehicle_plate', 'created_date', 'total_money']
     column_labels = {
@@ -175,14 +178,42 @@ class RepairFormAdmin(MyAdminModelView):
             }
         ))
     ]
-
+    # REPAIR_TO_VEHICLE_STATUS = {
+    #     RepairStatus.QUOTED: VehicleStatus.WAITING_APPROVAL,
+    #     RepairStatus.REPAIRING: VehicleStatus.REPAIRING,
+    #     RepairStatus.DONE: VehicleStatus.DONE
+    # }
+    REPAIR_TO_VEHICLE_STATUS = {
+        'QUOTED': VehicleStatus.WAITING_APPROVAL,
+        'REPAIRING': VehicleStatus.REPAIRING,
+        'DONE': VehicleStatus.DONE
+    }
     #lấy giá tại thời điểm tạo
+    REPAIR_TO_VEHICLE_STATUS = {
+        'QUOTED': VehicleStatus.WAITING_APPROVAL,
+        'REPAIRING': VehicleStatus.REPAIRING,
+        'DONE': VehicleStatus.DONE
+    }
+
     def on_model_change(self, form, model, is_created):
+        # Lưu giá tại thời điểm tạo
         for detail in model.details:
             if detail.service:
                 detail.service_price = detail.service.price
             if detail.spare_part:
                 detail.spare_part_price = detail.spare_part.unit_price
+
+        # đồng bộ trạng thái xe theo trạng thái phiếu sửa
+        if model.reception_form and model.reception_form.vehicle:
+            vehicle = model.reception_form.vehicle
+
+            new_vehicle_status = self.REPAIR_TO_VEHICLE_STATUS.get(
+                model.repair_status
+            )
+
+            if new_vehicle_status and vehicle.vehicle_status != new_vehicle_status:
+                vehicle.vehicle_status = new_vehicle_status
+                db.session.add(vehicle)
 
     column_formatters = {
         'id': lambda v, c, m, p: Markup(
@@ -274,18 +305,25 @@ class ReceptionFormAdmin(MyAdminModelView):
     def on_model_change(self, form, model, is_created):
         try:
             if form.appointment_id.data:
-                # Trường hợp có lịch đã đặt
-                appointment = db.session.query(Appointment).get(form.appointment_id.data)
+
+                appointment = db.session.get(Appointment, form.appointment_id.data)
                 if not appointment:
                     raise ValueError("Lịch không hợp lệ.")
+
                 vehicle = appointment.vehicle
                 customer = vehicle.customer
+
                 appointment.status = AppointmentStatus.COMPLETED
                 db.session.add(appointment)
+
+                vehicle.vehicle_status = VehicleStatus.RECEIVED
+                db.session.add(vehicle)
+
             else:
-                # Xử lý khách hàng mới/cũ
+                # === KHÔNG CÓ LỊCH (lại CH tiếp nhận) ===
                 if form.new_customer.data:
-                    customer = db.session.query(Customer).filter_by(phone=form.new_customer_phone.data).first()
+                    customer = db.session.query(Customer) \
+                        .filter_by(phone=form.new_customer_phone.data).first()
                     if not customer:
                         customer = Customer(
                             full_name=form.new_customer.data,
@@ -294,11 +332,10 @@ class ReceptionFormAdmin(MyAdminModelView):
                         db.session.add(customer)
                         db.session.flush()
                 elif form.customer_id.data:
-                    customer = db.session.query(Customer).get(form.customer_id.data)
+                    customer = db.session.get(Customer, form.customer_id.data)
                 else:
                     raise ValueError("Phải chọn khách hàng hoặc nhập khách hàng mới.")
 
-                # Xử lý xe mới/cũ
                 if form.new_vehicle_plate.data:
                     vehicle = Vehicle(
                         license_plate=form.new_vehicle_plate.data,
@@ -309,16 +346,23 @@ class ReceptionFormAdmin(MyAdminModelView):
                     db.session.add(vehicle)
                     db.session.flush()
                 elif form.vehicle_id.data:
-                    vehicle = db.session.query(Vehicle).get(form.vehicle_id.data)
+                    vehicle = db.session.get(Vehicle, form.vehicle_id.data)
+
+                    # ✔ đảm bảo xe chuyển sang RECEIVED
+                    vehicle.vehicle_status = VehicleStatus.RECEIVED
+                    db.session.add(vehicle)
                 else:
                     raise ValueError("Phải chọn xe hoặc nhập xe mới.")
 
-            # Gán cho model
+            # Gán cho phiếu tiếp nhận
             model.vehicle_id = vehicle.id
-            model.employee_id = current_user.employee.id if hasattr(current_user,
-                                                                    'employee') and current_user.employee else form.employee.data.id
+            model.employee_id = (
+                current_user.employee.id
+                if hasattr(current_user, 'employee') and current_user.employee
+                else form.employee.data.id
+            )
+
             db.session.add(model)
-            db.session.commit()
 
         except Exception as e:
             db.session.rollback()

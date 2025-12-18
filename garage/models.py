@@ -22,12 +22,12 @@ class AppointmentStatus(Enum):
 
 class VehicleStatus(Enum):
     PENDING_APPOINTMENT = 1 # đặt lịch, chưa đến gara
-    RECEIVED = 2
-    DIAGNOSING = 3  # đang kiểm tra
-    WAITING_APPROVAL = 4  # chờ khách duyệt giá
-    REPAIRING = 5
-    DONE = 6
-    DELIVERED = 7
+    RECEIVED = 2 # đã lập phiếu tiếp nhận
+    DIAGNOSING = 3  # đang kiểm tra| xoá cái này
+    WAITING_APPROVAL = 4  # chờ khách duyệt giá; đã lập phiếu sửa chữa
+    REPAIRING = 5 #
+    DONE = 6 # có thể thanh toán
+    DELIVERED = 7 # đã thanh toán
     CANCELLED = 8
 
 class PaymentStatus(Enum):

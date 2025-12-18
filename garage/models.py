@@ -68,6 +68,7 @@ class Customer(Base):
     address = Column(String(255))
     vehicles = relationship("Vehicle", backref="customer", lazy=True)
     user_id = Column(Integer, ForeignKey("user.id"), unique=True)
+    #receipts = relationship("Receipt", backref="customer", lazy=True, cascade="all, delete-orphan")
 
 class Employee(Base):
     full_name = Column(String(255))
@@ -192,6 +193,7 @@ class Invoice(Base):
 
 class Receipt(Base):
     repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True, unique=True)
+    #customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
     subtotal = Column(DOUBLE, nullable=False)
     vat_rate = Column(DOUBLE, default=0)
     type = Column(SQLEnum("REPAIR", "BUY"),default="REPAIR")
@@ -216,10 +218,10 @@ class ReceiptItem(Base):
 class Payment(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
-
+    type = Column(SQLEnum("REPAIR", "BUY"), default="REPAIR")
     amount = Column(DOUBLE, nullable=False)
     method = Column(String(50), default="VNPAY")
-
+    vat_rate = Column(DOUBLE, default=0)
     transaction_ref = Column(String(100), unique=True)      # txn_ref gửi VNPAY
     vnp_transaction_no = Column(String(100))                # mã VNPAY trả về
 
@@ -238,7 +240,7 @@ class Comment(Base):
 
 
 class SystemConfig(db.Model):
-    key = db.Column(db.String(50), primary_key=True)
+    id = db.Column(db.String(50), primary_key=True)
     value = db.Column(db.String(100), nullable=False)
 
 

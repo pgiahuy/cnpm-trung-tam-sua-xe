@@ -10,7 +10,7 @@ from markupsafe import Markup
 from sqlalchemy import func
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField
 from wtforms.validators import DataRequired, NumberRange, Optional
-from garage import db, app
+from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
                            VehicleStatus, SystemConfig)
@@ -27,11 +27,10 @@ class MyAdminHome(AdminIndexView):
 
     @expose('/')
     def index(self):
-        vat_obj = SystemConfig.query.filter_by(id='VAT').first()
         max_slot_obj = SystemConfig.query.filter_by(id='MAX_SLOT_PER_DAY').first()
         repairing = Vehicle.query.filter_by(vehicle_status='REPAIRING').count()
 
-        vat = float(vat_obj.value)
+        vat = dao.get_vat_value()
         max_slot = int(max_slot_obj.value)
 
         today = date.today()

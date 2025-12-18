@@ -12,7 +12,8 @@ from werkzeug.utils import redirect
 import dao
 from garage import app, login, db, utils, mail
 from garage.decorators import anonymous_required
-from garage.models import UserRole, AppointmentStatus, Service, SparePart, PaymentStatus, Receipt, Payment, ReceiptItem,RepairForm
+from garage.models import UserRole, AppointmentStatus, Service, SparePart, PaymentStatus, Receipt, Payment, ReceiptItem, \
+    RepairForm, SystemConfig
 from garage.vnpay import build_vnpay_url
 
 
@@ -75,6 +76,7 @@ def login_my_user():
         if user:
             login_user(user)
             print(current_user.role)
+            print(current_user.customer.id)
             if next_page:
                 return redirect(next_page)
             if user.role == UserRole.ADMIN:
@@ -402,19 +404,22 @@ def pay():
     cart = session.get('cart')
     if not cart:
         return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+    txn_ref = f"{current_user.id}_{int(time.time())}"
+
+    vat_rate = dao.get_vat_value() # = 0
 
     total = utils.count_cart(cart)['total_amount']
-
-    txn_ref = f"{current_user.id}_{int(time.time())}"
+    total += vat_rate*total
 
     payment = Payment(
         user_id=current_user.id,
         amount=total,
+        vat_rate=vat_rate,
         method='VNPAY',
+        type='BUY',
         transaction_ref=txn_ref,
         status=PaymentStatus.PENDING
     )
-
     db.session.add(payment)
     db.session.commit()
 
@@ -430,19 +435,23 @@ def pay():
 def pay_repair(repair_id):
     repair = RepairForm.query.get_or_404(repair_id)
 
-    # Tính tổng tiền sửa chữa
     total_amount = sum([ri.quantity * ri.unit_price for ri in repair.items])
+
+    vat_rate = dao.get_vat_value()
+
+    total_amount += vat_rate*total_amount
 
     txn_ref = f"{current_user.id}_{int(time.time())}"
 
     payment = Payment(
         user_id=current_user.id,
         amount=total_amount,
+        vat_rate=vat_rate,
         method='VNPAY',
-        status='pending',
+        type="REPAIR",
+        status=PaymentStatus.PENDING,
         transaction_ref=txn_ref,
-        payment_type="REPAIR",
-        repair_items=repair.items  # gắn các item sửa chữa
+        repair_items=repair.items
     )
     db.session.add(payment)
     db.session.commit()
@@ -474,47 +483,38 @@ def vnpay_return():
     # Thanh toán thành công
     payment.status = PaymentStatus.SUCCESS
     payment.vnp_transaction_no = vnp_trans_no
-
-    # Xác định loại thanh toán
-    payment_type = getattr(payment, 'payment_type', 'BUY')  # mặc định BUY
-
-    # VAT chỉ áp dụng cho sửa chữa
-    vat_rate = 0.1 if payment_type == "REPAIR" else 0
-
-    subtotal = payment.amount
-    vat_amount = subtotal * vat_rate
-    total_paid = subtotal + vat_amount
-
-    # Tạo receipt
+    type = getattr(payment, 'type')
+    subtotal = payment.amount/(1+payment.vat_rate)
     receipt = Receipt(
+       # customer_id=payment.user.customer.id,
         subtotal=subtotal,
-        vat_rate=vat_rate,
-        vat_amount=vat_amount,
-        total_paid=total_paid,
+        vat_rate=payment.vat_rate,
+        total_paid=payment.amount,
         payment_method="VNPAY",
-        type=payment_type  # BUY hoặc REPAIR
+        type=type  # BUY hoặc REPAIR
     )
     db.session.add(receipt)
     db.session.flush()  # để có receipt.id
 
     # Tạo receipt item
-    if payment_type == "BUY":
-        cart = session.get('cart')
-        if not cart:
-            return "Cart không tồn tại", 400
-        for c in cart.values():
-            item = ReceiptItem(
-                receipt_id=receipt.id,
-                spare_part_id=int(c['id']),
-                quantity=c['quantity'],
-                unit_price=c['unit_price'],
-                total_price=c['quantity'] * c['unit_price']
-            )
-            db.session.add(item)
-        session.pop('cart', None)
+    if type == "BUY":
+
+       cart = session.get('cart')
+       if not cart:
+           return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+       for c in cart.values():
+           item = ReceiptItem(
+               receipt_id=receipt.id,
+               spare_part_id=int(c['id']),
+               quantity=c['quantity'],
+               unit_price=c['unit_price'],
+               total_price=c['quantity'] * c['unit_price']
+           )
+           db.session.add(item)
+       session.pop('cart', None)
 
 
-    elif payment_type == "REPAIR":
+    elif type == "REPAIR":
         repair_items = getattr(payment, 'repair_items', [])
         for ri in repair_items:
             item = ReceiptItem(

@@ -10,23 +10,24 @@
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-</head><body class="d-flex flex-column min-vh-100
+</head>
+<body class="d-flex flex-column min-vh-100
 {% if request.path != '/' %}
 pt-nav
 {% endif %}
 ">
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="container mt-3">
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message | safe }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-      {% endfor %}
+{% if messages %}
+<div class="container mt-3">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+        {{ message | safe }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-  {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
 {% endwith %}
 
 {%block header%}

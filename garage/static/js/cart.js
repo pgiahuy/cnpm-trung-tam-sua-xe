@@ -77,11 +77,10 @@ function deleteCart(id){
 
 function pay(repairFormId){
    if(confirm("Bạn chắc chắn thanh toán không?")){
-    fetch('/api/pay',{
+    fetch('/api/pay_spare_part',{
         method: 'post',
         body: JSON.stringify({
             repair_form_id: repairFormId,
-            payment_method: "CASH"
         }),
         headers:{
             "Content-Type": "application/json"
@@ -104,7 +103,7 @@ function pay(repairFormId){
         alert("Lỗi hệ thống");
     });
 }
-
+}
 
 document.querySelectorAll('.cart-icon').forEach(icon => {
     icon.addEventListener('click', function(e) {

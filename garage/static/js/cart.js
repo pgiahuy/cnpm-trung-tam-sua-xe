@@ -79,24 +79,34 @@ function deleteCart(id){
 }
 
 //Thanh toán
-function pay(repairFormId){
-   if(confirm("Bạn chắc chắn thanh toán không?")){
-    fetch('/api/pay',{
-        method: 'post',
-        body: JSON.stringify({
-            repair_form_id: repairFormId,
-            payment_method: "CASH"
-        }),
-        headers:{
+function pay(repairFormId) {
+    if (!confirm("Bạn chắc chắn thanh toán hóa đơn sửa chữa này không?")) {
+        return;
+    }
+
+    fetch("/api/pay", {
+        method: "POST",
+        headers: {
             "Content-Type": "application/json"
-        }
-    }).then(res => res.json()).then(data => {
-      if (data.code == 200)
-        location.reload()
+        },
+        body: JSON.stringify({
+            repair_form_id: repairFormId
+        })
     })
-   }
+    .then(res => res.json())
+    .then(data => {
+        if (data.code === 200) {
+            // Redirect sang trang VNPAY
+            window.location.href = data.pay_url;
+        } else {
+            alert(data.msg || "Thanh toán thất bại");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Lỗi hệ thống");
+    });
 }
-//Xong thanh toán
 
 
 document.querySelectorAll('.cart-icon').forEach(icon => {
@@ -112,3 +122,5 @@ document.querySelectorAll('.cart-icon').forEach(icon => {
         }
     });
 });
+
+

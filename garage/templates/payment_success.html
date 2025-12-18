@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán thành công</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 40px;
+        }
+        .box {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #28a745;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        td {
+            padding: 8px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .total {
+            font-size: 18px;
+            color: #d9534f;
+            font-weight: bold;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            background: #007bff;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h1>✅ Thanh toán thành công</h1>
+    <p>Cảm ơn bạn đã thanh toán. Dưới đây là thông tin hóa đơn:</p>
+
+    <table>
+        <tr>
+            <td class="label">Mã hóa đơn:</td>
+            <td>#{{ receipt.id }}</td>
+        </tr>
+        <tr>
+            <td class="label">Tạm tính:</td>
+            <td>{{ "{:,.0f}".format(receipt.subtotal) }} VND</td>
+        </tr>
+        <tr>
+            <td class="label">VAT ({{ receipt.vat_rate * 100 }}%):</td>
+            <td>{{ "{:,.0f}".format(receipt.vat_amount) }} VND</td>
+        </tr>
+        <tr>
+            <td class="label total">Tổng thanh toán:</td>
+            <td class="total">{{ "{:,.0f}".format(receipt.total_paid) }} VND</td>
+        </tr>
+        <tr>
+            <td class="label">Phương thức:</td>
+            <td>{{ receipt.payment_method }}</td>
+        </tr>
+        <tr>
+            <td class="label">Thời gian:</td>
+            <td>{{ receipt.paid_at.strftime('%d/%m/%Y %H:%M') }}</td>
+        </tr>
+    </table>
+
+    <a href="/">⬅ Quay về trang chủ</a>
+</div>
+</body>
+</html>

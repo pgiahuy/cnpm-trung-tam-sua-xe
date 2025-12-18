@@ -56,9 +56,12 @@ body {
     padding: 15px 0;
 }
 
+
+
+
 #sidebar ul li a {
-    margin: 4px 12px;
-    padding: 12px 18px;
+    margin: 2px 12px;
+    padding: 9px 18px;
     display: flex;
     align-items: center;
     color: #cbd5f5;
@@ -196,4 +199,10 @@ body.sidebar-collapsed #content {
     width:28px;
     height:28px;
     object-fit:cover;
+}
+.menu-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 17px;
+    fill: white;
 }

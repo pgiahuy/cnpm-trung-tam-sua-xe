@@ -7,6 +7,7 @@ from flask_mail import Mail
 app = Flask(__name__, template_folder='templates')
 
 app.secret_key = "dwdswdw"
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:root@localhost/garage?charset=utf8mb4"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 3
@@ -29,8 +30,6 @@ cloudinary.config(  cloud_name='dslzjm9y1',
 mail = Mail(app)
 db=SQLAlchemy(app)
 login = LoginManager(app)
-
-from garage import admin
 
 
 from garage import admin

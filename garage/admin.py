@@ -1,23 +1,44 @@
-from flask import url_for, render_template
-from flask_admin import Admin, AdminIndexView, expose
+from datetime import date
+
+from flask import url_for, render_template, redirect
+from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 
 from flask_login import current_user
 from markupsafe import Markup
+from sqlalchemy import func
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField
 from wtforms.validators import DataRequired, NumberRange, Optional
 from garage import db, app
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
-                           VehicleStatus)
+                           VehicleStatus, SystemConfig)
 
+
+class AdminAccessMixin:
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == UserRole.ADMIN
+    def is_visible(self):
+        return self.is_accessible()
 
 class MyAdminHome(AdminIndexView):
+
+
     @expose('/')
     def index(self):
-        return self.render('admin/index.html')
+        vat_obj = SystemConfig.query.filter_by(id='VAT').first()
+        max_slot_obj = SystemConfig.query.filter_by(id='MAX_SLOT_PER_DAY').first()
+        repairing = Vehicle.query.filter_by(vehicle_status='REPAIRING').count()
 
+        vat = float(vat_obj.value)
+        max_slot = int(max_slot_obj.value)
+
+        today = date.today()
+        slots_today = ReceptionForm.query.filter(
+            func.date(ReceptionForm.created_date) == today
+        ).count()
+        return self.render('admin/index.html',vat=vat, slots_today=slots_today, max_slot=max_slot, repairing=repairing)
 
     #template = 'admin/custom_master.html'
     #base_template = 'admin/custom_base.html'
@@ -25,10 +46,11 @@ class MyAdminHome(AdminIndexView):
         return current_user.is_authenticated and current_user.role in (
             UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.TECHNICIAN
         )
-
     def inaccessible_callback(self, name, **kwargs):
         # Nếu không có quyền, trả về trang 403
         return render_template('errors/403.html'), 403
+
+
 
 
 class MyAdminModelView(ModelView):
@@ -44,7 +66,7 @@ class MyAdminModelView(ModelView):
         return render_template('errors/403.html'), 403
 
 
-class ServiceAdmin(MyAdminModelView):
+class ServiceAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['name', 'description', 'active', 'price','created_date']
     column_labels = {
         'name': 'Tên dịch vụ',
@@ -53,7 +75,7 @@ class ServiceAdmin(MyAdminModelView):
         'price':'Giá',
         'created_date':'Ngày tạo'
     }
-class CustomerAdmin(MyAdminModelView):
+class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
     column_labels = {
         'full_name': 'Họ tên',
         'phone' : 'Số điện thoại',
@@ -74,7 +96,7 @@ class CustomerAdmin(MyAdminModelView):
         )
     }
 
-class EmployeeAdmin(MyAdminModelView):
+class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['full_name',  'phone','active', 'user']
     column_labels = {
         'full_name': 'Họ tên',
@@ -88,7 +110,7 @@ class EmployeeAdmin(MyAdminModelView):
         'user': lambda v, c, m, p: m.user.username if m.user else ''
     }
 
-class UserAdmin(MyAdminModelView):
+class UserAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['username',  'active', 'role','created_date']
     column_labels = {
         'username': 'Tên đăng nhập',
@@ -97,7 +119,7 @@ class UserAdmin(MyAdminModelView):
         'created_date': 'Ngày tạo'
     }
 
-class VehicleAdmin(MyAdminModelView):
+class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['license_plate', 'vehicle_type', 'customer', 'vehicle_status', 'receptions']
     column_labels = {
         'license_plate': 'Biển số xe',
@@ -106,7 +128,7 @@ class VehicleAdmin(MyAdminModelView):
         'customer': 'Khách hàng',
         'receptions': 'Phiếu tiếp nhận'
     }
-class AppointmentAdmin(MyAdminModelView):
+class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['customer', 'vehicle', 'schedule_time', 'status', 'note']
     column_labels = {
         'customer': 'Khách',
@@ -185,11 +207,25 @@ class RepairFormAdmin(MyAdminModelView):
         ),
     }
 
-class RepairDetailView(MyAdminHome):
+# class RepairDetailView(BaseView):
+#     @expose('/<int:repair_id>')
+#     def detail(self, repair_id,**kwargs):
+#         repair = RepairForm.query.get_or_404(repair_id)
+#         return self.render('admin/custom_detail.html', repair=repair, enumerate=enumerate)
+class RepairDetailView(BaseView):
+
+    @expose('/')
+    def index(self):
+        return redirect(url_for('admin.index'))
+
     @expose('/<int:repair_id>')
-    def detail(self, repair_id,**kwargs):
+    def detail(self, repair_id, **kwargs):
         repair = RepairForm.query.get_or_404(repair_id)
-        return self.render('admin/custom_detail.html', repair=repair, enumerate=enumerate)
+        return self.render(
+            'admin/custom_detail.html',
+            repair=repair,
+            enumerate=enumerate
+        )
 
 
 class ReceptionFormAdmin(MyAdminModelView):
@@ -290,7 +326,7 @@ class ReceptionFormAdmin(MyAdminModelView):
             raise e
 
 
-class SparePartAdmin(MyAdminModelView):
+class SparePartAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['name','unit_price', 'unit','supplier','inventory']
     column_labels = {
         'name' : 'Tên',
@@ -300,18 +336,33 @@ class SparePartAdmin(MyAdminModelView):
         'inventory': 'Tồn kho'
     }
 
-admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name="TRANG CHỦ"))
+
+class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
+    column_list = ['id','value']
+    form_columns = ['id', 'value']
+    can_delete = False
+    column_labels = {
+        'id' : 'Quy định',
+        'value' : 'Giá trị'
+    }
 
 
-admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
+
+
+admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name='TRANG CHỦ'))
+
+
+admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
 admin.add_view(CustomerAdmin(Customer, db.session,name='KHÁCH HÀNG'))
 admin.add_view(EmployeeAdmin(Employee, db.session,name='NHÂN VIÊN'))
-admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
-admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
 admin.add_view(AppointmentAdmin(Appointment, db.session,name='LỊCH HẸN'))
 admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN'))
-admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA'))
+admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA CHỮA'))
+admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
+admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
 admin.add_view(SparePartAdmin(SparePart, db.session,name='PHỤ TÙNG'))
+admin.add_view(SystemConfigAdmin(SystemConfig, db.session,name='QUY ĐỊNH'))
 
 admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
+
 

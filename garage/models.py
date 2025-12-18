@@ -30,6 +30,12 @@ class VehicleStatus(Enum):
     DELIVERED = 7
     CANCELLED = 8
 
+class PaymentStatus(Enum):
+    PENDING = "pending"
+    SUCCESS = "success"
+    FAILED = "failed"
+
+
 
 class Base(db.Model):
     __abstract__ = True
@@ -172,23 +178,6 @@ class RepairDetail(Base):
         return cls(task=task,service=service,spare_part=spare_part,quantity=quantity,repair_id=repair_id,
                    service_price_at_time=service_price, spare_part_price_at_time=spare_part_price)
 
-class Receipt(Base):
-    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True, unique=True)
-
-    subtotal = Column(DOUBLE, nullable=False)
-    vat_rate = Column(DOUBLE, default=0)
-    vat_amount = Column(DOUBLE, nullable=False)
-    total_paid = Column(DOUBLE, nullable=False)
-
-    payment_method = Column(String(50))  # CASH / TRANSFER
-    paid_at = Column(DateTime, default=datetime.now)
-
-    invoice = relationship("Invoice", backref="receipt", uselist=False)
-    items = relationship(
-        "ReceiptItem",
-        backref="receipt",
-        cascade="all, delete-orphan"
-    )
 
 class Invoice(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False, unique=True)
@@ -201,6 +190,18 @@ class Invoice(Base):
     issued_date = Column(DateTime, default=datetime.now)
 
 
+class Receipt(Base):
+    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True, unique=True)
+    subtotal = Column(DOUBLE, nullable=False)
+    vat_rate = Column(DOUBLE, default=0)
+    type = Column(SQLEnum("REPAIR", "BUY"),default="REPAIR")
+    total_paid = Column(DOUBLE, nullable=False)
+    payment_method = Column(String(50))
+    paid_at = Column(DateTime, default=datetime.now)
+
+    invoice = relationship("Invoice", backref="receipt", uselist=False)
+    items = relationship("ReceiptItem",backref="receipt",cascade="all, delete-orphan")
+
 class ReceiptItem(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False)
     spare_part_id = Column(Integer, ForeignKey("spare_part.id"), nullable=False)
@@ -211,8 +212,27 @@ class ReceiptItem(Base):
 
     spare_part = relationship("SparePart")
 
+
+class Payment(Base):
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
+
+    amount = Column(DOUBLE, nullable=False)
+    method = Column(String(50), default="VNPAY")
+
+    transaction_ref = Column(String(100), unique=True)      # txn_ref gửi VNPAY
+    vnp_transaction_no = Column(String(100))                # mã VNPAY trả về
+
+    status = Column(
+        SQLEnum(PaymentStatus),
+        default=PaymentStatus.PENDING
+    )
+
+    user = relationship("User")
+    receipt = relationship("Receipt", backref="payment", uselist=False)
+
 class SystemConfig(db.Model):
-    key = db.Column(db.String(50), primary_key=True)
+    id = db.Column(db.String(50), primary_key=True)
     value = db.Column(db.String(100), nullable=False)
 
 

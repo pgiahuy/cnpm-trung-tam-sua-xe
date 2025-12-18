@@ -11,6 +11,7 @@ app.secret_key = "dwdswdw"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:root@localhost/garage?charset=utf8mb4"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 3
+app.config["COMMENTS_PAGE_SIZE"] = 10
 app.config["VAT_RATE"] = 0.1
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -27,9 +28,10 @@ app.config['MAIL_DEFAULT_SENDER'] = (
 cloudinary.config(  cloud_name='dslzjm9y1',
                     api_key='378681865892523',
                     api_secret='JoV-kP2mQAXaW3dfDlQAuuqP7pA')
-mail = Mail(app)
+
 db=SQLAlchemy(app)
 login = LoginManager(app)
+mail = Mail(app)
 
 
 from garage import admin

@@ -52,7 +52,6 @@ function updateCart(id, obj){
 
 }
 
-
 function deleteCart(id){
     if (confirm("Bạn chắc chắn xoá sản phẩm này không?") == true){
         fetch('/api/delete-cart/' + id,{
@@ -73,20 +72,18 @@ function deleteCart(id){
      e2.style.display = "none"
 
    })
-
     }
-
 }
 
-//Thanh toán
-function pay(repairFormId) {
-    if (!confirm("Bạn chắc chắn thanh toán hóa đơn sửa chữa này không?")) {
-        return;
-    }
-
-    fetch("/api/pay", {
-        method: "POST",
-        headers: {
+function pay(repairFormId){
+   if(confirm("Bạn chắc chắn thanh toán không?")){
+    fetch('/api/pay',{
+        method: 'post',
+        body: JSON.stringify({
+            repair_form_id: repairFormId,
+            payment_method: "CASH"
+        }),
+        headers:{
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -112,11 +109,10 @@ function pay(repairFormId) {
 document.querySelectorAll('.cart-icon').forEach(icon => {
     icon.addEventListener('click', function(e) {
         if (!isAuthenticated) {
-            e.preventDefault(); // ngăn redirect tới /cart
-            // Gửi POST để set flash
+            e.preventDefault();
+
             fetch('/flash-login-required', { method: 'POST' })
                 .then(() => {
-                    // reload để flash xuất hiện ngay chỗ template đã include
                     location.reload();
                 });
         }
@@ -124,3 +120,40 @@ document.querySelectorAll('.cart-icon').forEach(icon => {
 });
 
 
+function addComment(sparepartId) {
+    const textarea = document.getElementById('commentId');
+    if (!textarea) return;
+
+    const content = textarea.value.trim();
+    if (!content) {
+        alert("Vui lòng nhập nội dung bình luận!");
+        return;
+    }
+
+
+    event.preventDefault();
+
+    fetch('/api/comments', {
+        method: 'POST',
+        body: JSON.stringify({
+            sparepart_id: sparepartId,
+            content: content
+        }),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 201) {
+
+            location.reload();
+        } else {
+            alert(data.err_msg || "Không thể gửi bình luận. Vui lòng thử lại!");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Lỗi kết nối. Vui lòng kiểm tra mạng!");
+    });
+}

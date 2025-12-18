@@ -56,6 +56,7 @@ class User(Base, UserMixin):
     role = Column(SQLEnum(UserRole), default=UserRole.USER)
     customer = relationship("Customer", backref="user", uselist=False)
     employee = relationship("Employee", backref="user", uselist=False)
+    comments = relationship("Comment", backref="user", lazy=True)
 
     def __str__(self):
         return f"{self.username}"
@@ -178,7 +179,6 @@ class RepairDetail(Base):
         return cls(task=task,service=service,spare_part=spare_part,quantity=quantity,repair_id=repair_id,
                    service_price_at_time=service_price, spare_part_price_at_time=spare_part_price)
 
-
 class Invoice(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False, unique=True)
 
@@ -231,8 +231,14 @@ class Payment(Base):
     user = relationship("User")
     receipt = relationship("Receipt", backref="payment", uselist=False)
 
+class Comment(Base):
+    content = Column(String(255), nullable=False)
+    sparepart_id = Column(Integer, ForeignKey("spare_part.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+
+
 class SystemConfig(db.Model):
-    id = db.Column(db.String(50), primary_key=True)
+    key = db.Column(db.String(50), primary_key=True)
     value = db.Column(db.String(100), nullable=False)
 
 

@@ -68,7 +68,7 @@ class Customer(Base):
     address = Column(String(255))
     vehicles = relationship("Vehicle", backref="customer", lazy=True)
     user_id = Column(Integer, ForeignKey("user.id"), unique=True)
-    #receipts = relationship("Receipt", backref="customer", lazy=True, cascade="all, delete-orphan")
+    receipts = relationship("Receipt", backref="customer", lazy=True, cascade="all, delete-orphan")
 
 class Employee(Base):
     full_name = Column(String(255))
@@ -193,7 +193,7 @@ class Invoice(Base):
 
 class Receipt(Base):
     repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True, unique=True)
-    #customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
+    customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
     subtotal = Column(DOUBLE, nullable=False)
     vat_rate = Column(DOUBLE, default=0)
     type = Column(SQLEnum("REPAIR", "BUY"),default="REPAIR")

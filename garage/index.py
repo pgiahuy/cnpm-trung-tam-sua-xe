@@ -406,7 +406,7 @@ def pay():
         return jsonify({'code': 400, 'msg': 'Cart rỗng'})
     txn_ref = f"{current_user.id}_{int(time.time())}"
 
-    vat_rate = dao.get_vat_value() # = 0
+    vat_rate = 0 #dao.get_vat_value()
 
     total = utils.count_cart(cart)['total_amount']
     total += vat_rate*total
@@ -486,7 +486,7 @@ def vnpay_return():
     type = getattr(payment, 'type')
     subtotal = payment.amount/(1+payment.vat_rate)
     receipt = Receipt(
-       # customer_id=payment.user.customer.id,
+        customer_id=payment.user.customer.id,
         subtotal=subtotal,
         vat_rate=payment.vat_rate,
         total_paid=payment.amount,

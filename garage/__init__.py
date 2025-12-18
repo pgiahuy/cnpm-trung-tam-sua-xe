@@ -34,5 +34,4 @@ login = LoginManager(app)
 mail = Mail(app)
 
 
-
 from garage import admin

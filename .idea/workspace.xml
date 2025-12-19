@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="07f14b8c-61a6-4468-bdb3-2208cc1e321e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/cnpm-trung-tam-sua-xe.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cnpm-trung-tam-sua-xe.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/admin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/garage/dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/dao.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/index.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/index.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/admin/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/templates/bookrepair.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/bookrepair.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/garage/templates/user/orders.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/user/orders.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -219,17 +219,14 @@ def index_vehicles_by_user(user_id):
     )
 
 def index_receipts_by_user(user_id):
-    customer = get_customer_by_user_id(user_id)
+    customer = Customer.query.filter_by(user_id=user_id).first()
 
     if not customer:
         return []
 
     return (
         Receipt.query
-        .join(RepairForm)
-        .join(ReceptionForm)
-        .join(Vehicle)
-        .filter(Vehicle.customer_id == customer.id)
+        .filter(Receipt.customer_id == customer.id)
         .order_by(Receipt.paid_at.desc())
         .all()
     )

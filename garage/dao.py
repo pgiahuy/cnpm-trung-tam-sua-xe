@@ -8,6 +8,7 @@ from datetime import datetime, date, time
 from flask_login import current_user
 import re
 from flask import flash
+from sqlalchemy import func
 
 def md5_hash(password: str):
     return hashlib.md5(password.encode("utf-8")).hexdigest()
@@ -218,17 +219,14 @@ def index_vehicles_by_user(user_id):
     )
 
 def index_receipts_by_user(user_id):
-    customer = get_customer_by_user_id(user_id)
+    customer = Customer.query.filter_by(user_id=user_id).first()
 
     if not customer:
         return []
 
     return (
         Receipt.query
-        .join(RepairForm)
-        .join(ReceptionForm)
-        .join(Vehicle)
-        .filter(Vehicle.customer_id == customer.id)
+        .filter(Receipt.customer_id == customer.id)
         .order_by(Receipt.paid_at.desc())
         .all()
     )
@@ -297,6 +295,88 @@ def load_system_config(app):
 
 def get_vat_value():
     vat_obj = SystemConfig.query.filter_by(id='VAT').first()
+    if vat_obj:
+        try:
+            return float(vat_obj.value)
+        except (ValueError, TypeError):
+            return 0.1
+    return 0.1
+
+def get_revenue_by_month():
+    results = db.session.query(
+        func.month(Receipt.paid_at).label('month'),
+        func.sum(Receipt.total_paid).label('revenue')
+    ).group_by(func.month(Receipt.paid_at)).all()
+
+    return {f"Tháng {r.month}": float(r.revenue) for r in results}
+
+
+def get_revenue_by_day():
+    results = db.session.query(
+        func.date(Receipt.paid_at).label('date'),
+        func.sum(Receipt.total_paid).label('revenue')
+    ).group_by(func.date(Receipt.paid_at)).all()
+
+    return {str(r.date): float(r.revenue) for r in results}
+
+
+def get_vehicle_stats():
+    results = db.session.query(
+        Vehicle.vehicle_type,
+        func.count(ReceptionForm.id)
+    ).join(Vehicle, ReceptionForm.vehicle_id == Vehicle.id) \
+        .group_by(Vehicle.vehicle_type).all()
+    return {r[0]: r[1] for r in results if r[0]}
+
+def get_error_stats():
+    results = db.session.query(
+        ReceptionForm.error_description,
+        func.count(ReceptionForm.id)
+    ).group_by(ReceptionForm.error_description).limit(5).all()
+    return {r[0]: r[1] for r in results}
+
+def get_report_data(start_date_str=None, end_date_str=None, sections=None):
+    report_results = {}
+    today = datetime.now()
+
+    if not start_date_str:
+        start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    else:
+        start = datetime.strptime(start_date_str, '%Y-%m-%d')
+
+    if not end_date_str:
+        end = today.replace(hour=23, minute=59, second=59, microsecond=999999)
+    else:
+        end = datetime.strptime(end_date_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+
+    if not sections:
+        sections = []
+
+    if 'revenue_day' in sections:
+        query = db.session.query(
+            func.date(Receipt.paid_at).label('ngay'),
+            func.sum(Receipt.total_paid).label('tong')
+        ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end) \
+         .group_by(func.date(Receipt.paid_at)) \
+         .order_by(func.date(Receipt.paid_at))
+
+        report_results['Doanh Thu Ngay'] = [
+            {'Ngày': r.ngay.strftime('%d/%m/%Y'), 'Doanh Thu (VNĐ)': float(r.tong)}
+            for r in query.all()
+        ]
+
+    if 'revenue_month' in sections:
+        query = db.session.query(
+            func.date_format(Receipt.paid_at, '%m/%Y').label('thang'),
+            func.sum(Receipt.total_paid).label('tong')
+        ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end) \
+         .group_by('thang') \
+         .order_by(func.min(Receipt.paid_at))
+
+        report_results['Doanh Thu Thang'] = [
+            {'Tháng': r.thang, 'Doanh Thu (VNĐ)': float(r.tong)}
+            for r in query.all()
+        ]
     vat = float(vat_obj.value)
     return vat
 def is_username_exists(username):
@@ -304,6 +384,36 @@ def is_username_exists(username):
 
 def is_phone_exists(phone):
     return db.session.query(Customer).filter_by(phone=phone).first() is not None
+    if 'vehicle_stats' in sections:
+        query = db.session.query(
+            Vehicle.vehicle_type,
+            func.count(ReceptionForm.id)
+        ).join(Vehicle, ReceptionForm.vehicle_id == Vehicle.id) \
+            .filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
+            .group_by(Vehicle.vehicle_type).all()
+
+        report_results['Thống kê lượt xe'] = [
+            {
+                'Loại xe': r[0] if r[0] else "Chưa xác định",
+                'Số lượt đến sửa': r[1]
+            } for r in query
+        ]
+
+    if 'error_stats' in sections:
+        query = db.session.query(
+            ReceptionForm.error_description,
+            func.count(ReceptionForm.id)
+        ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
+         .group_by(ReceptionForm.error_description) \
+         .order_by(func.count(ReceptionForm.id).desc()) \
+         .limit(10)
+
+        report_results['Loi Thuong Gap'] = [
+            {'Mô tả lỗi': r[0] if r[0] else "Chưa xác định", 'Số lần xuất hiện': r[1]}
+            for r in query.all()
+        ]
+
+    return report_results
 if __name__ == "__main__":
     with app.app_context():
         print(load_customers())

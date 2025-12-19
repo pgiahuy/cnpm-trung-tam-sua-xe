@@ -1,23 +1,43 @@
-from flask import url_for, render_template
-from flask_admin import Admin, AdminIndexView, expose
+from datetime import date
+
+from flask import url_for, render_template, redirect
+from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 
 from flask_login import current_user
 from markupsafe import Markup
+from sqlalchemy import func
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField
 from wtforms.validators import DataRequired, NumberRange, Optional
-from garage import db, app
+from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
-                           VehicleStatus)
+                           VehicleStatus, SystemConfig)
 
+
+class AdminAccessMixin:
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == UserRole.ADMIN
+    def is_visible(self):
+        return self.is_accessible()
 
 class MyAdminHome(AdminIndexView):
+
+
     @expose('/')
     def index(self):
-        return self.render('admin/index.html')
+        max_slot_obj = SystemConfig.query.filter_by(id='MAX_SLOT_PER_DAY').first()
+        repairing = Vehicle.query.filter_by(vehicle_status='REPAIRING').count()
 
+        vat = dao.get_vat_value()
+        max_slot = int(max_slot_obj.value)
+
+        today = date.today()
+        slots_today = ReceptionForm.query.filter(
+            func.date(ReceptionForm.created_date) == today
+        ).count()
+        return self.render('admin/index.html',vat=vat, slots_today=slots_today, max_slot=max_slot, repairing=repairing)
 
     #template = 'admin/custom_master.html'
     #base_template = 'admin/custom_base.html'
@@ -25,10 +45,11 @@ class MyAdminHome(AdminIndexView):
         return current_user.is_authenticated and current_user.role in (
             UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.TECHNICIAN
         )
-
     def inaccessible_callback(self, name, **kwargs):
         # Nếu không có quyền, trả về trang 403
         return render_template('errors/403.html'), 403
+
+
 
 
 class MyAdminModelView(ModelView):
@@ -44,7 +65,7 @@ class MyAdminModelView(ModelView):
         return render_template('errors/403.html'), 403
 
 
-class ServiceAdmin(MyAdminModelView):
+class ServiceAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['name', 'description', 'active', 'price','created_date']
     column_labels = {
         'name': 'Tên dịch vụ',
@@ -53,7 +74,7 @@ class ServiceAdmin(MyAdminModelView):
         'price':'Giá',
         'created_date':'Ngày tạo'
     }
-class CustomerAdmin(MyAdminModelView):
+class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
     column_labels = {
         'full_name': 'Họ tên',
         'phone' : 'Số điện thoại',
@@ -74,7 +95,7 @@ class CustomerAdmin(MyAdminModelView):
         )
     }
 
-class EmployeeAdmin(MyAdminModelView):
+class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['full_name',  'phone','active', 'user']
     column_labels = {
         'full_name': 'Họ tên',
@@ -88,7 +109,7 @@ class EmployeeAdmin(MyAdminModelView):
         'user': lambda v, c, m, p: m.user.username if m.user else ''
     }
 
-class UserAdmin(MyAdminModelView):
+class UserAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['username',  'active', 'role','created_date']
     column_labels = {
         'username': 'Tên đăng nhập',
@@ -97,7 +118,7 @@ class UserAdmin(MyAdminModelView):
         'created_date': 'Ngày tạo'
     }
 
-class VehicleAdmin(MyAdminModelView):
+class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['license_plate', 'vehicle_type', 'customer', 'vehicle_status', 'receptions']
     column_labels = {
         'license_plate': 'Biển số xe',
@@ -106,7 +127,7 @@ class VehicleAdmin(MyAdminModelView):
         'customer': 'Khách hàng',
         'receptions': 'Phiếu tiếp nhận'
     }
-class AppointmentAdmin(MyAdminModelView):
+class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['customer', 'vehicle', 'schedule_time', 'status', 'note']
     column_labels = {
         'customer': 'Khách',
@@ -123,6 +144,9 @@ class AppointmentAdmin(MyAdminModelView):
             'format': '%Y-%m-%dT%H:%M'
         }
     }
+
+
+
 
 class RepairFormAdmin(MyAdminModelView):
     column_list = ['id', 'employee', 'reception_form', 'repair_status','vehicle_plate', 'created_date', 'total_money']
@@ -154,14 +178,42 @@ class RepairFormAdmin(MyAdminModelView):
             }
         ))
     ]
-
+    # REPAIR_TO_VEHICLE_STATUS = {
+    #     RepairStatus.QUOTED: VehicleStatus.WAITING_APPROVAL,
+    #     RepairStatus.REPAIRING: VehicleStatus.REPAIRING,
+    #     RepairStatus.DONE: VehicleStatus.DONE
+    # }
+    REPAIR_TO_VEHICLE_STATUS = {
+        'QUOTED': VehicleStatus.WAITING_APPROVAL,
+        'REPAIRING': VehicleStatus.REPAIRING,
+        'DONE': VehicleStatus.DONE
+    }
     #lấy giá tại thời điểm tạo
+    REPAIR_TO_VEHICLE_STATUS = {
+        'QUOTED': VehicleStatus.WAITING_APPROVAL,
+        'REPAIRING': VehicleStatus.REPAIRING,
+        'DONE': VehicleStatus.DONE
+    }
+
     def on_model_change(self, form, model, is_created):
+        # Lưu giá tại thời điểm tạo
         for detail in model.details:
             if detail.service:
                 detail.service_price = detail.service.price
             if detail.spare_part:
                 detail.spare_part_price = detail.spare_part.unit_price
+
+        # đồng bộ trạng thái xe theo trạng thái phiếu sửa
+        if model.reception_form and model.reception_form.vehicle:
+            vehicle = model.reception_form.vehicle
+
+            new_vehicle_status = self.REPAIR_TO_VEHICLE_STATUS.get(
+                model.repair_status
+            )
+
+            if new_vehicle_status and vehicle.vehicle_status != new_vehicle_status:
+                vehicle.vehicle_status = new_vehicle_status
+                db.session.add(vehicle)
 
     column_formatters = {
         'id': lambda v, c, m, p: Markup(
@@ -185,11 +237,25 @@ class RepairFormAdmin(MyAdminModelView):
         ),
     }
 
-class RepairDetailView(MyAdminHome):
+# class RepairDetailView(BaseView):
+#     @expose('/<int:repair_id>')
+#     def detail(self, repair_id,**kwargs):
+#         repair = RepairForm.query.get_or_404(repair_id)
+#         return self.render('admin/custom_detail.html', repair=repair, enumerate=enumerate)
+class RepairDetailView(BaseView):
+
+    @expose('/')
+    def index(self):
+        return redirect(url_for('admin.index'))
+
     @expose('/<int:repair_id>')
-    def detail(self, repair_id,**kwargs):
+    def detail(self, repair_id, **kwargs):
         repair = RepairForm.query.get_or_404(repair_id)
-        return self.render('admin/custom_detail.html', repair=repair, enumerate=enumerate)
+        return self.render(
+            'admin/custom_detail.html',
+            repair=repair,
+            enumerate=enumerate
+        )
 
 
 class ReceptionFormAdmin(MyAdminModelView):
@@ -239,18 +305,25 @@ class ReceptionFormAdmin(MyAdminModelView):
     def on_model_change(self, form, model, is_created):
         try:
             if form.appointment_id.data:
-                # Trường hợp có lịch đã đặt
-                appointment = db.session.query(Appointment).get(form.appointment_id.data)
+
+                appointment = db.session.get(Appointment, form.appointment_id.data)
                 if not appointment:
                     raise ValueError("Lịch không hợp lệ.")
+
                 vehicle = appointment.vehicle
                 customer = vehicle.customer
+
                 appointment.status = AppointmentStatus.COMPLETED
                 db.session.add(appointment)
+
+                vehicle.vehicle_status = VehicleStatus.RECEIVED
+                db.session.add(vehicle)
+
             else:
-                # Xử lý khách hàng mới/cũ
+                # === KHÔNG CÓ LỊCH (lại CH tiếp nhận) ===
                 if form.new_customer.data:
-                    customer = db.session.query(Customer).filter_by(phone=form.new_customer_phone.data).first()
+                    customer = db.session.query(Customer) \
+                        .filter_by(phone=form.new_customer_phone.data).first()
                     if not customer:
                         customer = Customer(
                             full_name=form.new_customer.data,
@@ -259,11 +332,10 @@ class ReceptionFormAdmin(MyAdminModelView):
                         db.session.add(customer)
                         db.session.flush()
                 elif form.customer_id.data:
-                    customer = db.session.query(Customer).get(form.customer_id.data)
+                    customer = db.session.get(Customer, form.customer_id.data)
                 else:
                     raise ValueError("Phải chọn khách hàng hoặc nhập khách hàng mới.")
 
-                # Xử lý xe mới/cũ
                 if form.new_vehicle_plate.data:
                     vehicle = Vehicle(
                         license_plate=form.new_vehicle_plate.data,
@@ -274,23 +346,30 @@ class ReceptionFormAdmin(MyAdminModelView):
                     db.session.add(vehicle)
                     db.session.flush()
                 elif form.vehicle_id.data:
-                    vehicle = db.session.query(Vehicle).get(form.vehicle_id.data)
+                    vehicle = db.session.get(Vehicle, form.vehicle_id.data)
+
+                    # ✔ đảm bảo xe chuyển sang RECEIVED
+                    vehicle.vehicle_status = VehicleStatus.RECEIVED
+                    db.session.add(vehicle)
                 else:
                     raise ValueError("Phải chọn xe hoặc nhập xe mới.")
 
-            # Gán cho model
+            # Gán cho phiếu tiếp nhận
             model.vehicle_id = vehicle.id
-            model.employee_id = current_user.employee.id if hasattr(current_user,
-                                                                    'employee') and current_user.employee else form.employee.data.id
+            model.employee_id = (
+                current_user.employee.id
+                if hasattr(current_user, 'employee') and current_user.employee
+                else form.employee.data.id
+            )
+
             db.session.add(model)
-            db.session.commit()
 
         except Exception as e:
             db.session.rollback()
             raise e
 
 
-class SparePartAdmin(MyAdminModelView):
+class SparePartAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['name','unit_price', 'unit','supplier','inventory']
     column_labels = {
         'name' : 'Tên',
@@ -300,18 +379,33 @@ class SparePartAdmin(MyAdminModelView):
         'inventory': 'Tồn kho'
     }
 
-admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name="TRANG CHỦ"))
+
+class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
+    column_list = ['id','value']
+    form_columns = ['id', 'value']
+    can_delete = False
+    column_labels = {
+        'id' : 'Quy định',
+        'value' : 'Giá trị'
+    }
 
 
-admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
+
+
+admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name='TRANG CHỦ'))
+
+
+admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
 admin.add_view(CustomerAdmin(Customer, db.session,name='KHÁCH HÀNG'))
 admin.add_view(EmployeeAdmin(Employee, db.session,name='NHÂN VIÊN'))
-admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
-admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
 admin.add_view(AppointmentAdmin(Appointment, db.session,name='LỊCH HẸN'))
 admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN'))
-admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA'))
+admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA CHỮA'))
+admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
+admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
 admin.add_view(SparePartAdmin(SparePart, db.session,name='PHỤ TÙNG'))
+admin.add_view(SystemConfigAdmin(SystemConfig, db.session,name='QUY ĐỊNH'))
 
 admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
+
 

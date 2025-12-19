@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán thành công</title>
+    <style>
+    /* Body */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f0f4f8;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0;
+        padding: 20px;
+    }
+
+    /* Container Box */
+    .box {
+        margin:15px;
+        background: #fff;
+        padding: 35px 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        width: 100%;
+        max-width: 500px; /* vừa đủ màn hình */
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.18);
+    }
+
+    /* Heading */
+    h1 {
+        color: #28a745;
+        font-size: 2.2rem;
+        margin-bottom: 12px;
+    }
+
+    p {
+        font-size: 1rem;
+        color: #555;
+        margin-bottom: 20px;
+    }
+
+    /* Table */
+    table {
+        width: 100%;
+        margin-top: 15px;
+        border-collapse: collapse;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    td {
+        padding: 12px 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    td.label {
+        font-weight: 600;
+        color: #333;
+        width: 45%;
+        text-align: left;
+    }
+
+    td.value {
+        text-align: right;
+        color: #555;
+        font-weight: 500;
+    }
+
+    td.total {
+        font-size: 1.25rem;
+        color: #d9534f;
+        font-weight: bold;
+        background: #fff5f5;
+    }
+
+    /* Button */
+    a {
+        display: inline-block;
+        margin-top: 25px;
+        text-decoration: none;
+        background: #007bff;
+        color: #fff;
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    a:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .box {
+            padding: 25px 20px;
+        }
+        h1 {
+            font-size: 1.8rem;
+        }
+        td {
+            padding: 10px 5px;
+        }
+        a {
+            width: 100%;
+            padding: 12px 0;
+        }
+    }
+</style>
+
+</head>
+<body>
+<div class="box">
+    <h1>✅ Thanh toán thành công</h1>
+    <p>Cảm ơn bạn đã thanh toán. Dưới đây là thông tin hóa đơn:</p>
+
+    <table>
+        <tr>
+            <td class="label">Mã hóa đơn:</td>
+            <td class="value">#{{ receipt.id }}</td>
+        </tr>
+        <tr>
+            <td class="label">Khách hàng:</td>
+            <td class="value">{{ receipt.customer.full_name }}</td>
+        </tr>
+        <tr>
+            <td class="label">Tạm tính:</td>
+            <td class="value">{{ "{:,.0f}".format(receipt.subtotal)}} VND</td>
+        </tr>
+        <tr>
+            <td class="label">VAT ({{ receipt.vat_rate * 100 }}%):</td>
+            <td class="value">{{ "{:,.0f}".format(receipt.subtotal*receipt.vat_rate) }} VND</td>
+        </tr>
+        <tr>
+            <td class="label total">Tổng thanh toán:</td>
+            <td class="value total">{{ "{:,.0f}".format(receipt.total_paid) }} VND</td>
+        </tr>
+        <tr>
+            <td class="label">Phương thức:</td>
+            <td class="value">{{ receipt.payment_method }}</td>
+        </tr>
+        <tr>
+            <td class="label">Thời gian:</td>
+            <td class="value">{{ receipt.paid_at.strftime('%d/%m/%Y %H:%M') }}</td>
+        </tr>
+    </table>
+
+    <a href="/">⬅ Quay về trang chủ</a>
+</div>
+</body>
+</html>

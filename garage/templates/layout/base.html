@@ -18,6 +18,12 @@
 <!--    Locale hiện tại: {{ current_lang }}-->
 <!--</p>-->
 
+</head>
+<body class="d-flex flex-column min-vh-100
+{% if request.path != '/' %}
+pt-nav
+{% endif %}
+">
 
 {% with messages = get_flashed_messages(with_categories=true) %}
 {% if messages %}
@@ -49,5 +55,6 @@
 </script>
 <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
 </body>
 </html>

@@ -1,42 +1,49 @@
 {% extends 'admin/master.html' %}
-
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_index.css') }}">
+{% endblock %}
 {% block body %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3 dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">VAT</h5>
+                <p class="card-text">{{ (vat * 100)|round(2) }}%</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3 dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Số xe đã tiếp nhận hôm nay</h5>
+                <p class="card-text">{{ slots_today }} / {{ max_slot }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3 dashboard-card">
+            <div class="card-body">
+                <h5 class="card-title">Số xe đang sửa</h5>
+                <p class="card-text">{{ repairing }}</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div class="quick-actions d-flex flex-wrap mt-4">
-    <a href="{{ url_for('receptionform.create_view') }}" class="quick-action btn btn-primary m-2">
-        <i class="fa fa-file-medical"></i> Thêm Phiếu Tiếp Nhận
+<div class="quick-actions">
+    <a href="{{ url_for('receptionform.create_view') }}" class="btn btn-primary">
+       <i class="fa fa-solid fa-plus"></i> Thêm Phiếu Tiếp Nhận
     </a>
-    <a href="{{ url_for('repairform.create_view') }}" class="quick-action btn btn-success m-2">
-        <i class="fa fa-wrench"></i> Thêm Phiếu Sửa Chữa
+    <a href="{{ url_for('repairform.create_view') }}" class="btn btn-success">
+        <i class="fa fa-solid fa-plus"></i> Thêm Phiếu Sửa Chữa
     </a>
-    <a href="{{ url_for('customer.create_view') }}" class="quick-action btn btn-info m-2">
-        <i class="fa fa-user-plus"></i> Thêm Khách Hàng
+    <a href="{{ url_for('customer.create_view') }}" class="btn btn-info">
+        <i class="fa fa-solid fa-plus"></i> Thêm Khách Hàng
     </a>
-    <a href="{{ url_for('vehicle.create_view') }}" class="quick-action btn btn-warning m-2">
-        <i class="fa fa-car"></i> Thêm Xe
+    <a href="{{ url_for('vehicle.create_view') }}" class="btn btn-warning">
+        <i class="fa fa-solid fa-plus"></i> Thêm Xe
     </a>
 </div>
 
-<style>
-.quick-actions a.quick-action {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 200px;
-    height: 80px;
-    font-size: 1rem;
-    font-weight: bold;
-    text-align: center;
-    transition: all 0.3s;
-}
-.quick-actions a.quick-action i {
-    margin-right: 10px;
-    font-size: 1.3rem;
-}
-.quick-actions a.quick-action:hover {
-    transform: scale(1.05);
-    text-decoration: none;
-    color: #fff;
-}
-</style>
+
 {% endblock %}

@@ -22,13 +22,19 @@ class AppointmentStatus(Enum):
 
 class VehicleStatus(Enum):
     PENDING_APPOINTMENT = 1 # đặt lịch, chưa đến gara
-    RECEIVED = 2
-    DIAGNOSING = 3  # đang kiểm tra
-    WAITING_APPROVAL = 4  # chờ khách duyệt giá
-    REPAIRING = 5
-    DONE = 6
-    DELIVERED = 7
+    RECEIVED = 2 # đã lập phiếu tiếp nhận
+    DIAGNOSING = 3  # đang kiểm tra| xoá cái này
+    WAITING_APPROVAL = 4  # chờ khách duyệt giá; đã lập phiếu sửa chữa
+    REPAIRING = 5 #
+    DONE = 6 # có thể thanh toán
+    DELIVERED = 7 # đã thanh toán
     CANCELLED = 8
+
+class PaymentStatus(Enum):
+    PENDING = "pending"
+    SUCCESS = "success"
+    FAILED = "failed"
+
 
 
 class Base(db.Model):
@@ -62,6 +68,7 @@ class Customer(Base):
     address = Column(String(255))
     vehicles = relationship("Vehicle", backref="customer", lazy=True)
     user_id = Column(Integer, ForeignKey("user.id"), unique=True)
+    receipts = relationship("Receipt", backref="customer", lazy=True, cascade="all, delete-orphan")
 
 class Employee(Base):
     full_name = Column(String(255))
@@ -116,7 +123,6 @@ class SparePart(Base):
         default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     )
     repair_details = relationship("RepairDetail", backref="spare_part", lazy=True)
-    comments = relationship("Comment", backref="spare_part", lazy=True)
     def __str__(self):
         return self.name
 
@@ -174,24 +180,6 @@ class RepairDetail(Base):
         return cls(task=task,service=service,spare_part=spare_part,quantity=quantity,repair_id=repair_id,
                    service_price_at_time=service_price, spare_part_price_at_time=spare_part_price)
 
-class Receipt(Base):
-    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True, unique=True)
-
-    subtotal = Column(DOUBLE, nullable=False)
-    vat_rate = Column(DOUBLE, default=0)
-    vat_amount = Column(DOUBLE, nullable=False)
-    total_paid = Column(DOUBLE, nullable=False)
-
-    payment_method = Column(String(50))  # CASH / TRANSFER
-    paid_at = Column(DateTime, default=datetime.now)
-
-    invoice = relationship("Invoice", backref="receipt", uselist=False)
-    items = relationship(
-        "ReceiptItem",
-        backref="receipt",
-        cascade="all, delete-orphan"
-    )
-
 class Invoice(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False, unique=True)
 
@@ -203,6 +191,19 @@ class Invoice(Base):
     issued_date = Column(DateTime, default=datetime.now)
 
 
+class Receipt(Base):
+    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True, unique=True)
+    customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
+    subtotal = Column(DOUBLE, nullable=False)
+    vat_rate = Column(DOUBLE, default=0)
+    type = Column(SQLEnum("REPAIR", "BUY"),default="REPAIR")
+    total_paid = Column(DOUBLE, nullable=False)
+    payment_method = Column(String(50))
+    paid_at = Column(DateTime, default=datetime.now)
+
+    invoice = relationship("Invoice", backref="receipt", uselist=False)
+    items = relationship("ReceiptItem",backref="receipt",cascade="all, delete-orphan")
+
 class ReceiptItem(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False)
     spare_part_id = Column(Integer, ForeignKey("spare_part.id"), nullable=False)
@@ -213,12 +214,33 @@ class ReceiptItem(Base):
 
     spare_part = relationship("SparePart")
 
+
+class Payment(Base):
+    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
+    type = Column(SQLEnum("REPAIR", "BUY"), default="REPAIR")
+    amount = Column(DOUBLE, nullable=False)
+    method = Column(String(50), default="VNPAY")
+    vat_rate = Column(DOUBLE, default=0)
+    transaction_ref = Column(String(100), unique=True)      # txn_ref gửi VNPAY
+    vnp_transaction_no = Column(String(100))                # mã VNPAY trả về
+
+    status = Column(
+        SQLEnum(PaymentStatus),
+        default=PaymentStatus.PENDING
+    )
+
+    user = relationship("User")
+    receipt = relationship("Receipt", backref="payment", uselist=False)
+
 class Comment(Base):
     content = Column(String(255), nullable=False)
     sparepart_id = Column(Integer, ForeignKey("spare_part.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+
+
 class SystemConfig(db.Model):
-    key = db.Column(db.String(50), primary_key=True)
+    id = db.Column(db.String(50), primary_key=True)
     value = db.Column(db.String(100), nullable=False)
 
 
@@ -234,5 +256,80 @@ if __name__ == "__main__":
                 services.append(service)
         db.session.commit()  # commit để có id thực tế
 
-    def __str__(self):
-        return self.content
+        with open("data/spare_parts.json", encoding="utf-8") as f:
+            spare_parts = []
+            for s in json.load(f):
+                spare_part = SparePart(**s)
+                db.session.add(spare_part)
+                spare_parts.append(spare_part)
+        db.session.commit()  # commit để có id thực tế
+
+        # --- Users ---
+        users = []
+        with open("data/user.json", encoding="utf-8") as f:
+            for u in json.load(f):
+                user = User(**u)
+                db.session.add(user)
+                users.append(user)
+        db.session.commit()
+
+        # --- Customers ---
+        customers = []
+        with open("data/customer.json", encoding="utf-8") as f:
+            for idx, c in enumerate(json.load(f)):
+                c['user_id'] = users[idx % len(users)].id  # gán user_id hợp lệ
+                cust = Customer(**c)
+                db.session.add(cust)
+                customers.append(cust)
+        db.session.commit()
+
+        # --- Vehicles ---
+        vehicles = []
+        with open("data/vehicle.json", encoding="utf-8") as f:
+            for idx, v in enumerate(json.load(f)):
+                v['customer_id'] = customers[idx % len(customers)].id  # gán customer_id hợp lệ
+                veh = Vehicle(**v)
+                db.session.add(veh)
+                vehicles.append(veh)
+        db.session.commit()
+
+        # --- Employees ---
+        employees = []
+        with open("data/employee.json", encoding="utf-8") as f:
+            for idx, e in enumerate(json.load(f)):
+                e['user_id'] = users[(idx + 1) % len(users)].id  # gán user_id hợp lệ
+                emp = Employee(**e)
+                db.session.add(emp)
+                employees.append(emp)
+        db.session.commit()
+
+        # --- Appointments ---
+        with open("data/appointment.json", encoding="utf-8") as f:
+            for idx, a in enumerate(json.load(f)):
+                a['customer_id'] = customers[idx % len(customers)].id
+                a['vehicle_id'] = vehicles[idx % len(vehicles)].id
+                db.session.add(Appointment(**a))
+        db.session.commit()
+
+        # --- ReceptionForms ---
+        with open("data/reception_form.json", encoding="utf-8") as f:
+            for idx, r in enumerate(json.load(f)):
+                r['vehicle_id'] = vehicles[idx % len(vehicles)].id
+                r['employee_id'] = employees[idx % len(employees)].id
+                db.session.add(ReceptionForm(**r))
+        db.session.commit()
+
+        # --- RepairForms ---
+        with open("data/repair_form.json", encoding="utf-8") as f:
+            for idx, rf in enumerate(json.load(f)):
+                rf['reception_id'] = idx + 1
+                rf['employee_id'] = employees[idx % len(employees)].id
+                db.session.add(RepairForm(**rf))
+        db.session.commit()
+
+        # --- RepairDetails ---
+        with open("data/repair_detail.json", encoding="utf-8") as f:
+            for idx, d in enumerate(json.load(f)):
+                d['repair_id'] = idx + 1
+                db.session.add(RepairDetail(**d))
+        db.session.commit()

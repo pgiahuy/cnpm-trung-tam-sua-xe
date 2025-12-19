@@ -295,7 +295,10 @@ def load_system_config(app):
 
         app.config[c.key] = value
 
-
+def get_vat_value():
+    vat_obj = SystemConfig.query.filter_by(id='VAT').first()
+    vat = float(vat_obj.value)
+    return vat
 
 if __name__ == "__main__":
     with app.app_context():

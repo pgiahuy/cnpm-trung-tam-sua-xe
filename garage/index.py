@@ -1,4 +1,5 @@
 import math
+import time
 from datetime import date, timedelta
 
 import cloudinary
@@ -11,7 +12,9 @@ from werkzeug.utils import redirect
 import dao
 from garage import app, login, db, utils, mail
 from garage.decorators import anonymous_required
-from garage.models import UserRole, AppointmentStatus, Service, SparePart, Comment
+from garage.models import UserRole, AppointmentStatus, Service, SparePart, PaymentStatus, Receipt, Payment, ReceiptItem, \
+    RepairForm, SystemConfig
+from garage.vnpay import build_vnpay_url
 
 
 @app.route("/")
@@ -73,6 +76,7 @@ def login_my_user():
         if user:
             login_user(user)
             print(current_user.role)
+            print(current_user.customer.id)
             if next_page:
                 return redirect(next_page)
             if user.role == UserRole.ADMIN:
@@ -383,19 +387,154 @@ def delete_cart(product_id):
 
 
 # Thanh toán
-@app.route('/api/pay', methods=['POST'])
+# @app.route('/api/pay', methods=['POST'])
+# @login_required
+# def pay():
+#     try:
+#         utils.add_receipt(session.get('cart'))
+#         session.pop('cart', None)
+#         return jsonify({'code': 200})
+#     except Exception as e:
+#         print(e)
+#         return jsonify({'code': 400})
+#
+@app.route('/api/pay_spare_part', methods=['POST'])
 @login_required
 def pay():
-    try:
-        utils.add_receipt(session.get('cart'))
-        session.pop('cart', None)
-        return jsonify({'code': 200})
-    except Exception as e:
-        print(e)
-        return jsonify({'code': 400})
+    cart = session.get('cart')
+    if not cart:
+        return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+    txn_ref = f"{current_user.id}_{int(time.time())}"
+
+    vat_rate = 0 #dao.get_vat_value()
+
+    total = utils.count_cart(cart)['total_amount']
+    total += vat_rate*total
+
+    payment = Payment(
+        user_id=current_user.id,
+        amount=total,
+        vat_rate=vat_rate,
+        method='VNPAY',
+        type='BUY',
+        transaction_ref=txn_ref,
+        status=PaymentStatus.PENDING
+    )
+    db.session.add(payment)
+    db.session.commit()
+
+    pay_url = build_vnpay_url(total, txn_ref)
+
+    return jsonify({
+        'code': 200,
+        'pay_url': pay_url
+    })
+
+@app.route('/api/pay_repair/<int:repair_id>', methods=['POST'])
+@login_required
+def pay_repair(repair_id):
+    repair = RepairForm.query.get_or_404(repair_id)
+
+    total_amount = sum([ri.quantity * ri.unit_price for ri in repair.items])
+
+    vat_rate = dao.get_vat_value()
+
+    total_amount += vat_rate*total_amount
+
+    txn_ref = f"{current_user.id}_{int(time.time())}"
+
+    payment = Payment(
+        user_id=current_user.id,
+        amount=total_amount,
+        vat_rate=vat_rate,
+        method='VNPAY',
+        type="REPAIR",
+        status=PaymentStatus.PENDING,
+        transaction_ref=txn_ref,
+        repair_items=repair.items
+    )
+    db.session.add(payment)
+    db.session.commit()
+
+    pay_url = build_vnpay_url(total_amount, txn_ref)
+    return jsonify({'code': 200, 'pay_url': pay_url})
 
 
-# Xong thanh toán
+# ================= VNPAY RETURN =================
+@app.route('/billing/vnpay_return')
+def vnpay_return():
+    response_code = request.args.get('vnp_ResponseCode')
+    txn_ref = request.args.get('vnp_TxnRef')
+    vnp_trans_no = request.args.get('vnp_TransactionNo')
+
+    payment = Payment.query.filter_by(
+        transaction_ref=txn_ref,
+        method='VNPAY'
+    ).first()
+
+    if not payment:
+        return "Payment không tồn tại", 404
+
+    if response_code != '00':
+        payment.status = PaymentStatus.FAILED
+        db.session.commit()
+        return render_template("payment_failed.html")
+
+    # Thanh toán thành công
+    payment.status = PaymentStatus.SUCCESS
+    payment.vnp_transaction_no = vnp_trans_no
+    type = getattr(payment, 'type')
+    subtotal = payment.amount/(1+payment.vat_rate)
+    receipt = Receipt(
+        customer_id=payment.user.customer.id,
+        subtotal=subtotal,
+        vat_rate=payment.vat_rate,
+        total_paid=payment.amount,
+        payment_method="VNPAY",
+        type=type  # BUY hoặc REPAIR
+    )
+    db.session.add(receipt)
+    db.session.flush()  # để có receipt.id
+
+    # Tạo receipt item
+    if type == "BUY":
+
+       cart = session.get('cart')
+       if not cart:
+           return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+       for c in cart.values():
+           item = ReceiptItem(
+               receipt_id=receipt.id,
+               spare_part_id=int(c['id']),
+               quantity=c['quantity'],
+               unit_price=c['unit_price'],
+               total_price=c['quantity'] * c['unit_price']
+           )
+           db.session.add(item)
+       session.pop('cart', None)
+
+
+    elif type == "REPAIR":
+        repair_items = getattr(payment, 'repair_items', [])
+        for ri in repair_items:
+            item = ReceiptItem(
+                receipt_id=receipt.id,
+                spare_part_id=ri.spare_part_id,
+                quantity=ri.quantity,
+                unit_price=ri.unit_price,
+                total_price=ri.quantity * ri.unit_price
+            )
+            db.session.add(item)
+
+    # Liên kết payment với receipt
+    payment.receipt_id = receipt.id
+
+    db.session.commit()
+
+    return render_template("payment_success.html", receipt=receipt)
+
+
+
 
 @app.route("/user/appointments/<int:appointment_id>/cancel", methods=["POST"])
 @login_required

@@ -4,16 +4,15 @@ from datetime import date, timedelta
 
 import cloudinary
 import cloudinary.uploader
-from flask import render_template, request, session, url_for, flash, jsonify, abort, current_app
+from flask import render_template, request, session, url_for, flash, jsonify, abort
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_mail import Message
 from werkzeug.utils import redirect
-
 import dao
 from garage import app, login, db, utils, mail
 from garage.decorators import anonymous_required
 from garage.models import UserRole, AppointmentStatus, Service, SparePart, PaymentStatus, Receipt, Payment, ReceiptItem, \
-    RepairForm, SystemConfig
+    RepairForm, SystemConfig, Vehicle
 from garage.vnpay import build_vnpay_url
 
 
@@ -75,8 +74,7 @@ def login_my_user():
 
         if user:
             login_user(user)
-            print(current_user.role)
-            print(current_user.customer.id)
+
             if next_page:
                 return redirect(next_page)
             if user.role == UserRole.ADMIN:
@@ -289,6 +287,19 @@ def user_vehicles():
     vehicles = dao.index_vehicles_by_user(current_user.id)
     return render_template("user/vehicles.html", vehicles=vehicles)
 
+@app.route('/vehicles/<int:customer_id>')
+def get_vehicles_by_customer(customer_id):
+    if customer_id == 0 or customer_id == '' or customer_id is None:
+        return jsonify([])
+
+    vehicles = Vehicle.query.filter_by(customer_id=customer_id, active=True).all()
+    return jsonify([
+        {
+            'id': v.id,
+            'license_plate': v.license_plate,
+            'vehicle_type': v.vehicle_type
+        } for v in vehicles
+    ])
 
 @app.route("/user/orders")
 @login_required

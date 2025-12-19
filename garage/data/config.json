@@ -1,0 +1,10 @@
+[
+  {
+    "id": "VAT",
+    "value": 0.1
+  },
+  {
+    "id": "MAX_SLOT_PER_DAY",
+    "value": 30
+  }
+]

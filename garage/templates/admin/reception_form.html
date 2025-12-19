@@ -1,0 +1,101 @@
+{% extends 'admin/model/create.html' %}
+{% import 'admin/lib.html' as lib with context %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/receive_form.css') }}">
+{% endblock %}
+
+{% block body %}
+<form action="" method="post" class="form-horizontal" role="form">
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+
+            <div class="form-group">
+                <label class="control-label ">
+                    <b>HÌNH THỨC TIẾP NHẬN</b>
+                </label>
+                <div class="col-md-10">
+                    {% for value, label in form.receive_type.choices %}
+                    <label class="radio-inline">
+                        <input type="radio" name="{{ form.receive_type.name }}" value="{{ value }}" {% if
+                               form.receive_type.data== value %}checked{% endif %}>
+                        {{ label }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {{ lib.render_form_fields([form.employee]) }}
+        </div>
+    </div>
+
+    <!-- ================= TỪ PHIẾU HẸN ================= -->
+    <div class="panel panel-info receive-appointment">
+
+        <div class="panel-body">
+            {{ lib.render_form_fields([form.appointment_id]) }}
+        </div>
+    </div>
+
+    <!-- ================= TIẾP NHẬN TẠI CỬA HÀNG ================= -->
+    <div class="panel panel-success receive-walkin">
+        <div class="panel-body">
+            <hr>
+            <div class="content-con">
+                <div class="content">
+                    <h3>KHÁCH HÀNG</h3>
+                    <div class="form-group">
+                        <div class="col-md-10 is-new">
+                            {{ form.is_new_customer() }}
+                            {{ form.is_new_customer.label(class_="checkbox-inline" ) }}
+
+                        </div>
+                    </div>
+                    {{ lib.render_form_fields([form.customer_id]) }}
+                    {{ lib.render_form_fields([form.new_customer_name, form.new_customer_phone]) }}
+                </div>
+
+
+                <hr>
+                <div class="content">
+                    <h3>XE</h3>
+                    <div class="form-group">
+                        <div class="col-md-10 is-new">
+                            {{ form.is_new_vehicle() }}
+                            {{ form.is_new_vehicle.label(class_="checkbox-inline") }}
+
+                        </div>
+                    </div>
+                    {{ lib.render_form_fields([form.vehicle_id]) }}
+                    {{ lib.render_form_fields([form.new_vehicle_plate, form.new_vehicle_type]) }}
+                </div>
+            </div>
+
+            <hr>
+
+        </div>
+
+    </div>
+
+
+    <div class="panel panel-default">
+
+        <div class="panel-body">
+            {{ lib.render_form_fields([form.error_description]) }}
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <div class="col-md-offset-2 col-md-10">
+            {{ lib.render_form_buttons(return_url) }}
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+{% block tail %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/receive_form.js') }}"></script>
+{% endblock %}

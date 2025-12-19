@@ -8,12 +8,13 @@ from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_login import current_user
 from markupsafe import Markup
 from sqlalchemy import func
-from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField
+from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField
 from wtforms.validators import DataRequired, NumberRange, Optional
 from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
                            VehicleStatus, SystemConfig)
+
 
 
 class AdminAccessMixin:
@@ -119,6 +120,7 @@ class UserAdmin(AdminAccessMixin,MyAdminModelView):
     }
 
 class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
+    can_create = False
     column_list = ['license_plate', 'vehicle_type', 'customer', 'vehicle_status', 'receptions']
     column_labels = {
         'license_plate': 'Biển số xe',
@@ -128,6 +130,7 @@ class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
         'receptions': 'Phiếu tiếp nhận'
     }
 class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
+    can_create = False
     column_list = ['customer', 'vehicle', 'schedule_time', 'status', 'note']
     column_labels = {
         'customer': 'Khách',
@@ -146,16 +149,204 @@ class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
     }
 
 
+class ReceptionFormAdmin(MyAdminModelView):
+    create_template = 'admin/reception_form.html'
+    edit_template = 'admin/reception_form.html'
+    extra_js = [
+        '/static/js/receive_form.js'
+    ]
+    column_list = ['id','customer','vehicle','employee','receive_type','error_description']
+    column_labels = {
+        'id': 'ID',
+        'customer': 'Khách hàng',
+        'vehicle': 'Biển số xe',
+        'employee': 'Nhân viên tiếp nhận',
+        'error_description': 'Mô tả lỗi',
+        'receive_type':'Lịch hẹn'
+    }
+
+    column_formatters = {
+        'customer': lambda v, c, m, p: (m.vehicle.customer.full_name if m.vehicle and m.vehicle.customer else ''),
+        'receive_type': lambda v, c, m, p: ('Có' if m.receive_type == 'appointment' else 'Không')
+
+    }
+
+    form_columns = [
+        'receive_type',
+        'employee',
+
+        'appointment_id',
+
+        'customer_id',
+        'is_new_customer',
+        'new_customer_name',
+        'new_customer_phone',
+
+        'vehicle_id',
+        'is_new_vehicle',
+        'new_vehicle_plate',
+        'new_vehicle_type',
+
+        'error_description'
+    ]
+
+    form_extra_fields = {
+
+        'receive_type': RadioField(
+            'Hình thức tiếp nhận',
+            choices=[('appointment', 'ĐÃ ĐẶT LỊCH'), ('walk_in', 'CHƯA ĐẶT LỊCH')],
+            default='appointment',
+            validators=[DataRequired()]
+        ),
+
+        'employee': QuerySelectField(
+            'Nhân viên',
+            query_factory=lambda: db.session.query(Employee).all(),
+            get_label='full_name',
+            validators=[DataRequired()]
+        ),
+
+        'appointment_id': SelectField(
+            'Chọn lịch đã đặt',
+            coerce=lambda x: int(x) if x else None,
+            validators=[Optional()]
+        ),
+
+        'customer_id': SelectField(
+            'Chọn khách hàng',
+            coerce=lambda x: int(x) if x else None,
+            validators=[Optional()]
+        ),
+        'vehicle_id': SelectField(
+            'Chọn xe',
+            coerce=lambda x: int(x) if x else None,
+            validators=[Optional()]
+        ),
+
+        'is_new_customer': BooleanField('Khách hàng mới'),
+        'is_new_vehicle': BooleanField('Xe mới'),
+
+        'new_customer_name': StringField('Tên khách mới'),
+        'new_customer_phone': StringField('SĐT khách mới'),
+
+        'new_vehicle_plate': StringField('Biển số xe mới'),
+        'new_vehicle_type': StringField('Loại xe mới'),
+
+        'error_description': StringField('Mô tả lỗi'),
+    }
+
+    def create_form(self):
+        form = super().create_form()
+        self._populate_choices(form)
+        return form
+
+    def edit_form(self):
+        form = super().edit_form()
+        self._populate_choices(form)
+        return form
+
+    def _populate_choices(self, form):
+        form.customer_id.choices = [('', '-- Chọn khách hàng --')] + [
+            (c.id, f"{c.full_name} - {c.phone}")
+            for c in Customer.query.order_by(Customer.full_name).all()
+        ]
+
+        appointments = Appointment.query.filter_by(status=AppointmentStatus.CONFIRMED).all()
+        form.appointment_id.choices = [('', '-- Chọn lịch hẹn --')] + [
+            (a.id, f"{a.vehicle.license_plate} - {a.customer.full_name} ({a.schedule_time.strftime('%d/%m %H:%M')})")
+            for a in appointments
+        ]
+
+        form.vehicle_id.choices = [('', '-- Chọn xe --')]
+
+        return form
+
+    def on_model_change(self, form, model, is_created):
+        try:
+            with db.session.no_autoflush:
+                receive_type = form.receive_type.data
+                model.employee_id = form.employee.data.id
+                model.error_description = form.error_description.data or ""
+                model.receive_type = receive_type
+
+                if receive_type == "appointment": # có lịch hẹn
+                    if not form.appointment_id.data:
+                        raise ValueError("Vui lòng chọn phiếu hẹn!")
+
+                    appointment = db.session.get(Appointment, int(form.appointment_id.data))
+                    if not appointment:
+                        raise ValueError("Phiếu hẹn không tồn tại!")
+
+
+                    vehicle = appointment.vehicle
+
+                    appointment.status = AppointmentStatus.COMPLETED
+                    vehicle.vehicle_status = VehicleStatus.RECEIVED
+
+                    db.session.add(appointment)
+                    db.session.add(vehicle)
+
+                else:  # walk_in
+                    if form.is_new_customer.data:
+                        if not form.new_customer_name.data or not form.new_customer_phone.data:
+                            raise ValueError("Vui lòng nhập tên và số điện thoại khách mới!")
+
+                        customer = Customer(
+                            full_name=form.new_customer_name.data.strip(),
+                            phone=form.new_customer_phone.data.strip(),
+                            active=True
+                        )
+                        db.session.add(customer)
+                    else:
+                        if not form.customer_id.data:
+                            raise ValueError("Vui lòng chọn khách hàng!")
+                        customer = db.session.get(Customer, int(form.customer_id.data))
+
+
+                    # === Xe ===
+                    if form.is_new_vehicle.data:
+                        if not form.new_vehicle_plate.data or not form.new_vehicle_type.data:
+                            raise ValueError("Vui lòng nhập biển số và loại xe mới!")
+
+                        plate = form.new_vehicle_plate.data.strip().upper()
+                        if Vehicle.query.filter_by(license_plate=plate).first():
+                            raise ValueError(f"Biển số {plate} đã tồn tại!")
+
+                        vehicle = Vehicle(
+                            license_plate=plate,
+                            vehicle_type=form.new_vehicle_type.data.strip(),
+                            vehicle_status=VehicleStatus.RECEIVED,
+                            customer=customer
+                        )
+                        db.session.add(vehicle)
+                    else:
+                        if not form.vehicle_id.data:
+                            raise ValueError("Vui lòng chọn xe!")
+                        vehicle = db.session.get(Vehicle, int(form.vehicle_id.data))
+                        # if not vehicle:
+                        #     raise ValueError("Xe không tồn tại!")
+                        # if vehicle.customer_id != customer.id:
+                        #     raise ValueError("Xe không thuộc khách hàng này!")
+
+                        vehicle.vehicle_status = VehicleStatus.RECEIVED
+                        db.session.add(vehicle)
+
+                # === QUAN TRỌNG NHẤT: Gán object vehicle cho model ===
+                model.vehicle = vehicle  # <--- Dòng này fix tất cả!
+
+        except Exception as e:
+            db.session.rollback()
+            raise ValueError(f"Lỗi tạo phiếu: {str(e)}")
+
 
 
 class RepairFormAdmin(MyAdminModelView):
-    column_list = ['id', 'employee', 'reception_form', 'repair_status','vehicle_plate', 'created_date', 'total_money']
+    column_list = ['id', 'employee', 'reception_form', 'repair_status','vehicle_plate', 'total_money']
     column_labels = {
         'id': 'Mã phiếu sửa',
         'employee': 'Nhân viên lập',
-        'reception_form': 'Phiếu tiếp nhận',
+        'reception_form': 'PTN',
         'vehicle_plate': 'Biển số xe',
-        'created_date': 'Ngày lập',
         'total_money': 'Tổng tiền',
         'repair_status':'Trạng thái'
     }
@@ -258,115 +449,70 @@ class RepairDetailView(BaseView):
         )
 
 
-class ReceptionFormAdmin(MyAdminModelView):
-    column_list = ['id','customer','vehicle','employee','error_description']
-    column_labels = {
-        'id': 'ID',
-        'customer': 'Khách hàng',
-        'vehicle': 'Biển số xe',
-        'employee': 'Nhân viên tiếp nhận',
-        'error_description': 'Mô tả lỗi',
-    }
-
-    column_formatters = {
-        'customer': lambda v, c, m, p: m.vehicle.customer.full_name if m.vehicle and m.vehicle.customer else ''
-    }
-
-    form_columns = ['employee', 'appointment_id', 'customer_id', 'new_customer', 'new_customer_phone',
-                    'vehicle_id', 'new_vehicle_plate', 'new_vehicle_type', 'error_description']
-
-    form_extra_fields = {
-        'employee': QuerySelectField(
-            'Nhân viên',
-            query_factory=lambda: db.session.query(Employee).all(),
-            get_label='full_name',
-            validators=[DataRequired()]
-        ),
-        'appointment_id': SelectField('Chọn lịch đã đặt', coerce=int, validators=[Optional()]),
-        'customer_id': SelectField('Chọn khách hàng', coerce=int, validators=[Optional()]),
-        'vehicle_id': SelectField('Chọn xe', coerce=int, validators=[Optional()]),
-        'new_customer': StringField('Tên khách hàng mới'),
-        'new_customer_phone': StringField('SĐT khách mới'),
-        'new_vehicle_plate': StringField('Biển số xe mới'),
-        'new_vehicle_type': StringField('Loại xe mới'),
-        'error_description': StringField('Lỗi')
-    }
-
-    def create_form(self, obj=None):
-        form = super().create_form(obj)
-        # Load tất cả khách hàng
-        form.customer_id.choices = [(c.id, c.full_name) for c in db.session.query(Customer).all()]
-        # Load tất cả xe có appointment confirmed
-        appointments = db.session.query(Appointment).filter_by(status=AppointmentStatus.CONFIRMED).all()
-        form.appointment_id.choices = [(a.id, f"{a.vehicle.license_plate} ({a.customer.full_name})") for a in appointments]
-        form.vehicle_id.choices = [(a.vehicle.id, a.vehicle.license_plate) for a in appointments]
-        return form
-
-    def on_model_change(self, form, model, is_created):
-        try:
-            if form.appointment_id.data:
-
-                appointment = db.session.get(Appointment, form.appointment_id.data)
-                if not appointment:
-                    raise ValueError("Lịch không hợp lệ.")
-
-                vehicle = appointment.vehicle
-                customer = vehicle.customer
-
-                appointment.status = AppointmentStatus.COMPLETED
-                db.session.add(appointment)
-
-                vehicle.vehicle_status = VehicleStatus.RECEIVED
-                db.session.add(vehicle)
-
-            else:
-                # === KHÔNG CÓ LỊCH (lại CH tiếp nhận) ===
-                if form.new_customer.data:
-                    customer = db.session.query(Customer) \
-                        .filter_by(phone=form.new_customer_phone.data).first()
-                    if not customer:
-                        customer = Customer(
-                            full_name=form.new_customer.data,
-                            phone=form.new_customer_phone.data
-                        )
-                        db.session.add(customer)
-                        db.session.flush()
-                elif form.customer_id.data:
-                    customer = db.session.get(Customer, form.customer_id.data)
-                else:
-                    raise ValueError("Phải chọn khách hàng hoặc nhập khách hàng mới.")
-
-                if form.new_vehicle_plate.data:
-                    vehicle = Vehicle(
-                        license_plate=form.new_vehicle_plate.data,
-                        vehicle_type=form.new_vehicle_type.data or "unknown",
-                        vehicle_status=VehicleStatus.RECEIVED,
-                        customer_id=customer.id
-                    )
-                    db.session.add(vehicle)
-                    db.session.flush()
-                elif form.vehicle_id.data:
-                    vehicle = db.session.get(Vehicle, form.vehicle_id.data)
-
-                    # ✔ đảm bảo xe chuyển sang RECEIVED
-                    vehicle.vehicle_status = VehicleStatus.RECEIVED
-                    db.session.add(vehicle)
-                else:
-                    raise ValueError("Phải chọn xe hoặc nhập xe mới.")
-
-            # Gán cho phiếu tiếp nhận
-            model.vehicle_id = vehicle.id
-            model.employee_id = (
-                current_user.employee.id
-                if hasattr(current_user, 'employee') and current_user.employee
-                else form.employee.data.id
-            )
-
-            db.session.add(model)
-
-        except Exception as e:
-            db.session.rollback()
-            raise e
+    # def on_model_change(self, form, model, is_created):
+    #     try:
+    #         if form.appointment_id.data:
+    #
+    #             appointment = db.session.get(Appointment, form.appointment_id.data)
+    #             if not appointment:
+    #                 raise ValueError("Lịch không hợp lệ.")
+    #
+    #             vehicle = appointment.vehicle
+    #             customer = vehicle.customer
+    #
+    #             appointment.status = AppointmentStatus.COMPLETED
+    #             db.session.add(appointment)
+    #
+    #             vehicle.vehicle_status = VehicleStatus.RECEIVED
+    #             db.session.add(vehicle)
+    #
+    #         else:
+    #             # === khôgn có lịch (lại CH tiếp nhận) ===
+    #             if form.new_customer.data:
+    #                 customer = db.session.query(Customer).filter_by(phone=form.new_customer_phone.data).first()
+    #                 if not customer:
+    #                     customer = Customer(
+    #                         full_name=form.new_customer.data,
+    #                         phone=form.new_customer_phone.data
+    #                     )
+    #                     db.session.add(customer)
+    #                     db.session.flush()
+    #             elif form.customer_id.data:
+    #                 customer = db.session.get(Customer, form.customer_id.data)
+    #             else:
+    #                 raise ValueError("Phải chọn khách hàng hoặc nhập khách hàng mới.")
+    #
+    #             if form.new_vehicle_plate.data:
+    #                 vehicle = Vehicle(
+    #                     license_plate=form.new_vehicle_plate.data,
+    #                     vehicle_type=form.new_vehicle_type.data or "unknown",
+    #                     vehicle_status=VehicleStatus.RECEIVED,
+    #                     customer_id=customer.id
+    #                 )
+    #                 db.session.add(vehicle)
+    #                 db.session.flush()
+    #             elif form.vehicle_id.data:
+    #                 vehicle = db.session.get(Vehicle, form.vehicle_id.data)
+    #
+    #                 # xe chuyển sang RECEIVED
+    #                 vehicle.vehicle_status = VehicleStatus.RECEIVED
+    #                 db.session.add(vehicle)
+    #             else:
+    #                 raise ValueError("Phải chọn xe hoặc nhập xe mới.")
+    #
+    #         # Gán cho phiếu tiếp nhận
+    #         model.vehicle_id = vehicle.id
+    #         model.employee_id = (
+    #             current_user.employee.id
+    #             if hasattr(current_user, 'employee') and current_user.employee
+    #             else form.employee.data.id
+    #         )
+    #
+    #         db.session.add(model)
+    #
+    #     except Exception as e:
+    #         db.session.rollback()
+    #         raise e
 
 
 class SparePartAdmin(AdminAccessMixin,MyAdminModelView):

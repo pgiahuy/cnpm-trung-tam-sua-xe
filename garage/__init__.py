@@ -54,6 +54,6 @@ cloudinary.config(
 db = SQLAlchemy(app)
 login = LoginManager(app)
 mail = Mail(app)
-
-
 from garage import admin
+
+

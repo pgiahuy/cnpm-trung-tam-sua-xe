@@ -162,7 +162,7 @@ def booking():
                     return redirect(url_for("index"))
                 else:
                     flash(
-                        "Biển số xe không hợp lệ. VD: 59X2-123.45 (xe máy), 30A-123.45 (ô tô)",
+                        "Biển số xe không hợp lệ. VD: 59X2-123.45 (xe máy), 30A-123.45 (ô tô, xe tải)",
                         "danger"
                     )
 

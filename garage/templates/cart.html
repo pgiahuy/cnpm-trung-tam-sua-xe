@@ -4,50 +4,51 @@
 
 {%block content%}
 <div class="container">
-<h1 class="text-center text-info mt-3">GIỎ HÀNG</h1>
+    <h1 class="text-center text-info mt-3">GIỎ HÀNG</h1>
 
-{%if 'cart' in session and session['cart']%}
-<table class="table">
-  <tr>
-    <th>ID</th>
-    <th>Tên sản phẩm</th>
-    <th>Giá</th>
-    <th>Số lượng</th>
-    <th></th>
-  </tr>
-  {%for p in session['cart'].values()%}
-  <tr id="product{{p['id']}}">
-    <td>{{p['id']}}</td>
-    <td>{{p['name']}}</td>
-    <td>{{"{:,.1f}".format(p['unit_price'])}}</td>
-    <td>
-      <input class="form-control"
-       type="number"
-       min="1"
-       value="{{ p['quantity'] }}"
-       oninput="updateCart({{ p['id'] }}, this)">
-    </td>
-    <td>
-      <button class="btn btn-danger"
-              value="Xoa"
-              onclick="deleteCart({{p['id']}})"
+    {%if 'cart' in session and session['cart']%}
+    <table class="table">
+        <tr>
+            <th>ID</th>
+            <th>Tên sản phẩm</th>
+            <th>Giá</th>
+            <th>Số lượng</th>
+            <th></th>
+        </tr>
+        {%for p in session['cart'].values()%}
+        <tr id="product{{p['id']}}">
+            <td>{{p['id']}}</td>
+            <td>{{p['name']}}</td>
+            <td>{{"{:,.1f}".format(p['unit_price'])}}</td>
+            <td>
+                <input class="form-control"
+                       type="number"
+                       min="1"
+                       value="{{ p['quantity'] }}"
+                       oninput="updateCart({{ p['id'] }}, this)">
+            </td>
+            <td>
+                <button class="btn btn-danger"
+                        value="Xoa"
+                        onclick="deleteCart({{p['id']}})"
 
-      >Xoá</button>
-    </td>
-  </tr>
+                >Xoá
+                </button>
+            </td>
+        </tr>
 
-  {%endfor%}
-</table>
+        {%endfor%}
+    </table>
 
-<div class="alert alert-info">
-  <h5>Tổng số sản phẩm: <span class="cart-counter"> {{stats_cart.total_quantity}}  </span> </h5>
-    <h5>Tổng số tiền: <span id="cart-amount"> {{"{:,.1f}".format(stats_cart.total_amount)}}</span> </h5>
-</div>
+    <div class="alert alert-info">
+        <h5>Tổng số sản phẩm: <span class="cart-counter"> {{stats_cart.total_quantity}}  </span></h5>
+        <h5>Tổng số tiền: <span id="cart-amount"> {{"{:,.1f}".format(stats_cart.total_amount)}}</span></h5>
+    </div>
 
     <input type="button" onclick=" pay()" value="Thanh toán" class="btn btn-danger"/>
 
-{%else%}
-<div class="alert alert-info">Bạn chưa thêm sản phẩm nào trong giỏ hàng!</div>
-{% endif %}
+    {%else%}
+    <div class="alert alert-info">Bạn chưa thêm sản phẩm nào trong giỏ hàng!</div>
+    {% endif %}
 </div>
 {%endblock%}

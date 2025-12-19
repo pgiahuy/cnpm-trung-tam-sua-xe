@@ -17,11 +17,35 @@
 
         <div class="sign-up__content">
             <h2 class="sign-up__title">{{ _("Đăng ký") }}</h2>
-            <input class="sign-up__inp" type="text" placeholder="{{ _('Họ và tên') }}" name="full_name" required="required"/>
-            <input class="sign-up__inp" type="text" placeholder="{{ _('Số điện thoại') }}" name="phone" required="required"/>
-            <input class="sign-up__inp" type="text" placeholder="{{ _('Tên đăng nhập') }}" name="username" required="required"/>
-            <input class="sign-up__inp" type="password" placeholder="{{ _('Mật khẩu') }}" name="password" required="required"/>
-            <input class="sign-up__inp" type="password" placeholder="{{ _('Xác nhận mật khẩu') }}" name="confirm" required="required"/>
+            <input class="sign-up__inp" type="text" placeholder="{{ _('Họ và tên') }}" name="full_name"
+                   required="required"/>
+            <input class="sign-up__inp" type="text" name="phone" id="phone" placeholder="Số điện thoại" required>
+            <small id="phone-error" class="text-danger"></small>
+
+            <input class="sign-up__inp" type="text" name="username" id="username" placeholder="Tên đăng nhập" required>
+            <small id="username-error" class="text-danger"></small>
+<input
+    class="sign-up__inp"
+    type="password"
+    name="password"
+    id="password"
+    placeholder="Mật khẩu"
+    required
+>
+
+<div class="text-start mt-1">
+    <ul id="password-rules" style="list-style: none; padding-left: 0; font-size: 14px;">
+        <li id="rule-length" class="text-muted">• Ít nhất 8 ký tự</li>
+        <li id="rule-upper" class="text-muted">• Có chữ hoa (A-Z)</li>
+        <li id="rule-lower" class="text-muted">• Có chữ thường (a-z)</li>
+        <li id="rule-number" class="text-muted">• Có số (0-9)</li>
+    </ul>
+    <small id="password-error" class="text-danger"></small>
+</div>
+
+
+            <input class="sign-up__inp" type="password" placeholder="{{ _('Xác nhận mật khẩu') }}" name="confirm"
+                   required="required"/>
             <label for="avatar" class="custom-file">
                 {{ _("Tải ảnh avatar của bạn") }}
             </label>
@@ -33,4 +57,116 @@
 
     </form>
 </div>
+<script>
+/* ================== STATE ================== */
+let phoneValid = false;
+let usernameValid = false;
+let passwordValid = false;
+
+/* ================== ELEMENTS ================== */
+const submitBtn = document.querySelector('button[type="submit"]');
+const phoneInput = document.getElementById('phone');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+
+const phoneError = document.getElementById('phone-error');
+const usernameError = document.getElementById('username-error');
+const passwordError = document.getElementById('password-error');
+
+const rules = {
+    length: document.getElementById("rule-length"),
+    upper: document.getElementById("rule-upper"),
+    lower: document.getElementById("rule-lower"),
+    number: document.getElementById("rule-number")
+};
+
+/* ================== INIT ================== */
+submitBtn.disabled = true;
+
+/* ================== COMMON ================== */
+function toggleSubmit() {
+    submitBtn.disabled = !(phoneValid && usernameValid && passwordValid);
+}
+
+function updateRule(el, ok) {
+    el.classList.toggle("text-success", ok);
+    el.classList.toggle("text-muted", !ok);
+}
+
+/* ================== PHONE ================== */
+phoneInput.addEventListener('blur', function () {
+    const phone = this.value.trim();
+    const phoneRegex = /^(0)(3|5|7|8|9)\d{8}$/;
+
+    if (!phoneRegex.test(phone)) {
+        phoneError.innerText = "SĐT không hợp lệ (VD: 0912345678)";
+        phoneValid = false;
+        toggleSubmit();
+        return;
+    }
+
+    fetch(`/api/check-phone?phone=${phone}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.exists) {
+                phoneError.innerText = "SĐT đã được sử dụng";
+                phoneValid = false;
+            } else {
+                phoneError.innerText = "";
+                phoneValid = true;
+            }
+            toggleSubmit();
+        });
+});
+
+/* ================== USERNAME ================== */
+usernameInput.addEventListener('blur', function () {
+    const username = this.value.trim();
+
+    if (!username) {
+        usernameError.innerText = "Không được để trống";
+        usernameValid = false;
+        toggleSubmit();
+        return;
+    }
+
+    fetch(`/api/check-username?username=${username}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.exists) {
+                usernameError.innerText = "Tên đăng nhập đã tồn tại";
+                usernameValid = false;
+            } else {
+                usernameError.innerText = "";
+                usernameValid = true;
+            }
+            toggleSubmit();
+        });
+});
+
+/* ================== PASSWORD ================== */
+passwordInput.addEventListener("input", function () {
+    const v = this.value;
+
+    const hasLength = v.length >= 8;
+    const hasUpper  = /[A-Z]/.test(v);
+    const hasLower  = /[a-z]/.test(v);
+    const hasNumber = /\d/.test(v);
+
+    updateRule(rules.length, hasLength);
+    updateRule(rules.upper, hasUpper);
+    updateRule(rules.lower, hasLower);
+    updateRule(rules.number, hasNumber);
+
+    passwordValid = hasLength && hasUpper && hasLower && hasNumber;
+    toggleSubmit();
+});
+
+passwordInput.addEventListener("blur", function () {
+    if (!passwordValid && this.value) {
+        passwordError.innerText = "Mật khẩu chưa đủ mạnh";
+    }
+});
+</script>
+
 {% endblock %}

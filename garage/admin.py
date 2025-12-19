@@ -74,6 +74,8 @@ class ServiceAdmin(AdminAccessMixin,MyAdminModelView):
         'price':'Giá',
         'created_date':'Ngày tạo'
     }
+
+
 class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
     column_labels = {
         'full_name': 'Họ tên',

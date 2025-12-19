@@ -5,23 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="07f14b8c-61a6-4468-bdb3-2208cc1e321e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/garage/static/css/admin_index.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/garage/templates/payment_failed.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/garage/templates/payment_success.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/garage/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/config.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/garage/dao.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/dao.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/garage/index.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/index.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/static/css/admin.css" beforeDir="false" afterPath="$PROJECT_DIR$/garage/static/css/admin.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/static/js/cart.js" beforeDir="false" afterPath="$PROJECT_DIR$/garage/static/js/cart.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/templates/admin/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/admin/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/templates/admin/master.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/admin/master.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/templates/layout/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/layout/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/templates/layout/header.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/layout/header.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/garage/vnpay.py" beforeDir="false" afterPath="$PROJECT_DIR$/garage/vnpay.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/garage/templates/cart.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/cart.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/garage/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/garage/templates/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,15 +32,16 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.index.executor": "Run",
+    "Python.models.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "Merging main",
+    "git-widget-placeholder": "main",
     "settings.editor.selected.configurable": "preferences.fileTypes"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.index">
     <configuration name="index" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="cnpm-trung-tam-sua-xe" />
       <option name="ENV_FILES" value="" />
@@ -74,9 +64,32 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="models" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="cnpm-trung-tam-sua-xe" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/garage" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/garage/models.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.index" />
+        <item itemvalue="Python.models" />
       </list>
     </recent_temporary>
   </component>

@@ -299,7 +299,11 @@ def get_vat_value():
     vat_obj = SystemConfig.query.filter_by(id='VAT').first()
     vat = float(vat_obj.value)
     return vat
+def is_username_exists(username):
+    return db.session.query(User).filter_by(username=username).first() is not None
 
+def is_phone_exists(phone):
+    return db.session.query(Customer).filter_by(phone=phone).first() is not None
 if __name__ == "__main__":
     with app.app_context():
         print(load_customers())

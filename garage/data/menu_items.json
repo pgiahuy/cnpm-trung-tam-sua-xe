@@ -1,22 +1,22 @@
 [
   {
     "id": 1,
-    "name": "Dịch vụ",
-     "url_name": "services"
+    "url_name": "services",
+    "name_key": "Dịch vụ"
   },
-   {
+  {
     "id": 2,
-    "name": "Linh kiện",
-    "url_name": "sparepart"
+    "url_name": "sparepart",
+    "name_key": "Linh kiện"
   },
   {
     "id": 3,
-    "name": "Đặt lịch",
-    "url_name": "bookrepair"
+    "url_name": "bookrepair",
+    "name_key": "Đặt lịch"
   },
-   {
+  {
     "id": 4,
-    "name": "Liên hệ",
-     "url_name": "contact"
+    "url_name": "contact",
+    "name_key": "Liên hệ"
   }
 ]

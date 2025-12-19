@@ -8,34 +8,20 @@
 
 <nav id="mainNav"
      class="navbar navbar-expand-lg navbar-dark fixed-top
-     {% if transparent_nav %}
-        navbar-transparent
-     {% else %}
-        bg-dark
-     {% endif %} mt+10">
+     {% if transparent_nav %}navbar-transparent{% else %}bg-dark{% endif %} mt+10">
 
     <div class="container-fluid px-4">
+        <a class="navbar-brand fw-bold" href="/">{{ _("GARAGE CENTER") }}</a>
 
-
-        <a class="navbar-brand fw-bold" href="/">GARAGE CENTER</a>
-
-        <!-- TOGGLER -->
-        <button class="navbar-toggler"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#mynavbar">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- NAVBAR -->
         <div class="collapse navbar-collapse" id="mynavbar">
-
-            <!-- MENU GIỮA -->
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 align-items-lg-center">
-
                 <li class="nav-item">
                     <a class="nav-link {% if current_path == '/' %}active{% endif %}" href="/">
-                        Trang chủ
+                        {{ _("Trang chủ") }}
                     </a>
                 </li>
 
@@ -43,105 +29,118 @@
                 <li class="nav-item">
                     <a class="nav-link {% if current_path.startswith('/' ~ i.url_name) %}active{% endif %}"
                        href="/{{ i.url_name }}">
-                        {{ i.name }}
+                        {{ _(i.name_key) }}
                     </a>
                 </li>
                 {% endfor %}
 
                 {% if current_user.is_authenticated %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle fw-semibold"
-                       href="#"
-                       role="button"
-                       data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
                         <i class="fa-regular fa-circle-user me-1"></i>
                         {{ current_user.customer.full_name }}
                     </a>
-
                     <ul class="dropdown-menu dropdown-menu-end shadow">
-
-                        <li>
-                            <a class="dropdown-item" href="/user/profile">
-                                <i class="fa-solid fa-id-card me-2"></i> Hồ sơ cá nhân
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('user_vehicles') }}">
-                                <i class="fa-solid fa-car me-2"></i> Xe của tôi
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="/user/appointments">
-                                <i class="fa-solid fa-calendar-check me-2"></i> Lịch sử đặt lịch
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item" href="{{ url_for('user_orders_history') }}">
-                                <i class="fa-solid fa-receipt me-2"></i> Lịch sử mua hàng
-                            </a>
-                        </li>
-
+                        <li><a class="dropdown-item" href="/user/profile"><i class="fa-solid fa-id-card me-2"></i> {{
+                            _("Hồ sơ cá nhân") }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('user_vehicles') }}"><i
+                                class="fa-solid fa-car me-2"></i> {{ _("Xe của tôi") }}</a></li>
+                        <li><a class="dropdown-item" href="/user/appointments"><i
+                                class="fa-solid fa-calendar-check me-2"></i> {{ _("Lịch sử đặt lịch") }}</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('user_orders_history') }}"><i
+                                class="fa-solid fa-receipt me-2"></i> {{ _("Lịch sử mua hàng") }}</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-
-                        <li>
-                            <a class="dropdown-item text-danger" href="{{ url_for('logout_my_user') }}">
-                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Đăng xuất
-                            </a>
-                        </li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout_my_user') }}"><i
+                                class="fa-solid fa-arrow-right-from-bracket me-2"></i> {{ _("Đăng xuất") }}</a></li>
                     </ul>
                 </li>
                 {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">
-                        <i class="fa-regular fa-user me-1"></i> Đăng nhập
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/register">Đăng ký</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin">A</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" href="/login"><i class="fa-regular fa-user me-1"></i>
+                    {{ _("Đăng nhập") }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="/register">{{ _("Đăng ký") }}</a></li>
                 {% endif %}
             </ul>
 
-
             <div class="d-flex align-items-center gap-3">
+                <!-- NGÔN NGỮ DROPDOWN (GỌN GÀNG, DỄ MỞ RỘNG) -->
+                <div class="dropdown d-inline-block">
+                    <a class="btn btn-outline-light btn-sm dropdown-toggle" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if current_lang == 'vi' %}🇻🇳 VI
+                        {% elif current_lang == 'en' %}🇬🇧 EN
+                        {% elif current_lang == 'es' %}🇪🇸 ES
+                        {% elif current_lang == 'zh' %}🇨🇳 ZH
+                        {% elif current_lang == 'ja' %}🇯🇵 JA
+                        {% elif current_lang == 'ko' %}🇰🇷 KO
+                        {% elif current_lang == 'fr' %}🇫🇷 FR
+                        {% else %}🌐 {{ current_lang.upper() }}
+                        {% endif %}
+                    </a>
 
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        {% for lang in languages %}
+                        {% if lang == 'vi' %}
+                        {% set flag = '🇻🇳' %}
+                        {% set lang_name = 'Tiếng Việt' %}
+                        {% elif lang == 'en' %}
+                        {% set flag = '🇬🇧' %}
+                        {% set lang_name = 'English' %}
+                        {% elif lang == 'es' %}
+                        {% set flag = '🇪🇸' %}
+                        {% set lang_name = 'Español' %}
+                        {% elif lang == 'zh' %}
+                        {% set flag = '🇨🇳' %}
+                        {% set lang_name = '中文' %}
+                        {% elif lang == 'ja' %}
+                        {% set flag = '🇯🇵' %}
+                        {% set lang_name = '日本語' %}
+                        {% elif lang == 'ko' %}
+                        {% set flag = '🇰🇷' %}
+                        {% set lang_name = '한국어' %}
+                        {% elif lang == 'fr' %}
+                        {% set flag = '🇫🇷' %}
+                        {% set lang_name = 'Français' %}
+                        {% else %}
+                        {% set flag = '🌐' %}
+                        {% set lang_name = lang.upper() %}
+                        {% endif %}
+
+                        <li>
+                            <a class="dropdown-item {% if current_lang == lang %}active{% endif %}"
+                               href="{{ url_for('change_lang', lang=lang) }}">
+                                {{ flag }} {{ lang_name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <!-- SEARCH -->
                 <form action="{{ url_for('search') }}" method="get" class="nav-search-glass">
                     <i class="fas fa-search"></i>
-
                     {% if current_path == '/services' %}
-                    {% set search_placeholder = "Tìm dịch vụ..." %}
                     <input type="hidden" name="scope" value="service">
+                    <input type="text" name="kw" placeholder="{{ _('Tìm dịch vụ...') }}" value="{{ kw or '' }}">
                     {% elif current_path == '/sparepart' %}
-                    {% set search_placeholder = "Tìm linh kiện..." %}
                     <input type="hidden" name="scope" value="sparepart">
+                    <input type="text" name="kw" placeholder="{{ _('Tìm linh kiện...') }}" value="{{ kw or '' }}">
                     {% else %}
-                    {% set search_placeholder = "Tìm dịch vụ, linh kiện..." %}
                     <input type="hidden" name="scope" value="all">
+                    <input type="text" name="kw" placeholder="{{ _('Tìm dịch vụ, linh kiện...') }}"
+                           value="{{ kw or '' }}">
                     {% endif %}
-
-                    <input type="text" name="kw" placeholder="{{ search_placeholder }}" value="{{ kw or '' }}" required>
-
-                    <button type="submit">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
+                    <button type="submit"><i class="fas fa-arrow-right"></i></button>
                 </form>
 
-
+                <!-- CART -->
                 <div class="position-relative">
                     <a class="nav-link d-flex align-items-center cart-icon" href="/cart">
                         <i class="fa-solid fa-cart-shopping fs-5"></i>
-                        <span class="cart-badge cart-counter"> {{stats_cart.total_quantity}}</span>
-
+                        <span class="cart-badge cart-counter">{{ stats_cart.total_quantity }}</span>
                     </a>
                 </div>
-
             </div>
-
         </div>
     </div>
 </nav>

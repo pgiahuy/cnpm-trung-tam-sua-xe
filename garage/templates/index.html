@@ -1,15 +1,17 @@
 {% extends 'layout/base.html' %}
 
+{% block title %}{{ _("Trang chủ - Garage Center") }}{% endblock %}
+
 {% block content %}
 
 <div class="hero-section">
     <div class="container">
         <div class="overlay">
-            <h3 class="display-4 text-white">CHĂM SÓC XE CHUYÊN NGHIỆP 24/7</h3>
-            <p class="lead text-white-50">Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng.</p>
+            <h3 class="display-4 text-white">{{ _("CHĂM SÓC XE CHUYÊN NGHIỆP 24/7") }}</h3>
+            <p class="lead text-white-50">{{ _("Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng.") }}</p>
 
             <div class="d-flex justify-content-center mt-4">
-                <a href="/bookrepair" class="btn btn-warning btn-lg me-3">Đặt lịch ngay</a>
+                <a href="/bookrepair" class="btn btn-warning btn-lg me-3">{{ _("Đặt lịch ngay") }}</a>
             </div>
         </div>
     </div>
@@ -18,25 +20,23 @@
 <hr>
 
 <div class="container-xxl my-5" style="max-width: 1400px;">
-    <h4 class="text-center mb-5 display-5" style="color: light-blue; font-weight: 300;">Dịch vụ của chúng tôi</h4>
+    <h4 class="text-center mb-5 display-5" style="color: light-blue; font-weight: 300;">
+        {{ _("Dịch vụ của chúng tôi") }}
+    </h4>
 
     <div class="row align-items-center" style="background-color: #1a1a1a; padding: 40px; border-radius: 10px;">
-
         <div class="col-md-6">
             <div class="row service-grid">
                 {% for s in services[:4] %}
                 <div class="col-6 p-3">
                     <div class="service-tile text-center p-4 h-100"
                          style="background-color: #2a2a2a; border-radius: 8px;">
-
                         <div class="service-home-card">
                             <a href="/services/{{s.id}}">
                                 <img src="{{ s.image }}" alt="{{ s.name }}">
-                                <h6>{{ s.name }}</h6>
+                                <h6>{{ s.name }}</h6>  <!-- Tên dịch vụ từ DB, không cần dịch -->
                             </a>
                         </div>
-
-
                     </div>
                 </div>
                 {% endfor %}
@@ -46,100 +46,99 @@
         <div class="col-md-6 featured-image">
             <div class="featured-overlay"></div>
         </div>
-
     </div>
 </div>
 
 <div class="text-center my-5">
     <a href="/services" class="btn btn-outline-secondary btn-lg">
-        Xem tất cả dịch vụ &raquo;
+        {{ _("Xem tất cả dịch vụ") }} &raquo;
     </a>
 </div>
 
 <hr>
-<div class="card h-100 shadow sparepart-card">
 
-    <div class="container my-5">
-        <h4 class="text-center mb-5 display-5"
-            style="color: light-blue; font-weight: 300;">Linh kiện
-            nổi bật </h4>
-        <div class="row">
-            {% for p in spare_parts[:4] %}
-            <div class="col-md-3 col-sm-6 mt-3 p-3">
-                <div class="sparepart-card h-100">
-                    <div class="sparepart-img-wrapper">
-                        <img src="{{ p.image_url }}" alt="{{ p.name }}">
-                    </div>
+<div class="container my-5">
+    <h4 class="text-center mb-5 display-5" style="color: light-blue; font-weight: 300;">
+        {{ _("Linh kiện nổi bật") }}
+    </h4>
+    <div class="row">
+        {% for p in spare_parts[:4] %}
+        <div class="col-md-3 col-sm-6 mt-3 p-3">
+            <div class="sparepart-card h-100">
+                <div class="sparepart-img-wrapper">
+                    <img src="{{ p.image_url }}" alt="{{ p.name }}">
+                </div>
 
-                    <div class="sparepart-body">
-                        <h6>{{ p.name }}</h6>
-                        <p class="text-muted small">
-                            {{ p.supplier | truncate(60) }}
-                        </p>
+                <div class="sparepart-body">
+                    <h6>{{ p.name }}</h6>  <!-- Tên linh kiện từ DB -->
+                    <p class="text-muted small">
+                        {{ p.supplier | truncate(60) }}
+                    </p>
 
-                        <p class="price">
-                            {{ "{:,.0f}".format(p.unit_price | default(0)) }} VNĐ / {{ p.unit }}
-                        </p>
+                    <p class="price">
+                        {{ "{:,.0f}".format(p.unit_price | default(0)) }} {{ _("VNĐ") }} / {{ p.unit }}
+                    </p>
 
-                        <a href="/sparepart/{{ p.id }}" class="btn btn-outline-warning btn-sm w-100 mt-2">
-                            Xem chi tiết
-                        </a>
-                    </div>
+                    <a href="/sparepart/{{ p.id }}" class="btn btn-outline-warning btn-sm w-100 mt-2">
+                        {{ _("Xem chi tiết") }}
+                    </a>
                 </div>
             </div>
-
-
-            {% endfor %}
         </div>
-    </div>
-    <div class="text-center my-5">
-        <a href="/sparepart" class="btn btn-outline-secondary btn-lg">
-            Xem toàn bộ linh kiện &raquo;
-        </a>
+        {% endfor %}
     </div>
 </div>
 
-<hr class="my-5">
-<div class="container-fluid my-5">
+<div class="text-center my-5">
+    <a href="/sparepart" class="btn btn-outline-secondary btn-lg">
+        {{ _("Xem toàn bộ linh kiện") }} &raquo;
+    </a>
+</div>
 
+<hr class="my-5">
+
+<div class="container-fluid my-5">
     <div class="row contact-form-section shadow-lg mx-auto"
          style="max-width: 1100px; background-color: #3e3e3e; border-radius: 10px;">
 
         <div class="col-md-5 p-0 d-none d-md-block">
             <img src="https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-                 alt="Nhân viên bảo dưỡng" class="img-fluid"
+                 alt="{{ _('Nhân viên bảo dưỡng') }}" class="img-fluid"
                  style="height: 100%; object-fit: cover; border-top-left-radius: 10px; border-bottom-left-radius: 10px;">
         </div>
 
         <div class="col-md-7 p-5">
-            <h3 class="text-white mb-4 text-center">Nhận tư vấn miễn phí</h3>
+            <h3 class="text-white mb-4 text-center">{{ _("Nhận tư vấn miễn phí") }}</h3>
 
             <form action="/submit-contact" method="post">
                 <div class="mb-3">
-                    <input type="text" class="form-control form-control-custom" name="name" placeholder="Họ và tên"
-                           required>
+                    <input type="text" class="form-control form-control-custom" name="name"
+                           placeholder="{{ _('Họ và tên') }}" required>
                 </div>
 
                 <div class="row mb-3">
                     <div class="col-sm-6">
-                        <input type="tel" class="form-control form-control-custom" name="phone" placeholder="SĐT"
-                               required>
+                        <input type="tel" class="form-control form-control-custom" name="phone"
+                               placeholder="{{ _('SĐT') }}" required>
                     </div>
                     <div class="col-sm-6">
-                        <input type="email" class="form-control form-control-custom" name="email" placeholder="Email">
+                        <input type="email" class="form-control form-control-custom" name="email"
+                               placeholder="{{ _('Email') }}">
                     </div>
                 </div>
 
                 <div class="mb-4">
                     <textarea class="form-control form-control-custom" name="message" rows="3"
-                              placeholder="Lời nhắn"></textarea>
+                          placeholder="{{ _('Lời nhắn') }}">
+                    </textarea>
                 </div>
 
                 <button type="submit" class="btn btn-warning btn-lg w-100 btn-custom-gradient">
-                    Gửi
+                    {{ _("Gửi") }}
                 </button>
             </form>
         </div>
     </div>
 </div>
+
 {% endblock %}

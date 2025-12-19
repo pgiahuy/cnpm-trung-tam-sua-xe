@@ -1,5 +1,5 @@
 {% extends 'layout/base.html' %}
-{% block title %}Chỉnh sửa lịch hẹn{% endblock %}
+{% block title %}{{ _("Chỉnh sửa lịch hẹn - Garage Center") }}{% endblock %}
 {% block content %}
 
 <div class="container my-5">
@@ -7,7 +7,7 @@
         <div class="col-lg-8">
 
             <h1 class="text-warning text-center fw-bold display-6 mb-4 border-bottom pb-2">
-                CHỈNH SỬA LỊCH HẸN
+                {{ _("CHỈNH SỬA LỊCH HẸN") }}
             </h1>
 
             {% if err_msg %}
@@ -18,9 +18,9 @@
                   class="p-4 border rounded shadow-sm bg-white"
                   id="editForm">
 
-                <!-- ================= VEHICLE INFO ================= -->
+                <!-- VEHICLE INFO -->
                 <h3 class="fw-semibold text-secondary mb-3 mt-4">
-                    Thông tin Phương tiện
+                    {{ _("Thông tin Phương tiện") }}
                 </h3>
 
                 <div class="row g-3 mb-4">
@@ -30,7 +30,7 @@
                                    class="form-control"
                                    value="{{ appointment.vehicle.vehicle_type }}"
                                    disabled>
-                            <label>Loại xe</label>
+                            <label>{{ _("Loại xe") }}</label>
                         </div>
                     </div>
 
@@ -40,14 +40,14 @@
                                    class="form-control"
                                    value="{{ appointment.vehicle.license_plate }}"
                                    disabled>
-                            <label>Biển số xe</label>
+                            <label>{{ _("Biển số xe") }}</label>
                         </div>
                     </div>
                 </div>
 
-                <!-- ================= APPOINTMENT DETAILS ================= -->
+                <!-- APPOINTMENT DETAILS -->
                 <h3 class="fw-semibold text-secondary mb-3 mt-4">
-                    Chi tiết Lịch hẹn
+                    {{ _("Chi tiết Lịch hẹn") }}
                 </h3>
 
                 <div class="row g-3 mb-4">
@@ -59,7 +59,7 @@
                                    name="scheduleDate"
                                    required
                                    value="{{ selected_date.isoformat() }}">
-                            <label for="scheduleDate">Chọn ngày hẹn</label>
+                            <label for="scheduleDate">{{ _("Chọn ngày hẹn") }}</label>
                         </div>
                     </div>
 
@@ -69,7 +69,7 @@
                                     id="scheduleTime"
                                     name="scheduleTime"
                                     required>
-                                <option value="">Chọn khung giờ</option>
+                                <option value="">{{ _("Chọn khung giờ") }}</option>
                                 {% for slot in time_slots %}
                                     <option value="{{ slot }}"
                                         {% if slot == current_slot %}selected{% endif %}>
@@ -77,35 +77,35 @@
                                     </option>
                                 {% endfor %}
                             </select>
-                            <label for="scheduleTime">Khung giờ</label>
+                            <label for="scheduleTime">{{ _("Khung giờ") }}</label>
                         </div>
                     </div>
                 </div>
 
-                <!-- ================= NOTE ================= -->
+                <!-- NOTE -->
                 <div class="col-12">
                     <div class="form-floating">
                         <textarea class="form-control"
                                   id="description"
                                   name="description"
                                   style="height: 150px"
-                                  placeholder="Mô tả tình trạng xe">{{ appointment.note or '' }}</textarea>
-                        <label for="description">Mô tả tình trạng xe</label>
+                                  placeholder="{{ _('Mô tả tình trạng xe') }}">{{ appointment.note or '' }}</textarea>
+                        <label for="description">{{ _("Mô tả tình trạng xe") }}</label>
                     </div>
                 </div>
 
                 <input type="hidden" name="action_type" id="actionType" value="save">
 
-                <!-- ================= ACTIONS ================= -->
+                <!-- ACTIONS -->
                 <div class="text-center mt-5">
                     <a href="{{ url_for('user_appointment_history') }}"
                        class="btn btn-secondary me-3">
-                        Quay lại
+                        {{ _("Quay lại") }}
                     </a>
 
                     <button class="btn btn-warning btn-lg w-50"
                             type="submit">
-                        Lưu thay đổi
+                        {{ _("Lưu thay đổi") }}
                     </button>
                 </div>
 

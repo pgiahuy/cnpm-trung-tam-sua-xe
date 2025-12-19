@@ -1,3 +1,15 @@
+
+@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,600&display=swap");
+:root {
+  --red: #ee596f;
+  --yellow: #feb800;
+  --green: #07a787;
+  --purple: #c765d0;
+  --gray: #787878;
+  --gray-light: #eee;
+  --gray-dark: #2e3c54;
+  --font: "Montserrat", sans-serif;
+}
 @font-face {
     font-family: 'Dosis';
     src: url('/static/fonts/dosis.ttf') format('truetype');
@@ -109,17 +121,6 @@ h1, h2, h3, h4, h5, h6 {
 
 
 
-@import url("https://fonts.googleapis.com/css?family=Montserrat:300,400,600&display=swap");
-:root {
-  --red: #ee596f;
-  --yellow: #feb800;
-  --green: #07a787;
-  --purple: #c765d0;
-  --gray: #787878;
-  --gray-light: #eee;
-  --gray-dark: #2e3c54;
-  --font: "Montserrat", sans-serif;
-}
 a {
   text-decoration: none;
 }

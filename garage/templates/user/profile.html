@@ -1,8 +1,10 @@
 {% extends "layout/base.html" %}
 
+{% block title %}{{ _("Hồ sơ cá nhân - Garage Center") }}{% endblock %}
+
 {% block content %}
 <div class="container mt-5" style="max-width: 600px;">
-    <h2 class="text-center mb-4 fw-bold">Hồ sơ cá nhân</h2>
+    <h2 class="text-center mb-4 fw-bold">{{ _("Hồ sơ cá nhân") }}</h2>
 
     <div class="card shadow-sm border-1">
         <div class="card-body text-center">
@@ -17,25 +19,25 @@
 
             <!-- Thông tin -->
             <div class="mb-3 text-start px-4">
-                <label class="form-label fw-semibold">Họ và tên</label>
+                <label class="form-label fw-semibold">{{ _("Họ và tên") }}</label>
                 <input type="text" class="form-control" value="{{ user.customer.full_name }}" disabled>
             </div>
 
             <div class="mb-3 text-start px-4">
-                <label class="form-label fw-semibold">Số điện thoại</label>
+                <label class="form-label fw-semibold">{{ _("Số điện thoại") }}</label>
                 <input type="text" class="form-control" value="{{ user.customer.phone }}" disabled>
             </div>
 
             <div class="mb-3 text-start px-4">
-                <label class="form-label fw-semibold">Địa chỉ</label>
-                <input type="text" class="form-control" value="{{ user.customer.address or 'Chưa cập nhật' }}" disabled>
+                <label class="form-label fw-semibold">{{ _("Địa chỉ") }}</label>
+                <input type="text" class="form-control" value="{{ user.customer.address or _('Chưa cập nhật') }}" disabled>
             </div>
 
             <a href="{{ url_for('user_edit_profile') }}" class="btn btn-primary btn-sm mt-3">
-                <i class="fa-solid fa-pen me-1"></i> Chỉnh sửa
+                <i class="fa-solid fa-pen me-1"></i> {{ _("Chỉnh sửa") }}
             </a>
             <a href="{{ url_for('change_password') }}" class="btn btn-outline-danger btn-sm mt-3">
-                <i class="fa-solid fa-lock me-1"></i> Đổi mật khẩu
+                <i class="fa-solid fa-lock me-1"></i> {{ _("Đổi mật khẩu") }}
             </a>
         </div>
     </div>

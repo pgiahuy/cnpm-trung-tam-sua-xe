@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, session, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_babel import Babel, get_locale
 import cloudinary
 from flask_mail import Mail
 
@@ -22,13 +23,34 @@ app.config['MAIL_DEFAULT_SENDER'] = (
     'nguyenlyminuong1234567890@gmail.com'
 )
 
-#==============================
+app.config['LANGUAGES'] = ['vi', 'en']
+app.config['BABEL_DEFAULT_LOCALE'] = 'vi'
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = '../translations'
 
-cloudinary.config(  cloud_name='dslzjm9y1',
-                    api_key='378681865892523',
-                    api_secret='JoV-kP2mQAXaW3dfDlQAuuqP7pA')
+babel = Babel(app)
 
-db=SQLAlchemy(app)
+@babel.localeselector
+def select_locale():
+    return session.get('lang') or 'vi'
+@app.route('/change-lang/<lang>')
+def change_lang(lang):
+    if lang in app.config['LANGUAGES']:
+        session['lang'] = lang
+    return redirect(request.referrer or url_for('index'))
+@app.context_processor
+def inject_lang():
+    return {
+        'current_lang': str(get_locale()),
+        'languages': app.config['LANGUAGES']
+    }
+
+cloudinary.config(
+    cloud_name='dslzjm9y1',
+    api_key='378681865892523',
+    api_secret='JoV-kP2mQAXaW3dfDlQAuuqP7pA'
+)
+
+db = SQLAlchemy(app)
 login = LoginManager(app)
 mail = Mail(app)
 

@@ -1,10 +1,13 @@
 {% extends 'layout/base.html' %}
+
+{% block title %}{{ _("Linh kiện ô tô - Garage Center") }}{% endblock %} {# Thêm title cho trang #}
+
 {% block content %}
 
 <div class="hero-section">
     <div class="overlay">
-        <h3 class="display-5 text-white">LINH KIỆN Ô TÔ</h3>
-        <p class="text-white-50">Chính hãng – Giá tốt – Dễ đặt hàng</p>
+        <h3 class="display-5 text-white">{{ _("LINH KIỆN Ô TÔ") }}</h3>
+        <p class="text-white-50">{{ _("Chính hãng – Giá tốt – Dễ đặt hàng") }}</p>
     </div>
 </div>
 
@@ -21,23 +24,23 @@
                     </div>
 
                     <div class="sparepart-body d-flex flex-column p-3">
-                        <h6>{{ p.name }}</h6>
+                        <h6>{{ p.name }}</h6> {# Tên linh kiện từ DB, không dịch #}
 
                         <p class="text-muted small">
                             {{ p.supplier | truncate(40) }}
                         </p>
 
                         <div class="fw-bold text-warning mb-3">
-                            {{ "{:,.0f}".format(p.unit_price | default(0)) }} đ / {{ p.unit }}
+                            {{ "{:,.0f}".format(p.unit_price | default(0)) }} {{ _("đ") }} / {{ p.unit }}
                         </div>
                         <div class="d-flex gap-2 mt-auto">
                             <a href="/sparepart/{{ p.id }}" class="btn btn-outline-warning flex-fill">
-                                Xem chi tiết
+                                {{ _("Xem chi tiết") }}
                             </a>
                             <a href="#"
                                class="btn btn-warning"
                                onclick="addToCart( {{ p.id }}, '{{ p.name }}', {{ p.unit_price }})">
-                                🛒
+                                🛒 {# Icon giỏ hàng không cần dịch #}
                             </a>
 
                         </div>
@@ -53,17 +56,17 @@
         <nav class="mt-5">
             <ul class="pagination justify-content-center">
                 <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                    <a class="page-link" href="/sparepart?page={{ page - 1 }}#sparepart-list">«</a>
+                    <a class="page-link" href="/sparepart?page={{ page - 1 }}#sparepart-list">{{ _("«") }}</a> {# Hoặc dùng « Previous nếu muốn #}
                 </li>
 
                 {% for i in range(1, page_of_spareparts + 1) %}
                 <li class="page-item {% if page == i %}active{% endif %}">
-                    <a class="page-link" href="/sparepart?page={{ i }}#sparepart-list">{{ i }}</a>
+                    <a class="page-link" href="/sparepart?page={{ i }}#sparepart-list">{{ i }}</a> {# Số trang không cần dịch #}
                 </li>
                 {% endfor %}
 
                 <li class="page-item {% if page == page_of_spareparts %}disabled{% endif %}">
-                    <a class="page-link" href="/sparepart?page={{ page + 1 }}#sparepart-list">»</a>
+                    <a class="page-link" href="/sparepart?page={{ page + 1 }}#sparepart-list">{{ _("»") }}</a> {# Hoặc Next » #}
                 </li>
             </ul>
         </nav>

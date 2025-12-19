@@ -1,40 +1,36 @@
-{% extends 'layout/base.html'%}
+{% extends 'layout/base.html' %}
 
-{% block title %} Đăng ký {% endblock %}
+{% block title %}{{ _("Đăng ký - Garage Center") }}{% endblock %}
 
 {% block content %}
 <div class="text-info text-center mt-3">
     {% if err_msg %}
-    <div class="alert alert-danger">{{err_msg}}</div>
+    <div class="alert alert-danger">{{ err_msg }}</div>
     {% endif %}
     {% if success %}
     <script>
-        alert("Đăng ký tài khoản thành công! Nhấn ok để đăng nhập ngay!");
-       window.location.href = "/login";
+        alert("{{ _("Đăng ký tài khoản thành công! Nhấn OK để đăng nhập ngay!") }}");
+        window.location.href = "/login";
     </script>
     {% endif %}
     <form class="sign-up__form" method="POST" enctype="multipart/form-data">
 
         <div class="sign-up__content">
-            <h2 class="sign-up__title">Sign up</h2>
-            <input class="sign-up__inp" type="text" placeholder="Họ và tên" name="full_name" required="required"/>
-            <input class="sign-up__inp" type="text" placeholder="Số điện thoại" name="phone" required="required"/>
-            <input class="sign-up__inp" type="text" placeholder="Username" name="username" required="required"/>
-            <input class="sign-up__inp" type="password" placeholder="Password" name="password" required="required"/>
-            <input class="sign-up__inp" type="password" placeholder="Confirm" name="confirm" required="required"/>
+            <h2 class="sign-up__title">{{ _("Đăng ký") }}</h2>
+            <input class="sign-up__inp" type="text" placeholder="{{ _('Họ và tên') }}" name="full_name" required="required"/>
+            <input class="sign-up__inp" type="text" placeholder="{{ _('Số điện thoại') }}" name="phone" required="required"/>
+            <input class="sign-up__inp" type="text" placeholder="{{ _('Tên đăng nhập') }}" name="username" required="required"/>
+            <input class="sign-up__inp" type="password" placeholder="{{ _('Mật khẩu') }}" name="password" required="required"/>
+            <input class="sign-up__inp" type="password" placeholder="{{ _('Xác nhận mật khẩu') }}" name="confirm" required="required"/>
             <label for="avatar" class="custom-file">
-                Upload a picture as your avatar
+                {{ _("Tải ảnh avatar của bạn") }}
             </label>
             <input id="avatar" type="file" name="avatar" hidden>
-
-
         </div>
         <div class="sign-up__buttons">
-            <button class="btn btn--signin" type="submit">Sign up</button>
+            <button class="btn btn--signin" type="submit">{{ _("Đăng ký") }}</button>
         </div>
 
     </form>
-
-
 </div>
 {% endblock %}

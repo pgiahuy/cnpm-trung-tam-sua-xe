@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 import cloudinary
 import cloudinary.uploader
-from flask import render_template, request, session, url_for, flash, jsonify, abort
+from flask import render_template, request, session, url_for, flash, jsonify, abort, current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_mail import Message
 from werkzeug.utils import redirect

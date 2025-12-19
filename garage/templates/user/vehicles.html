@@ -1,9 +1,12 @@
 {% extends "layout/base.html" %}
+
+{% block title %}{{ _("Xe của tôi - Garage Center") }}{% endblock %}
+
 {% block content %}
 
 <div class="container mt-4">
     <h4 class="mb-4">
-        Xe của tôi
+        {{ _("Xe của tôi") }}
     </h4>
 
     {% if vehicles %}
@@ -11,10 +14,10 @@
         <table class="table table-bordered table-hover align-middle">
             <thead class="table-primary text-center">
                 <tr>
-                    <th>Biển số</th>
-                    <th>Loại xe</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày đăng ký</th>
+                    <th>{{ _("Biển số") }}</th>
+                    <th>{{ _("Loại xe") }}</th>
+                    <th>{{ _("Trạng thái") }}</th>
+                    <th>{{ _("Ngày đăng ký") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -36,9 +39,9 @@
         </table>
     </div>
     {% else %}
-        <div class="alert alert-info">
-            Bạn chưa có xe nào.
-        </div>
+    <div class="alert alert-info">
+        {{ _("Bạn chưa có xe nào.") }}
+    </div>
     {% endif %}
 </div>
 

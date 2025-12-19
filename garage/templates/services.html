@@ -1,10 +1,13 @@
 {% extends 'layout/base.html' %}
+
+{% block title %}{{ _("Dịch vụ sửa xe - Garage Center") }}{% endblock %}
+
 {% block content %}
 
 <div class="container-lg service-wrapper">
-    <h2 class="text-center section-title">DỊCH VỤ SỬA XE</h2>
+    <h2 class="text-center section-title">{{ _("DỊCH VỤ SỬA XE") }}</h2>
     <p class="text-center text-muted mb-5">
-        Chúng tôi cung cấp các dịch vụ bảo dưỡng và sửa chữa chuyên nghiệp
+        {{ _("Chúng tôi cung cấp các dịch vụ bảo dưỡng và sửa chữa chuyên nghiệp") }}
     </p>
 
     <div class="row g-4">
@@ -13,10 +16,10 @@
             <div class="service-card">
                 <img src="{{ s.image }}" alt="{{ s.name }}">
                 <div class="service-card-body">
-                    <h5>{{ s.name }}</h5>
-                    <p>{{ s.description | truncate(90) }}</p>
+                    <h5>{{ s.name }}</h5> {# Tên dịch vụ từ DB, không dịch #}
+                    <p>{{ s.description | truncate(90) }}</p> {# Mô tả từ DB, không dịch #}
                     <a href="/services/{{ s.id }}" class="btn btn-outline-primary btn-sm">
-                        Xem chi tiết
+                        {{ _("Xem chi tiết") }}
                     </a>
                 </div>
             </div>
@@ -32,7 +35,7 @@
 
             <!-- Nút Previous -->
             <li class="page-item {% if current == 1 %}disabled{% endif %}">
-                <a class="page-link" href="/services?page={{ current - 1 }}">«</a>
+                <a class="page-link" href="/services?page={{ current - 1 }}">{{ _("«") }}</a>
             </li>
 
             <!-- Danh sách số trang -->
@@ -44,13 +47,12 @@
 
             <!-- Nút Next -->
             <li class="page-item {% if current == page_of_services %}disabled{% endif %}">
-                <a class="page-link" href="/services?page={{ current + 1 }}">»</a>
+                <a class="page-link" href="/services?page={{ current + 1 }}">{{ _("»") }}</a>
             </li>
 
         </ul>
     </nav>
     {% endif %}
-
 
 </div>
 

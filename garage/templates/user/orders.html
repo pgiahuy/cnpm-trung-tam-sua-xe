@@ -1,9 +1,12 @@
 {% extends "layout/base.html" %}
+
+{% block title %}{{ _("Lịch sử mua hàng - Garage Center") }}{% endblock %}
+
 {% block content %}
 
 <div class="container mt-4">
     <h4 class="mb-4">
-        Lịch sử mua hàng
+        {{ _("Lịch sử mua hàng") }}
     </h4>
 
     {% if receipts %}
@@ -11,12 +14,12 @@
         <table class="table table-striped table-bordered align-middle">
             <thead class="table-primary text-center">
                 <tr>
-                    <th>Mã hóa đơn</th>
-                    <th>Ngày thanh toán</th>
-                    <th>Tạm tính</th>
-                    <th>VAT</th>
-                    <th>Tổng tiền</th>
-                    <th>Hình thức</th>
+                    <th>{{ _("Mã hóa đơn") }}</th>
+                    <th>{{ _("Ngày thanh toán") }}</th>
+                    <th>{{ _("Tạm tính") }}</th>
+                    <th>{{ _("VAT") }}</th>
+                    <th>{{ _("Tổng tiền") }}</th>
+                    <th>{{ _("Hình thức") }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,7 +52,7 @@
     </div>
     {% else %}
         <div class="alert alert-info">
-            Bạn chưa có lịch sử mua hàng nào.
+            {{ _("Bạn chưa có lịch sử mua hàng nào.") }}
         </div>
     {% endif %}
 </div>

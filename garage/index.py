@@ -810,7 +810,6 @@ def add_comment():
         db.session.rollback()
         return jsonify({'status': 500, 'err_msg': 'Lỗi hệ thống'}), 500
 
-
 @app.route('/api/check-phone')
 def check_phone():
     phone = request.args.get('phone')

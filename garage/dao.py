@@ -264,9 +264,9 @@ MOTOR_PLATE_REGEX = r"^\d{2}[A-Z][0-9]-\d{5}$"
 def validate_license_plate(plate, vehicle_type):
     plate = plate.upper().strip()
 
-    if vehicle_type == "car":
+    if vehicle_type == "Ô tô" or vehicle_type=="Xe tải":
         return re.match(CAR_PLATE_REGEX, plate)
-    elif vehicle_type == "motorbike":
+    elif vehicle_type == "Xe máy":
         return re.match(MOTOR_PLATE_REGEX, plate)
 
     return False
@@ -380,13 +380,7 @@ def get_report_data(start_date_str=None, end_date_str=None, sections=None):
             {'Tháng': r.thang, 'Doanh Thu (VNĐ)': float(r.tong)}
             for r in query.all()
         ]
-    vat = float(vat_obj.value)
-    return vat
-def is_username_exists(username):
-    return db.session.query(User).filter_by(username=username).first() is not None
 
-def is_phone_exists(phone):
-    return db.session.query(Customer).filter_by(phone=phone).first() is not None
     if 'vehicle_stats' in sections:
         query = db.session.query(
             Vehicle.vehicle_type,
@@ -417,6 +411,11 @@ def is_phone_exists(phone):
         ]
 
     return report_results
+def is_username_exists(username):
+    return db.session.query(User).filter_by(username=username).first() is not None
+
+def is_phone_exists(phone):
+    return db.session.query(Customer).filter_by(phone=phone).first() is not None
 if __name__ == "__main__":
     with app.app_context():
         print(load_customers())

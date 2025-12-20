@@ -311,8 +311,7 @@ def get_revenue_by_month():
         func.sum(Receipt.total_paid).label('revenue')
     ).group_by(func.month(Receipt.paid_at)).all()
 
-    return {f"Tháng {r.month}": float(r.revenue) for r in results}
-
+    return {f"{r.month:02d}/{r.year}": float(r.revenue) for r in results}
 
 def get_revenue_by_day():
     results = db.session.query(
@@ -320,7 +319,7 @@ def get_revenue_by_day():
         func.sum(Receipt.total_paid).label('revenue')
     ).group_by(func.date(Receipt.paid_at)).all()
 
-    return {str(r.date): float(r.revenue) for r in results}
+    return {r.date.strftime('%d/%m/%Y'): float(r.revenue) for r in results if r.date}
 
 
 def get_vehicle_stats():

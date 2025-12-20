@@ -27,18 +27,15 @@
                                     {{ _("Chọn loại xe") }}
                                 </option>
 
-                                <option value="Xe máy" {% if form_data.vehicleType=='Xe máy
-                                ' %}selected{% endif %}>
+                                <option value="Xe máy" {% if form_data.vehicleType=='Xe máy' %}selected{% endif %}>
                                 {{ _("Xe máy") }}
                                 </option>
 
-                                <option value="Ô tô" {% if form_data.vehicleType=='Ô tô
-                                ' %}selected{% endif %}>
+                                <option value="Ô tô" {% if form_data.vehicleType=='Ô tô' %}selected{% endif %}>
                                 {{ _("Ô tô") }}
                                 </option>
 
-                                <option value="Xe tải" {% if form_data.vehicleType=='Xe tải
-                                ' %}selected{% endif %}>
+                                <option value="Xe tải" {% if form_data.vehicleType=='Xe tải' %}selected{% endif %}>
                                 {{ _("Xe tải") }}
                                 </option>
                             </select>
@@ -127,5 +124,30 @@
         }
     });
 </script>
+.custom-checkbox .form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
 
+.custom-checkbox label {
+    font-size: 0.95rem;
+    color: #444;
+    cursor: pointer;
+}
+
+.btn-hover-effect {
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-hover-effect:hover {
+    background-color: #218838 !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3) !important;
+}
+
+input[type="date"] {
+    padding: 10px;
+    color: #555;
+}
 {% endblock %}

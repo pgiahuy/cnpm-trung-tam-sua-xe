@@ -1,18 +1,20 @@
 import math
 import time
 from datetime import date, timedelta
+import re
 
 import cloudinary
 import cloudinary.uploader
-from flask import render_template, request, session, url_for, flash, jsonify, abort
+from flask import render_template, request, session, url_for, flash, jsonify, abort, current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_mail import Message
 from werkzeug.utils import redirect
+
 import dao
 from garage import app, login, db, utils, mail
 from garage.decorators import anonymous_required
 from garage.models import UserRole, AppointmentStatus, Service, SparePart, PaymentStatus, Receipt, Payment, ReceiptItem, \
-    RepairForm, SystemConfig, Vehicle
+    RepairForm, SystemConfig, Vehicle, Customer, User
 from garage.vnpay import build_vnpay_url
 
 
@@ -39,37 +41,74 @@ def common_adtributes():
 def register():
     err_msg = None
     if request.method == 'POST':
+        username = request.form.get('username')
         password = request.form.get('password')
         confirm = request.form.get('confirm')
-        if password == confirm:
-            username = request.form.get('username')
-            avatar = request.files.get('avatar')
-            file_path = None
-            full_name = request.form.get('full_name')
-            phone = request.form.get('phone')
-            if avatar:
-                upload_result = cloudinary.uploader.upload(avatar)
-                file_path = upload_result["secure_url"]
-            try:
-                dao.add_user(username=username, password=password, avatar=file_path, full_name=full_name, phone=phone)
-                return render_template("register.html", success=True)
-            except:
-                db.session.rollback()
-                err_msg = "Hệ thống đang lỗi!"
-        else:
+        full_name = request.form.get('full_name')
+        phone = request.form.get('phone')
+        avatar = request.files.get('avatar')
+
+        # 1. Validate SĐT VN
+        if not re.match(r'^(0)(3|5|7|8|9)\d{8}$', phone):
+            err_msg = "Số điện thoại không hợp lệ, phải gồm 10 kí tự. VD: 0123456789"
+            return render_template('register.html', err_msg=err_msg)
+
+        # 2. Check trùng
+        if dao.is_username_exists(username):
+            err_msg = "Tên đăng nhập đã tồn tại"
+            return render_template('register.html', err_msg=err_msg)
+
+        if dao.is_phone_exists(phone):
+            err_msg = "Số điện thoại đã được sử dụng"
+            return render_template('register.html', err_msg=err_msg)
+
+        # 3. Validate mật khẩu
+        if len(password) < 8:
+            err_msg = "Mật khẩu phải có ít nhất 8 ký tự"
+            return render_template('register.html', err_msg=err_msg)
+
+        if not re.search(r'[A-Z]', password) or not re.search(r'\d', password):
+            err_msg = "Mật khẩu phải có chữ hoa và số"
+            return render_template('register.html', err_msg=err_msg)
+
+        if password != confirm:
             err_msg = "Mật khẩu không khớp!"
+            return render_template('register.html', err_msg=err_msg)
+
+        # 4. Upload avatar
+        file_path = None
+        if avatar:
+            upload_result = cloudinary.uploader.upload(avatar)
+            file_path = upload_result["secure_url"]
+
+        try:
+            dao.add_user(
+                username=username,
+                password=password,
+                avatar=file_path,
+                full_name=full_name,
+                phone=phone
+            )
+            return render_template("register.html", success=True)
+        except Exception as ex:
+            db.session.rollback()
+            err_msg = "Hệ thống đang lỗi!"
+            print(ex)
+
+
 
     return render_template('register.html', err_msg=err_msg)
 
-
-@app.route("/login", methods=['get', 'post'])
+@app.route("/login", methods=['GET', 'POST'])
 @anonymous_required
 def login_my_user():
     err_msg = None
     next_page = request.args.get('next') or request.form.get('next')
-    if request.method.__eq__('POST'):
+
+    if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
+
         user = dao.auth_user(username, password)
 
         if user:
@@ -77,6 +116,7 @@ def login_my_user():
 
             if next_page:
                 return redirect(next_page)
+
             if user.role == UserRole.ADMIN:
                 return redirect("/admin")
             else:
@@ -441,6 +481,7 @@ def pay():
         'pay_url': pay_url
     })
 
+
 @app.route('/api/pay_repair/<int:repair_id>', methods=['POST'])
 @login_required
 def pay_repair(repair_id):
@@ -510,19 +551,19 @@ def vnpay_return():
     # Tạo receipt item
     if type == "BUY":
 
-       cart = session.get('cart')
-       if not cart:
-           return jsonify({'code': 400, 'msg': 'Cart rỗng'})
-       for c in cart.values():
-           item = ReceiptItem(
-               receipt_id=receipt.id,
-               spare_part_id=int(c['id']),
-               quantity=c['quantity'],
-               unit_price=c['unit_price'],
-               total_price=c['quantity'] * c['unit_price']
-           )
-           db.session.add(item)
-       session.pop('cart', None)
+        cart = session.get('cart')
+        if not cart:
+            return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+        for c in cart.values():
+            item = ReceiptItem(
+                receipt_id=receipt.id,
+                spare_part_id=int(c['id']),
+                quantity=c['quantity'],
+                unit_price=c['unit_price'],
+                total_price=c['quantity'] * c['unit_price']
+            )
+            db.session.add(item)
+        session.pop('cart', None)
 
 
     elif type == "REPAIR":
@@ -543,8 +584,6 @@ def vnpay_return():
     db.session.commit()
 
     return render_template("payment_success.html", receipt=receipt)
-
-
 
 
 @app.route("/user/appointments/<int:appointment_id>/cancel", methods=["POST"])
@@ -690,6 +729,8 @@ Garage24h – Chăm sóc xe chuyên nghiệp 24/7
 
     flash("Gửi yêu cầu tư vấn thành công! Chúng tôi sẽ liên hệ sớm.", "success")
     return redirect('/')
+
+
 @app.route("/sparepart/<int:id>")
 def sparepart_detail(id):
     sparepart = dao.get_sparepart_by_id(id)
@@ -707,12 +748,14 @@ def sparepart_detail(id):
         pagination=pagination,
         current_page=page
     )
+
+
 @app.route('/flash-login-required', methods=['POST'])
 def flash_login_required():
-
     next_url = request.referrer or '/'
     flash(f'Bạn cần <a href="/login?next={next_url}" class="text-warning fw-bold">đăng nhập</a> để tiếp tục', 'warning')
     return '', 204
+
 
 @app.route("/search")
 def search():
@@ -738,7 +781,6 @@ def search():
         spare_parts=spare_parts,
         scope=scope
     )
-
 
 
 @app.route('/api/comments', methods=['POST'])
@@ -767,5 +809,33 @@ def add_comment():
         print(e)
         db.session.rollback()
         return jsonify({'status': 500, 'err_msg': 'Lỗi hệ thống'}), 500
+
+
+@app.route('/api/check-phone')
+def check_phone():
+    phone = request.args.get('phone')
+    if not phone:
+        return jsonify({'exists': False})
+
+    exists = db.session.query(Customer.id).filter(
+        Customer.phone == phone
+    ).first() is not None
+
+    return jsonify({'exists': exists})
+
+
+@app.route('/api/check-username')
+def check_username():
+    username = request.args.get('username')
+    if not username:
+        return jsonify({'exists': False})
+
+    exists = db.session.query(User.id).filter(
+        User.username == username
+    ).first() is not None
+
+    return jsonify({'exists': exists})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

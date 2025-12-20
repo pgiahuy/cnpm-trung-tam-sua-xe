@@ -23,30 +23,33 @@
                     <div class="col-md-4">
                         <div class="form-floating">
                             <select class="form-select" id="vehicleType" name="vehicleType" required>
-                                <option value="" disabled
-                                        {% if not form_data.vehicleType %}selected{% endif %}>
+                                <option value="" disabled {% if not form_data.vehicleType %}selected{% endif %}>
                                     {{ _("Chọn loại xe") }}
                                 </option>
 
-                                <option value="motorbike"
-                                        {% if form_data.vehicleType=='motorbike' %}selected{% endif %}>
-                                    {{ _("Xe máy") }}
+                                <option value="Xe máy" {% if form_data.vehicleType=='Xe máy
+                                ' %}selected{% endif %}>
+                                {{ _("Xe máy") }}
                                 </option>
 
-                                <option value="car"
-                                        {% if form_data.vehicleType=='car' %}selected{% endif %}>
-                                    {{ _("Ô tô") }}
+                                <option value="Ô tô" {% if form_data.vehicleType=='Ô tô
+                                ' %}selected{% endif %}>
+                                {{ _("Ô tô") }}
+                                </option>
+
+                                <option value="Xe tải" {% if form_data.vehicleType=='Xe tải
+                                ' %}selected{% endif %}>
+                                {{ _("Xe tải") }}
                                 </option>
                             </select>
                             <label for="vehicleType">{{ _("Loại xe") }}</label>
                         </div>
                     </div>
-
                     <div class="col-md-8">
                         <div class="form-floating">
                             <input type="text" class="form-control" id="licensePlate"
-                                   name="licensePlate" placeholder="{{ _("Biển số xe") }}" required
-                                   value="{{ request.form.licensePlate or '' }}">
+                                   name="licensePlate" placeholder="{{ _(" Biển số xe") }}" required
+                            value="{{ request.form.licensePlate or '' }}">
                             <label for="licensePlate">{{ _("Biển số xe") }}</label>
                         </div>
                     </div>

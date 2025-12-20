@@ -13,28 +13,44 @@
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
             <thead class="table-primary text-center">
-                <tr>
-                    <th>{{ _("Biển số") }}</th>
-                    <th>{{ _("Loại xe") }}</th>
-                    <th>{{ _("Trạng thái") }}</th>
-                    <th>{{ _("Ngày đăng ký") }}</th>
-                </tr>
+            <tr>
+                <th>{{ _("Biển số") }}</th>
+                <th>{{ _("Loại xe") }}</th>
+                <th>{{ _("Trạng thái") }}</th>
+                <th>{{ _("Ngày đăng ký") }}</th>
+                <th>{{ _("Thanh toán") }}</th>
+            </tr>
             </thead>
             <tbody>
-                {% for v in vehicles %}
-                <tr>
-                    <td class="fw-semibold">{{ v.license_plate }}</td>
-                    <td>{{ v.vehicle_type }}</td>
-                    <td class="text-center">
+            {% for v in vehicles %}
+            <tr>
+                <td class="fw-semibold">{{ v.license_plate }}</td>
+                <td>{{ v.vehicle_type }}</td>
+                <td class="text-center">
                         <span class="badge bg-info">
                             {{ v.vehicle_status.name.replace("_", " ") }}
                         </span>
-                    </td>
+                </td>
+                <td class="text-center">
+                    {{ v.created_date.strftime('%d/%m/%Y %H:%M') }}
+                </td>
+
+                {% if v.vehicle_status.name == 'DONE'%}
+                    {% set rf = v.repair_forms[-1] %}
                     <td class="text-center">
-                        {{ v.created_date.strftime('%d/%m/%Y %H:%M') }}
+                        <input type="button" class="btn btn-primary" value="VNPAY" onclick="payRepair({{ rf.id }})"/>
                     </td>
-                </tr>
-                {% endfor %}
+
+                {% elif v.vehicle_status.name == 'DELIVERED'%}
+                <td class="text-center">
+                    <span class="badge bg-success p-2">ĐÃ THANH TOÁN</span>
+
+                </td>
+                {%else%}
+                <td class="text-center">-</td>
+                {%endif%}
+            </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>

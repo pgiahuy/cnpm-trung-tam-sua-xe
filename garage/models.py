@@ -3,7 +3,7 @@ import json
 from enum import Enum
 
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DOUBLE, Enum as SQLEnum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, DOUBLE, Enum as SQLEnum, Text
 from sqlalchemy.orm import relationship
 from garage import db, app, dao
 from datetime import datetime
@@ -36,7 +36,16 @@ class PaymentStatus(Enum):
     SUCCESS = "success"
     FAILED = "failed"
 
+class RepairStatus(Enum):
+    QUOTED = "QUOTED"
+    APPROVED = "APPROVED"
+    REPAIRING = "REPAIRING"
+    DONE = "DONE"
+    PAID = "PAID"
 
+class ReceiptItemType(Enum):
+    SERVICE = "SERVICE"
+    SPARE_PART = "SPARE_PART"
 
 class Base(db.Model):
     __abstract__ = True
@@ -84,6 +93,7 @@ class Vehicle(Base):
     vehicle_status = Column(SQLEnum(VehicleStatus), default=VehicleStatus.PENDING_APPOINTMENT)
     customer_id = Column(Integer, ForeignKey("customer.id"), nullable=False)
     receptions = relationship("ReceptionForm", backref="vehicle", lazy=True)
+    repair_forms = relationship("RepairForm", backref="vehicle")
 
     def __str__(self):
         return f"{self.license_plate}"
@@ -109,9 +119,21 @@ class ReceptionForm(Base):
     receive_type = db.Column(db.String(20), default='appointment')
     vehicle_id = Column(Integer, ForeignKey("vehicle.id"), nullable=False)
     employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
-
     repair_form = relationship("RepairForm", backref="reception_form", uselist=False)
 
+
+
+class RepairForm(Base):
+    reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False)
+    vehicle_id = Column(Integer, ForeignKey("vehicle.id"), nullable=False)
+    employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
+    repair_status = Column(SQLEnum(RepairStatus), default=RepairStatus.QUOTED)
+    details = relationship("RepairDetail",backref="repair_form",cascade="all, delete-orphan")
+    receipt = relationship("Receipt", backref="repair_form", uselist=False)
+
+    @property
+    def total_before_vat(self):
+        return sum(d.total_cost for d in self.details)
 
 
 
@@ -124,7 +146,11 @@ class SparePart(Base):
     image_url = Column(String(255),
         default="https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
     )
-    repair_details = relationship("RepairDetail", backref="spare_part", lazy=True)
+    repair_details = relationship(
+        "RepairDetail",
+        back_populates="spare_part",
+        lazy=True
+    )
     def __str__(self):
         return self.name
 
@@ -141,28 +167,25 @@ class Service(Base):
     def __str__(self):
         return f"{self.name}"
 
-
-class RepairForm(Base):
-    reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False)
-    employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
-    repair_status = Column(SQLEnum("QUOTED", "APPROVED", "REPAIRING", "DONE", name="repair_status"),default="QUOTED")
-    details = relationship("RepairDetail",backref="repair_form",cascade="all, delete-orphan")
-    receipt = relationship("Receipt", backref="repair_form", uselist=False)
-
-    @property
-    def total_before_vat(self):
-        return sum(d.total_cost for d in self.details)
-
-
 class RepairDetail(Base):
     task = Column(String(255), nullable=False)
+
     service_id = Column(Integer, ForeignKey("service.id"))
     spare_part_id = Column(Integer, ForeignKey("spare_part.id"))
+
     quantity = Column(Integer, nullable=False, default=1)
     repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=False)
+
     service = relationship("Service", lazy=True)
+    spare_part = relationship(
+        "SparePart",
+        back_populates="repair_details",
+        lazy=True
+    )
+
     service_price = Column(DOUBLE, nullable=True)
     spare_part_price = Column(DOUBLE, nullable=True)
+
     @property
     def total_cost(self):
         total = 0
@@ -171,8 +194,6 @@ class RepairDetail(Base):
         if self.spare_part_price:
             total += self.spare_part_price * self.quantity
 
-            print(self.service_price)
-            print( self.spare_part_price)
         return total
 
     @classmethod
@@ -180,7 +201,7 @@ class RepairDetail(Base):
         service_price = service.price if service else 0
         spare_part_price = spare_part.unit_price if spare_part else 0
         return cls(task=task,service=service,spare_part=spare_part,quantity=quantity,repair_id=repair_id,
-                   service_price_at_time=service_price, spare_part_price_at_time=spare_part_price)
+                   service_price=service_price, spare_part_price=spare_part_price)
 
 class Invoice(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False, unique=True)
@@ -207,19 +228,22 @@ class Receipt(Base):
     items = relationship("ReceiptItem",backref="receipt",cascade="all, delete-orphan")
 
 class ReceiptItem(Base):
-    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=False)
-    spare_part_id = Column(Integer, ForeignKey("spare_part.id"), nullable=False)
+    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
+    repair_detail_id = Column(Integer, ForeignKey("repair_detail.id"), nullable=True)
 
-    quantity = Column(Integer, nullable=False, default=1)
+    item_type = Column(SQLEnum(ReceiptItemType), default=ReceiptItemType.SPARE_PART)
+
+    service_id = Column(Integer, ForeignKey("service.id"), nullable=True)
+    spare_part_id = Column(Integer, ForeignKey("spare_part.id"), nullable=True)
+
+    quantity = Column(Integer, default=1)
     unit_price = Column(DOUBLE, nullable=False)
     total_price = Column(DOUBLE, nullable=False)
-
-    spare_part = relationship("SparePart")
-
 
 class Payment(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
+    repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True)
     type = Column(SQLEnum("REPAIR", "BUY"), default="REPAIR")
     amount = Column(DOUBLE, nullable=False)
     method = Column(String(50), default="VNPAY")
@@ -231,9 +255,10 @@ class Payment(Base):
         SQLEnum(PaymentStatus),
         default=PaymentStatus.PENDING
     )
-
     user = relationship("User")
     receipt = relationship("Receipt", backref="payment", uselist=False)
+    repair = relationship("RepairForm", backref="payments")
+    cart_snapshot = db.Column(Text, nullable=True)
 
 class Comment(Base):
     content = Column(String(255), nullable=False)

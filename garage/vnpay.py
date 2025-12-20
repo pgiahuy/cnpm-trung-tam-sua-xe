@@ -17,10 +17,7 @@ def get_client_ip():
 
 
 def build_vnpay_url(amount, txn_ref, order_info='Thanh toan don hang'):
-    """
-    amount: VND (vd: 50000)
-    """
-    vnp_amount = int(amount * 100)  # VNPAY x100
+    vnp_amount = int(amount * 100)
 
     params = {
         'vnp_Version': '2.1.0',

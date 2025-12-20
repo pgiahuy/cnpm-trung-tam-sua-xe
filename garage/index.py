@@ -1,3 +1,4 @@
+import json
 import math
 import time
 from datetime import date, timedelta
@@ -14,7 +15,7 @@ import dao
 from garage import app, login, db, utils, mail
 from garage.decorators import anonymous_required
 from garage.models import UserRole, AppointmentStatus, Service, SparePart, PaymentStatus, Receipt, Payment, ReceiptItem, \
-    RepairForm, SystemConfig, Vehicle, Customer, User
+    RepairForm, SystemConfig, Vehicle, Customer, User, VehicleStatus, RepairStatus, ReceiptItemType
 from garage.vnpay import build_vnpay_url
 
 
@@ -325,6 +326,7 @@ def site_spareparts():
 @login_required
 def user_vehicles():
     vehicles = dao.index_vehicles_by_user(current_user.id)
+
     return render_template("user/vehicles.html", vehicles=vehicles)
 
 @app.route('/vehicles/<int:customer_id>')
@@ -437,18 +439,6 @@ def delete_cart(product_id):
     return jsonify(utils.count_cart(cart=cart))
 
 
-# Thanh toán
-# @app.route('/api/pay', methods=['POST'])
-# @login_required
-# def pay():
-#     try:
-#         utils.add_receipt(session.get('cart'))
-#         session.pop('cart', None)
-#         return jsonify({'code': 200})
-#     except Exception as e:
-#         print(e)
-#         return jsonify({'code': 400})
-#
 @app.route('/api/pay_spare_part', methods=['POST'])
 @login_required
 def pay():
@@ -469,7 +459,8 @@ def pay():
         method='VNPAY',
         type='BUY',
         transaction_ref=txn_ref,
-        status=PaymentStatus.PENDING
+        status=PaymentStatus.PENDING,
+        cart_snapshot=json.dumps(cart)
     )
     db.session.add(payment)
     db.session.commit()
@@ -486,24 +477,23 @@ def pay():
 @login_required
 def pay_repair(repair_id):
     repair = RepairForm.query.get_or_404(repair_id)
-
-    total_amount = sum([ri.quantity * ri.unit_price for ri in repair.items])
+    total_before_vat = repair.total_before_vat
 
     vat_rate = dao.get_vat_value()
 
-    total_amount += vat_rate*total_amount
+    total_amount = total_before_vat + total_before_vat * vat_rate
 
-    txn_ref = f"{current_user.id}_{int(time.time())}"
+    txn_ref = f"{repair.id}_{int(time.time())}"
 
     payment = Payment(
         user_id=current_user.id,
+        repair_id=repair.id,
         amount=total_amount,
         vat_rate=vat_rate,
-        method='VNPAY',
+        method="VNPAY",
         type="REPAIR",
         status=PaymentStatus.PENDING,
-        transaction_ref=txn_ref,
-        repair_items=repair.items
+        transaction_ref=txn_ref
     )
     db.session.add(payment)
     db.session.commit()
@@ -548,12 +538,15 @@ def vnpay_return():
     db.session.add(receipt)
     db.session.flush()  # để có receipt.id
 
+
     # Tạo receipt item
     if type == "BUY":
 
-        cart = session.get('cart')
+        cart = json.loads(payment.cart_snapshot)
+
         if not cart:
             return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+
         for c in cart.values():
             item = ReceiptItem(
                 receipt_id=receipt.id,
@@ -566,21 +559,39 @@ def vnpay_return():
         session.pop('cart', None)
 
 
+
+
+
     elif type == "REPAIR":
-        repair_items = getattr(payment, 'repair_items', [])
-        for ri in repair_items:
-            item = ReceiptItem(
-                receipt_id=receipt.id,
-                spare_part_id=ri.spare_part_id,
-                quantity=ri.quantity,
-                unit_price=ri.unit_price,
-                total_price=ri.quantity * ri.unit_price
-            )
-            db.session.add(item)
+        repair = payment.repair
+        for d in repair.details:
 
-    # Liên kết payment với receipt
+            if d.service_price and d.service_price > 0:
+                db.session.add(ReceiptItem(
+                    receipt_id=receipt.id,
+                    repair_detail_id=d.id,
+                    item_type=ReceiptItemType.SERVICE,
+                    service_id=d.service_id,
+                    quantity=1,
+                    unit_price=d.service_price,
+                    total_price=d.service_price
+                ))
+
+            if d.spare_part_id and d.spare_part_price:
+                db.session.add(ReceiptItem(
+                    receipt_id=receipt.id,
+                    repair_detail_id=d.id,
+                    item_type=ReceiptItemType.SPARE_PART,
+                    spare_part_id=d.spare_part_id,
+                    quantity=d.quantity,
+                    unit_price=d.spare_part_price,
+                    total_price=d.quantity * d.spare_part_price
+                ))
+        repair.repair_status = RepairStatus.PAID
+        repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
+
+
     payment.receipt_id = receipt.id
-
     db.session.commit()
 
     return render_template("payment_success.html", receipt=receipt)

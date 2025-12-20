@@ -75,19 +75,15 @@ function deleteCart(id){
     }
 }
 
-function pay(repairFormId){
+function pay(){
    if(confirm("Bạn chắc chắn thanh toán không?")){
     fetch('/api/pay_spare_part',{
         method: 'post',
-        body: JSON.stringify({
-            repair_form_id: repairFormId,
-        }),
+
         headers:{
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-            repair_form_id: repairFormId
-        })
+
     })
     .then(res => res.json())
     .then(data => {
@@ -105,6 +101,32 @@ function pay(repairFormId){
 }
 }
 
+function payRepair(repairFormId){
+   if(confirm("Bạn chắc chắn thanh toán không?")){
+    fetch('/api/pay_repair/'+repairFormId,{
+        method: 'post',
+        body: JSON.stringify({
+            repair_form_id: repairFormId,
+        }),
+        headers:{
+            "Content-Type": "application/json"
+        },
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.code === 200) {
+            // Redirect sang trang VNPAY
+            window.location.href = data.pay_url;
+        } else {
+            alert(data.msg || "Thanh toán thất bại");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Lỗi hệ thống");
+    });
+}
+}
 document.querySelectorAll('.cart-icon').forEach(icon => {
     icon.addEventListener('click', function(e) {
         if (!isAuthenticated) {

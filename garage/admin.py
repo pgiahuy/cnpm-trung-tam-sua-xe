@@ -13,7 +13,7 @@ from wtforms.validators import DataRequired, NumberRange, Optional
 from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
-                           VehicleStatus, SystemConfig)
+                           VehicleStatus, SystemConfig, RepairStatus)
 import json
 import pandas as pd
 import io
@@ -435,42 +435,34 @@ class RepairFormAdmin(MyAdminModelView):
             }
         ))
     ]
-    # REPAIR_TO_VEHICLE_STATUS = {
-    #     RepairStatus.QUOTED: VehicleStatus.WAITING_APPROVAL,
-    #     RepairStatus.REPAIRING: VehicleStatus.REPAIRING,
-    #     RepairStatus.DONE: VehicleStatus.DONE
-    # }
+
     REPAIR_TO_VEHICLE_STATUS = {
-        'QUOTED': VehicleStatus.WAITING_APPROVAL,
-        'REPAIRING': VehicleStatus.REPAIRING,
-        'DONE': VehicleStatus.DONE
-    }
-    #lấy giá tại thời điểm tạo
-    REPAIR_TO_VEHICLE_STATUS = {
-        'QUOTED': VehicleStatus.WAITING_APPROVAL,
-        'REPAIRING': VehicleStatus.REPAIRING,
-        'DONE': VehicleStatus.DONE
+        "QUOTED": VehicleStatus.WAITING_APPROVAL,
+        "REPAIRING": VehicleStatus.REPAIRING,
+        "DONE": VehicleStatus.DONE,
+        "PAID": VehicleStatus.DELIVERED
     }
 
     def on_model_change(self, form, model, is_created):
-        # Lưu giá tại thời điểm tạo
-        for detail in model.details:
-            if detail.service:
-                detail.service_price = detail.service.price
-            if detail.spare_part:
-                detail.spare_part_price = detail.spare_part.unit_price
+        with db.session.no_autoflush:
 
-        # đồng bộ trạng thái xe theo trạng thái phiếu sửa
-        if model.reception_form and model.reception_form.vehicle:
-            vehicle = model.reception_form.vehicle
+            if not model.reception_form or not model.reception_form.vehicle:
+                raise ValueError("Phiếu tiếp nhận chưa gắn xe")
 
-            new_vehicle_status = self.REPAIR_TO_VEHICLE_STATUS.get(
-                model.repair_status
-            )
+            if is_created:
+                model.vehicle = model.reception_form.vehicle
 
-            if new_vehicle_status and vehicle.vehicle_status != new_vehicle_status:
-                vehicle.vehicle_status = new_vehicle_status
-                db.session.add(vehicle)
+            for detail in model.details:
+                if detail.service:
+                    detail.service_price = detail.service.price
+                if detail.spare_part:
+                    detail.spare_part_price = detail.spare_part.unit_price
+
+            new_vehicle_status = self.REPAIR_TO_VEHICLE_STATUS.get(model.repair_status)
+
+            if new_vehicle_status and model.vehicle.vehicle_status != new_vehicle_status:
+                model.vehicle.vehicle_status = new_vehicle_status
+                db.session.add(model.vehicle)
 
     column_formatters = {
         'id': lambda v, c, m, p: Markup(
@@ -484,6 +476,8 @@ class RepairFormAdmin(MyAdminModelView):
         ),
         'reception_form': lambda v, c, m, p: f"PTN {m.reception_form.id}" if m.reception_form else '-'
     }
+
+
     form_extra_fields = {
         'reception_form': QuerySelectField(
             'Chọn phiếu tiếp nhận',
@@ -494,11 +488,8 @@ class RepairFormAdmin(MyAdminModelView):
         ),
     }
 
-# class RepairDetailView(BaseView):
-#     @expose('/<int:repair_id>')
-#     def detail(self, repair_id,**kwargs):
-#         repair = RepairForm.query.get_or_404(repair_id)
-#         return self.render('admin/custom_detail.html', repair=repair, enumerate=enumerate)
+
+
 class RepairDetailView(BaseView):
 
     @expose('/')

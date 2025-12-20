@@ -261,18 +261,19 @@ def update_appointment_note(appointment: Appointment, note: str):
 CAR_PLATE_REGEX = r"^\d{2}[A-Z]-\d{5}$"
 MOTOR_PLATE_REGEX = r"^\d{2}[A-Z][0-9]-\d{5}$"
 
+
 def validate_license_plate(plate, vehicle_type):
     plate = plate.upper().strip()
-
-    if vehicle_type == "car":
+    if vehicle_type == "Ô tô" or vehicle_type == "Xe tải":
         return re.match(CAR_PLATE_REGEX, plate)
-    elif vehicle_type == "motorbike":
+    elif vehicle_type == "Xe máy":
         return re.match(MOTOR_PLATE_REGEX, plate)
-
     return False
 
 def get_sparepart_by_id(sparepart_id):
     return SparePart.query.get(sparepart_id)
+
+
 
 def unique_by_name(items):
     seen = set()
@@ -338,6 +339,13 @@ def get_error_stats():
     ).group_by(ReceptionForm.error_description).limit(5).all()
     return {r[0]: r[1] for r in results}
 
+
+def is_username_exists(username):
+    return db.session.query(User).filter_by(username=username).first() is not None
+
+def is_phone_exists(phone):
+    return db.session.query(Customer).filter_by(phone=phone).first() is not None
+
 def get_report_data(start_date_str=None, end_date_str=None, sections=None):
     report_results = {}
     today = datetime.now()
@@ -360,8 +368,8 @@ def get_report_data(start_date_str=None, end_date_str=None, sections=None):
             func.date(Receipt.paid_at).label('ngay'),
             func.sum(Receipt.total_paid).label('tong')
         ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end) \
-         .group_by(func.date(Receipt.paid_at)) \
-         .order_by(func.date(Receipt.paid_at))
+            .group_by(func.date(Receipt.paid_at)) \
+            .order_by(func.date(Receipt.paid_at))
 
         report_results['Doanh Thu Ngay'] = [
             {'Ngày': r.ngay.strftime('%d/%m/%Y'), 'Doanh Thu (VNĐ)': float(r.tong)}
@@ -373,20 +381,14 @@ def get_report_data(start_date_str=None, end_date_str=None, sections=None):
             func.date_format(Receipt.paid_at, '%m/%Y').label('thang'),
             func.sum(Receipt.total_paid).label('tong')
         ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end) \
-         .group_by('thang') \
-         .order_by(func.min(Receipt.paid_at))
+            .group_by('thang') \
+            .order_by(func.min(Receipt.paid_at))
 
         report_results['Doanh Thu Thang'] = [
             {'Tháng': r.thang, 'Doanh Thu (VNĐ)': float(r.tong)}
             for r in query.all()
         ]
-    vat = float(vat_obj.value)
-    return vat
-def is_username_exists(username):
-    return db.session.query(User).filter_by(username=username).first() is not None
 
-def is_phone_exists(phone):
-    return db.session.query(Customer).filter_by(phone=phone).first() is not None
     if 'vehicle_stats' in sections:
         query = db.session.query(
             Vehicle.vehicle_type,
@@ -407,9 +409,9 @@ def is_phone_exists(phone):
             ReceptionForm.error_description,
             func.count(ReceptionForm.id)
         ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
-         .group_by(ReceptionForm.error_description) \
-         .order_by(func.count(ReceptionForm.id).desc()) \
-         .limit(10)
+            .group_by(ReceptionForm.error_description) \
+            .order_by(func.count(ReceptionForm.id).desc()) \
+            .limit(10)
 
         report_results['Loi Thuong Gap'] = [
             {'Mô tả lỗi': r[0] if r[0] else "Chưa xác định", 'Số lần xuất hiện': r[1]}

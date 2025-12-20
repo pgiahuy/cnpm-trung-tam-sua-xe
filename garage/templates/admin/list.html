@@ -6,6 +6,7 @@
 
 {% block body %}
 {% macro render_repair_status(v) %}
+    {% set v = v.value %}
     {% if v == "QUOTED" %}
         <span class="badge text-white p-2 bg-info">Đã báo giá</span>
     {% elif v == "APPROVED" %}
@@ -14,6 +15,8 @@
         <span class="badge text-white p-2 bg-warning">Đang sửa</span>
     {% elif v == "DONE" %}
         <span class="badge text-white p-2 bg-success">Hoàn tất</span>
+    {% elif v == "PAID" %}
+        <span class="badge text-white p-2 bg-success">Đã thanh toán</span>
     {% else %}
         <span class="badge text-white p-2 bg-secondary">Unknown</span>
     {% endif %}

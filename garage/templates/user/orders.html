@@ -27,7 +27,9 @@
                 <tr>
 
                     <td class="text-center fw-semibold">
-                        HD{{ r.id }}
+                        <a href="{{ url_for('receipt_detail', receipt_id=r.id) }}">
+                            HD{{ r.id }}
+                        </a>
                     </td>
 
                     <td class="text-center">

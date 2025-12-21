@@ -206,3 +206,19 @@ body.sidebar-collapsed #content {
     margin-right: 17px;
     fill: white;
 }
+
+#sidebar {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar .sidebar-header {
+    flex-shrink: 0;
+}
+
+#sidebar .components {
+    flex: 1;
+    overflow-y: auto;
+}
+

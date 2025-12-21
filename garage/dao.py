@@ -70,6 +70,9 @@ def get_service_by_id(service_id):
 
 def get_customer_by_user_id(user_id):
     return Customer.query.filter_by(user_id=user_id).first()
+def get_customer_by_id(id):
+    return Customer.query.filter_by(id=id).first()
+
 
 def get_time_slots_for_date(selected_date: date):
     slots = [
@@ -307,6 +310,7 @@ def get_vat_value():
 
 def get_revenue_by_month():
     results = db.session.query(
+        func.month(Receipt.paid_at).label('year'),
         func.month(Receipt.paid_at).label('month'),
         func.sum(Receipt.total_paid).label('revenue')
     ).group_by(func.month(Receipt.paid_at)).all()

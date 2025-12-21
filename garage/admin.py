@@ -13,7 +13,7 @@ from wtforms.validators import DataRequired, NumberRange, Optional
 from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
-                           VehicleStatus, SystemConfig, RepairStatus)
+                           VehicleStatus, SystemConfig, RepairStatus, Receipt)
 import json
 import pandas as pd
 import io
@@ -533,6 +533,22 @@ class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
         'value' : 'Giá trị'
     }
 
+class ReceiptAdmin(AdminAccessMixin,MyAdminModelView):
+    column_list = ['id','customer_id','type','vat_rate','total_paid','payment_method']
+    column_labels = {
+        'id':'ID',
+        'customer_id':'Khách hàng',
+        'type':'Loại',
+        'vat_rate': 'VAT',
+        'total_paid':'Tổng tiền',
+        'payment_method':'Phương thức'
+    }
+
+    can_edit = False
+    can_create = False
+
+
+
 class StatsView(BaseView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
@@ -607,6 +623,7 @@ admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
 admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
 admin.add_view(SparePartAdmin(SparePart, db.session,name='PHỤ TÙNG'))
 admin.add_view(SystemConfigAdmin(SystemConfig, db.session,name='QUY ĐỊNH'))
+admin.add_view(ReceiptAdmin(Receipt, db.session,name='HOÁ ĐƠN'))
 
 admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
 admin.add_view(StatsView(name='BÁO CÁO THỐNG KÊ', endpoint='statistical-report'))

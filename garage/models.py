@@ -238,7 +238,7 @@ class ReceiptItem(Base):
 
     service_id = Column(Integer, ForeignKey("service.id"), nullable=True)
     spare_part_id = Column(Integer, ForeignKey("spare_part.id"), nullable=True)
-
+    spare_part = relationship("SparePart", backref="receipt_details", lazy=True)
     quantity = Column(Integer, default=1)
     unit_price = Column(DOUBLE, nullable=False)
     total_price = Column(DOUBLE, nullable=False)

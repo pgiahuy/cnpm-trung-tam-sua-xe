@@ -444,6 +444,12 @@ def delete_cart(product_id):
 
     return jsonify(utils.count_cart(cart=cart))
 
+@app.route('/receipt/<int:receipt_id>')
+def receipt_detail(receipt_id):
+    receipt = Receipt.query.get_or_404(receipt_id)
+    return render_template('user/receipt_detail.html', receipt=receipt)
+
+
 
 @app.route('/api/pay_spare_part', methods=['POST'])
 @login_required

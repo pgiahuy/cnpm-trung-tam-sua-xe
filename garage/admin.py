@@ -608,8 +608,6 @@ class StatsView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.role == UserRole.ADMIN
 
-
-
 admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name='TRANG CHỦ'))
 
 
@@ -627,4 +625,3 @@ admin.add_view(ReceiptAdmin(Receipt, db.session,name='HOÁ ĐƠN'))
 
 admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
 admin.add_view(StatsView(name='BÁO CÁO THỐNG KÊ', endpoint='statistical-report'))
-

@@ -29,8 +29,14 @@
             </div>
 
             <div class="mb-3 text-start px-4">
+                <label class="form-label fw-semibold">{{ _("Email") }}</label>
+                <input type="text" class="form-control" value="{{ user.customer.email}}" disabled>
+            </div>
+
+            <div class="mb-3 text-start px-4">
                 <label class="form-label fw-semibold">{{ _("Địa chỉ") }}</label>
-                <input type="text" class="form-control" value="{{ user.customer.address or _('Chưa cập nhật') }}" disabled>
+                <input type="text" class="form-control" value="{{ user.customer.address or _('Chưa cập nhật') }}"
+                       disabled>
             </div>
 
             <a href="{{ url_for('user_edit_profile') }}" class="btn btn-primary btn-sm mt-3">

@@ -380,14 +380,14 @@ button {
 }
 /* ===== LINH KIỆN NỔI BẬT – HOVER MƯỢT ===== */
 
-/* Card linh kiện */
+
 .sparepart-card {
     background: #1f1f1f;
     border-radius: 14px;
-    height: 100%;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    height: 430px; /* Chiều cao cố định – điều chỉnh số này để cao/thấp hơn nếu cần */
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -396,9 +396,10 @@ button {
     box-shadow: 0 18px 35px rgba(0,0,0,0.4);
 }
 
-/* Ảnh */
+/* Ảnh: cố định chiều cao, crop đẹp dù ảnh gốc tỷ lệ khác nhau */
 .sparepart-img-wrapper {
-    height: 180px;
+    height: 210px; /* Chiều cao ảnh cố định – chiếm phần trên card */
+    overflow: hidden;
     background: #111;
     display: flex;
     align-items: center;
@@ -406,33 +407,52 @@ button {
 }
 
 .sparepart-img-wrapper img {
-    max-width: 85%;
-    max-height: 85%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Crop đẹp, full khung, không bị méo dù ảnh vuông/dài */
+    transition: transform 0.3s ease;
 }
 
-/* Nội dung */
+.sparepart-card:hover .sparepart-img-wrapper img {
+    transform: scale(1.08);
+}
+
+/* Nội dung: chiếm phần còn lại, đẩy nút xuống dưới cùng */
 .sparepart-body {
     padding: 16px;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
+    justify-content: space-between; /* Đẩy nút xuống dưới */
     text-align: center;
-    height: 100%;
 }
 
 .sparepart-body h6 {
     font-weight: 600;
     color: #fff;
     margin-bottom: 6px;
+    font-size: 15px;
+    height: 40px; /* Giới hạn tên không quá dài */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .sparepart-body p {
     color: #adb5bd;
     font-size: 14px;
+    margin-bottom: 10px;
+    flex-grow: 1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
-.sparepart-body .btn {
-    border-radius: 8px;
+/* Nút luôn ở dưới cùng */
+.sparepart-body .d-flex {
+    margin-top: auto;
 }
 /* ===== FIX LỆCH TRANG LINH KIỆN ===== */
 .sparepart-wrapper {

@@ -1,7 +1,7 @@
 import json
 import math
 import time
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import re
 
 import cloudinary
@@ -9,6 +9,7 @@ import cloudinary.uploader
 from flask import render_template, request, session, url_for, flash, jsonify, abort, current_app
 from flask_login import current_user, login_user, logout_user, login_required
 from flask_mail import Message
+from itsdangerous import URLSafeTimedSerializer
 from werkzeug.utils import redirect
 
 import dao
@@ -83,12 +84,15 @@ def register():
             file_path = upload_result["secure_url"]
 
         try:
+            email = request.form.get('email')  # có thể rỗng
+
             dao.add_user(
                 username=username,
                 password=password,
                 avatar=file_path,
                 full_name=full_name,
-                phone=phone
+                phone=phone,
+                email=email  # truyền thêm email
             )
             return render_template("register.html", success=True)
         except Exception as ex:
@@ -307,19 +311,21 @@ def forbidden_error(e):
 @app.route("/sparepart")
 def site_spareparts():
     page = request.args.get('page', 1, type=int)
-
     spare_parts = dao.load_sparepart(page=page)
+    page_of_spareparts = math.ceil(dao.count_sparepart() / app.config["PAGE_SIZE"])
 
-    page_of_spareparts = math.ceil(
-        dao.count_sparepart() / app.config["PAGE_SIZE"]
-    )
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Nếu là AJAX → chỉ render phần list
+        return render_template('sparepart_list.html',
+                               spare_parts=spare_parts,
+                               page=page,
+                               page_of_spareparts=page_of_spareparts)
 
-    return render_template(
-        "sparepart.html",
-        spare_parts=spare_parts,
-        page_of_spareparts=page_of_spareparts,
-        page=page
-    )
+    # Bình thường → render full page
+    return render_template("sparepart.html",
+                           spare_parts=spare_parts,
+                           page=page,
+                           page_of_spareparts=page_of_spareparts)
 
 
 @app.route("/user/vehicles")
@@ -845,7 +851,91 @@ def check_username():
     ).first() is not None
 
     return jsonify({'exists': exists})
+# Tạo serializer để mã hóa token
+s = URLSafeTimedSerializer(app.secret_key)
 
+@app.route('/reset-password/<token>', methods=['GET', 'POST'])
+@anonymous_required
+def reset_password(token):
+    try:
+        data = s.loads(token, salt='reset-password', max_age=3600)  # 1 giờ
+        user_id = data['user_id']
+    except:
+        flash("Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.", "danger")
+        return redirect(url_for('forgot_password'))
 
+    user = User.query.get(user_id)
+    if not user or user.reset_token != token or user.reset_token_expiry < datetime.utcnow():
+        flash("Link không hợp lệ.", "danger")
+        return redirect(url_for('forgot_password'))
+
+    if request.method == 'POST':
+        password = request.form.get('password')
+        confirm = request.form.get('confirm')
+
+        if password != confirm or len(password) < 8 or not re.search(r'[A-Z]', password) or not re.search(r'\d', password):
+            flash("Mật khẩu không hợp lệ hoặc không khớp!", "danger")
+            return render_template('reset_password.html', token=token)
+
+        user.password = dao.md5_hash(password)
+        user.reset_token = None
+        user.reset_token_expiry = None
+        db.session.commit()
+
+        flash("Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay.", "success")
+        return redirect(url_for('login_my_user'))
+
+    return render_template('reset_password.html', token=token)
+@app.route('/forgot-password', methods=['GET', 'POST'])
+@anonymous_required
+def forgot_password():
+    if request.method == 'POST':
+        identifier = request.form.get('identifier').strip()
+
+        # Tìm user bằng username hoặc email
+        user = User.query.join(Customer).filter(
+            (User.username == identifier) |
+            (Customer.email == identifier)
+        ).first()
+
+        if not user or not user.customer or not user.customer.email:
+            flash("Không tìm thấy tài khoản hoặc email liên kết.", "danger")
+            return redirect(url_for('forgot_password'))
+
+        # Tạo token có hạn 1 giờ
+        token = s.dumps({'user_id': user.id}, salt='reset-password')
+
+        user.reset_token = token
+        user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
+        db.session.commit()
+
+        # Link reset
+        reset_url = url_for('reset_password', token=token, _external=True)
+
+        # Gửi email
+        msg = Message("Đặt lại mật khẩu - Garage Center",
+                      recipients=[user.customer.email])
+        msg.html = f"""
+        <h3>Chào {user.customer.full_name or user.username},</h3>
+        <p>Bạn đã yêu cầu đặt lại mật khẩu tài khoản Garage Center.</p>
+        <p>Click vào link dưới đây để đặt lại mật khẩu (có hiệu lực trong 1 giờ):</p>
+        <p><a href="{reset_url}" style="background:#ffc107;padding:10px 20px;color:black;text-decoration:none;border-radius:5px;">
+            Đặt lại mật khẩu ngay
+        </a></p>
+        <p>Nếu bạn không yêu cầu, vui lòng bỏ qua email này.</p>
+        <hr>
+        <small>Garage Center - Chăm sóc xe chuyên nghiệp 24/7</small>
+        """
+
+        try:
+            mail.send(msg)
+            flash("Đã gửi link đặt lại mật khẩu đến email của bạn! Vui lòng kiểm tra hộp thư.", "success")
+        except Exception as e:
+            print(e)
+            flash("Lỗi gửi email. Vui lòng thử lại sau hoặc liên hệ hotline.", "danger")
+
+        return redirect(url_for('login_my_user'))
+
+    return render_template('forgot_password.html')
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

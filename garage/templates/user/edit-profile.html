@@ -46,7 +46,16 @@
                            name="phone"
                            class="form-control"
                            value="{{ user.customer.phone }}"
-                           required>
+                           readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email</label>
+                    <input type="text"
+                           name="phone"
+                           class="form-control"
+                           value="{{ user.customer.email}}"
+                           readonly>
                 </div>
 
                 <!-- Address -->
@@ -74,18 +83,18 @@
 </div>
 
 <script>
-document.getElementById('avatarInput').addEventListener('change', function(e){
-    const [file] = e.target.files;
-    if(file){
-        const allowedTypes = ['image/jpeg','image/png','image/jpg','image/gif'];
-        if(!allowedTypes.includes(file.type)){
-            alert('Chỉ được chọn file ảnh (jpg, jpeg, png, gif)');
-            e.target.value = '';
-            return;
+    document.getElementById('avatarInput').addEventListener('change', function(e){
+        const [file] = e.target.files;
+        if(file){
+            const allowedTypes = ['image/jpeg','image/png','image/jpg','image/gif'];
+            if(!allowedTypes.includes(file.type)){
+                alert('Chỉ được chọn file ảnh (jpg, jpeg, png, gif)');
+                e.target.value = '';
+                return;
+            }
+            const preview = document.getElementById('avatarPreview');
+            preview.src = URL.createObjectURL(file);
         }
-        const preview = document.getElementById('avatarPreview');
-        preview.src = URL.createObjectURL(file);
-    }
-});
+    });
 </script>
 {% endblock %}

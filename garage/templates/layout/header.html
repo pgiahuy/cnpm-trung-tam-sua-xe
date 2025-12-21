@@ -4,8 +4,7 @@
 </head>
 
 {% set current_path = request.path %}
-{% set transparent_nav = current_path == '/' or current_path.startswith('/sparepart') %}
-
+{% set transparent_nav = current_path == '/' or current_path == '/sparepart' %}
 <nav id="mainNav"
      class="navbar navbar-expand-lg navbar-dark fixed-top
      {% if transparent_nav %}navbar-transparent{% else %}bg-dark{% endif %}">

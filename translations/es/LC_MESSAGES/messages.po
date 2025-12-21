@@ -1,0 +1,497 @@
+# Spanish translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-12-21 14:10+0700\n"
+"PO-Revision-Date: 2025-12-21 14:10+0700\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: es\n"
+"Language-Team: es <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: garage/templates/bookrepair.html:3
+msgid "Đặt lịch sửa xe - Garage Center"
+msgstr ""
+
+#: garage/templates/bookrepair.html:12
+msgid "ĐẶT LỊCH SỬA XE HÔM NAY"
+msgstr ""
+
+#: garage/templates/bookrepair.html:21
+#: garage/templates/user/edit-appointment.html:23
+msgid "Thông tin Phương tiện"
+msgstr ""
+
+#: garage/templates/bookrepair.html:27
+msgid "Chọn loại xe"
+msgstr ""
+
+#: garage/templates/bookrepair.html:31
+msgid "Xe máy"
+msgstr ""
+
+#: garage/templates/bookrepair.html:35
+msgid "Ô tô"
+msgstr ""
+
+#: garage/templates/bookrepair.html:39
+msgid "Xe tải"
+msgstr ""
+
+#: garage/templates/bookrepair.html:42
+#: garage/templates/user/edit-appointment.html:33
+#: garage/templates/user/vehicles.html:18
+msgid "Loại xe"
+msgstr ""
+
+#: garage/templates/bookrepair.html:48
+msgid " Biển số xe"
+msgstr ""
+
+#: garage/templates/bookrepair.html:50
+#: garage/templates/user/edit-appointment.html:43
+msgid "Biển số xe"
+msgstr ""
+
+#: garage/templates/bookrepair.html:55
+#: garage/templates/user/edit-appointment.html:50
+msgid "Chi tiết Lịch hẹn"
+msgstr ""
+
+#: garage/templates/bookrepair.html:63
+#: garage/templates/user/edit-appointment.html:62
+msgid "Chọn ngày hẹn"
+msgstr ""
+
+#: garage/templates/bookrepair.html:70
+#: garage/templates/user/edit-appointment.html:72
+msgid "Chọn khung giờ"
+msgstr ""
+
+#: garage/templates/bookrepair.html:77
+#: garage/templates/user/edit-appointment.html:80
+msgid "Khung giờ"
+msgstr ""
+
+#: garage/templates/bookrepair.html:86
+msgid "Mô tả tình trạng xe (ví dụ: xe kêu lạ, đèn báo lỗi...)"
+msgstr ""
+
+#: garage/templates/bookrepair.html:87
+#: garage/templates/user/edit-appointment.html:92
+#: garage/templates/user/edit-appointment.html:93
+msgid "Mô tả tình trạng xe"
+msgstr ""
+
+#: garage/templates/bookrepair.html:95
+msgid "Đăng ký Lịch Hẹn"
+msgstr ""
+
+#: garage/templates/contact.html:3
+msgid "Liên hệ - Garage Center"
+msgstr ""
+
+#: garage/templates/contact.html:12
+msgid "Liên hệ với chúng tôi"
+msgstr ""
+
+#: garage/templates/contact.html:14
+msgid "Garage Center – Chăm sóc xe chuyên nghiệp 24/7"
+msgstr ""
+
+#: garage/templates/contact.html:27
+msgid "Thông tin liên hệ"
+msgstr ""
+
+#: garage/templates/contact.html:31
+msgid "123 Nguyễn Văn Linh, Quận 7, TP.HCM"
+msgstr ""
+
+#: garage/templates/contact.html:36
+msgid "0909 123 456"
+msgstr ""
+
+#: garage/templates/contact.html:41
+msgid "garagecenter@gmail.com"
+msgstr ""
+
+#: garage/templates/contact.html:46
+msgid "Thứ 2 – Chủ nhật: 7:00 – 21:00"
+msgstr ""
+
+#: garage/templates/contact.html:68
+msgid "Gửi yêu cầu tư vấn"
+msgstr ""
+
+#: garage/templates/contact.html:77 garage/templates/index.html:116
+#: garage/templates/register.html:20 garage/templates/user/profile.html:22
+msgid "Họ và tên"
+msgstr ""
+
+#: garage/templates/contact.html:86 garage/templates/user/profile.html:27
+msgid "Số điện thoại"
+msgstr ""
+
+#: garage/templates/contact.html:93 garage/templates/index.html:126
+msgid "Email"
+msgstr ""
+
+#: garage/templates/contact.html:101
+msgid "Nội dung liên hệ"
+msgstr ""
+
+#: garage/templates/contact.html:106
+msgid "Gửi liên hệ"
+msgstr ""
+
+#: garage/templates/index.html:3
+msgid "Trang chủ - Garage Center"
+msgstr ""
+
+#: garage/templates/index.html:10
+msgid "CHĂM SÓC XE CHUYÊN NGHIỆP 24/7"
+msgstr ""
+
+#: garage/templates/index.html:11
+msgid "Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng."
+msgstr ""
+
+#: garage/templates/index.html:14
+msgid "Đặt lịch ngay"
+msgstr ""
+
+#: garage/templates/index.html:24
+msgid "Dịch vụ của chúng tôi"
+msgstr ""
+
+#: garage/templates/index.html:54
+msgid "Xem tất cả dịch vụ"
+msgstr ""
+
+#: garage/templates/index.html:62
+msgid "Linh kiện nổi bật"
+msgstr ""
+
+#: garage/templates/index.html:79
+msgid "VNĐ"
+msgstr ""
+
+#: garage/templates/index.html:83
+#: garage/templates/partials/sparepart_cards.html:16
+#: garage/templates/services.html:22 garage/templates/sparepart.html:39
+msgid "Xem chi tiết"
+msgstr ""
+
+#: garage/templates/index.html:94
+msgid "Xem toàn bộ linh kiện"
+msgstr ""
+
+#: garage/templates/index.html:106
+msgid "Nhân viên bảo dưỡng"
+msgstr ""
+
+#: garage/templates/index.html:111
+msgid "Nhận tư vấn miễn phí"
+msgstr ""
+
+#: garage/templates/index.html:122
+msgid "SĐT"
+msgstr ""
+
+#: garage/templates/index.html:132
+msgid "Lời nhắn"
+msgstr ""
+
+#: garage/templates/index.html:137
+msgid "Gửi"
+msgstr ""
+
+#: garage/templates/login.html:3
+msgid "Đăng nhập - Garage Center"
+msgstr ""
+
+#: garage/templates/layout/header.html:64 garage/templates/login.html:13
+#: garage/templates/login.html:20
+msgid "Đăng nhập"
+msgstr ""
+
+#: garage/templates/login.html:14
+msgid "Tên đăng nhập"
+msgstr ""
+
+#: garage/templates/login.html:15
+msgid "Mật khẩu"
+msgstr ""
+
+#: garage/templates/login.html:16
+msgid "Quên mật khẩu?"
+msgstr ""
+
+#: garage/templates/login.html:19
+msgid "Tạo tài khoản"
+msgstr ""
+
+#: garage/templates/register.html:3
+msgid "Đăng ký - Garage Center"
+msgstr ""
+
+#: garage/templates/register.html:12
+msgid "Đăng ký tài khoản thành công! Nhấn OK để đăng nhập ngay!"
+msgstr ""
+
+#: garage/templates/layout/header.html:68 garage/templates/register.html:19
+#: garage/templates/register.html:55
+msgid "Đăng ký"
+msgstr ""
+
+#: garage/templates/register.html:47
+msgid "Xác nhận mật khẩu"
+msgstr ""
+
+#: garage/templates/register.html:50
+msgid "Tải ảnh avatar của bạn"
+msgstr ""
+
+#: garage/templates/services.html:3
+msgid "Dịch vụ sửa xe - Garage Center"
+msgstr ""
+
+#: garage/templates/services.html:8
+msgid "DỊCH VỤ SỬA XE"
+msgstr ""
+
+#: garage/templates/services.html:10
+msgid "Chúng tôi cung cấp các dịch vụ bảo dưỡng và sửa chữa chuyên nghiệp"
+msgstr ""
+
+#: garage/templates/services.html:38 garage/templates/sparepart.html:60
+msgid "«"
+msgstr ""
+
+#: garage/templates/services.html:50 garage/templates/sparepart.html:70
+msgid "»"
+msgstr ""
+
+#: garage/templates/sparepart.html:3
+msgid "Linh kiện ô tô - Garage Center"
+msgstr ""
+
+#: garage/templates/sparepart.html:9
+msgid "LINH KIỆN Ô TÔ"
+msgstr ""
+
+#: garage/templates/sparepart.html:10
+msgid "Chính hãng – Giá tốt – Dễ đặt hàng"
+msgstr ""
+
+#: garage/templates/sparepart.html:35
+msgid "đ"
+msgstr ""
+
+#: garage/templates/layout/base.html:6
+msgid "Garage Center - Trung tâm sửa xe chuyên nghiệp"
+msgstr ""
+
+#: garage/templates/layout/footer.html:2 garage/templates/layout/header.html:13
+msgid "GARAGE CENTER"
+msgstr ""
+
+#: garage/templates/layout/footer.html:3
+msgid "Bản quyền thuộc về Garage Center. All rights reserved."
+msgstr ""
+
+#: garage/templates/layout/header.html:23
+msgid "Trang chủ"
+msgstr ""
+
+#: garage/templates/layout/header.html:44 garage/templates/user/profile.html:7
+msgid "Hồ sơ cá nhân"
+msgstr ""
+
+#: garage/templates/layout/header.html:47 garage/templates/user/vehicles.html:9
+msgid "Xe của tôi"
+msgstr ""
+
+#: garage/templates/layout/header.html:50
+#: garage/templates/user/appointments-history.html:8
+msgid "Lịch sử đặt lịch"
+msgstr ""
+
+#: garage/templates/layout/header.html:53 garage/templates/user/orders.html:9
+msgid "Lịch sử mua hàng"
+msgstr ""
+
+#: garage/templates/layout/header.html:57
+msgid "Đăng xuất"
+msgstr ""
+
+#: garage/templates/layout/header.html:116
+msgid "Tìm dịch vụ..."
+msgstr ""
+
+#: garage/templates/layout/header.html:119
+msgid "Tìm linh kiện..."
+msgstr ""
+
+#: garage/templates/layout/header.html:122
+msgid "Tìm dịch vụ, linh kiện..."
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:3
+msgid "Lịch sử đặt lịch - Garage Center"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:15
+msgid "Ngày hẹn"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:16
+msgid "Xe"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:17
+#: garage/templates/user/vehicles.html:17
+msgid "Biển số"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:18
+#: garage/templates/user/vehicles.html:19
+msgid "Trạng thái"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:19
+msgid "Ghi chú"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:20
+msgid "Thao tác"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:40
+#: garage/templates/user/profile.html:37
+msgid "Chỉnh sửa"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:46
+msgid "Bạn có chắc muốn hủy lịch này không?"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:48
+msgid "Hủy"
+msgstr ""
+
+#: garage/templates/user/appointments-history.html:61
+msgid "Bạn chưa có lịch hẹn nào."
+msgstr ""
+
+#: garage/templates/user/change-password.html:3
+msgid "Đổi mật khẩu - Garage Center"
+msgstr ""
+
+#: garage/templates/user/change-password.html:8
+#: garage/templates/user/profile.html:40
+msgid "Đổi mật khẩu"
+msgstr ""
+
+#: garage/templates/user/change-password.html:15
+msgid "Mật khẩu hiện tại"
+msgstr ""
+
+#: garage/templates/user/change-password.html:20
+msgid "Mật khẩu mới"
+msgstr ""
+
+#: garage/templates/user/change-password.html:25
+msgid "Xác nhận mật khẩu mới"
+msgstr ""
+
+#: garage/templates/user/change-password.html:31
+#: garage/templates/user/edit-appointment.html:103
+msgid "Quay lại"
+msgstr ""
+
+#: garage/templates/user/change-password.html:34
+msgid "Cập nhật mật khẩu"
+msgstr ""
+
+#: garage/templates/user/edit-appointment.html:2
+msgid "Chỉnh sửa lịch hẹn - Garage Center"
+msgstr ""
+
+#: garage/templates/user/edit-appointment.html:10
+msgid "CHỈNH SỬA LỊCH HẸN"
+msgstr ""
+
+#: garage/templates/user/edit-appointment.html:108
+msgid "Lưu thay đổi"
+msgstr ""
+
+#: garage/templates/user/orders.html:3
+msgid "Lịch sử mua hàng - Garage Center"
+msgstr ""
+
+#: garage/templates/user/orders.html:17
+msgid "Mã hóa đơn"
+msgstr ""
+
+#: garage/templates/user/orders.html:18
+msgid "Ngày thanh toán"
+msgstr ""
+
+#: garage/templates/user/orders.html:19
+msgid "Tạm tính"
+msgstr ""
+
+#: garage/templates/user/orders.html:20
+msgid "VAT"
+msgstr ""
+
+#: garage/templates/user/orders.html:21
+msgid "Tổng thanh toán"
+msgstr ""
+
+#: garage/templates/user/orders.html:22
+msgid "Hình thức"
+msgstr ""
+
+#: garage/templates/user/orders.html:61
+msgid "Bạn chưa có lịch sử mua hàng nào."
+msgstr ""
+
+#: garage/templates/user/profile.html:3
+msgid "Hồ sơ cá nhân - Garage Center"
+msgstr ""
+
+#: garage/templates/user/profile.html:32
+msgid "Địa chỉ"
+msgstr ""
+
+#: garage/templates/user/profile.html:33
+msgid "Chưa cập nhật"
+msgstr ""
+
+#: garage/templates/user/vehicles.html:3
+msgid "Xe của tôi - Garage Center"
+msgstr ""
+
+#: garage/templates/user/vehicles.html:20
+msgid "Ngày đăng ký"
+msgstr ""
+
+#: garage/templates/user/vehicles.html:21
+msgid "Thanh toán"
+msgstr ""
+
+#: garage/templates/user/vehicles.html:59
+msgid "Bạn chưa có xe nào."
+msgstr ""
+

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from flask import url_for, render_template, redirect, request, send_file, flash, abort
+from flask import url_for, render_template, redirect, request, send_file, flash, abort, jsonify
 from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
@@ -613,54 +613,91 @@ class ReceiptDetailAdmin(BaseView):
         )
 
 class StatsView(BaseView):
+    @expose('/export-excel', methods=['POST'])
+    def export_excel(self):
+        start_date = request.form.get('startDate')
+        end_date = request.form.get('endDate')
+        sections = request.form.getlist('sections')
+
+        if not sections:
+            flash("Vui lòng chọn ít nhất 1 nội dung để xuất báo cáo", "warning")
+            return redirect(request.referrer)
+
+        output = io.BytesIO()
+        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+
+        # ===== DOANH THU THEO NGÀY =====
+        if 'revenue_day' in sections:
+            data = dao.get_revenue_by_day(start_date, end_date)
+            df = pd.DataFrame(list(data.items()), columns=['Ngày', 'Doanh thu'])
+            df['Ngày'] = pd.to_datetime(df['Ngày'], dayfirst=True, errors='coerce')
+            df = df.sort_values(by='Ngày', ascending=False)
+            df['Ngày'] = df['Ngày'].dt.strftime('%d/%m/%Y')
+            df.to_excel(writer, sheet_name='Doanh thu ngày', index=False)
+
+        # ===== DOANH THU THEO THÁNG =====
+        if 'revenue_month' in sections:
+            data = dao.get_revenue_by_month(start_date, end_date)
+            df = pd.DataFrame(list(data.items()), columns=['Tháng', 'Doanh thu'])
+            df['Tháng'] = pd.to_datetime(df['Tháng'], format='%m/%Y', errors='coerce')
+            df = df.sort_values(by='Tháng', ascending=False)
+            df['Tháng'] = df['Tháng'].dt.strftime('%m/%Y')
+            df.to_excel(writer, sheet_name='Doanh thu tháng', index=False)
+
+        # ===== TỶ LỆ XE =====
+        if 'vehicle_stats' in sections:
+            data = dao.get_vehicle_stats(start_date, end_date)
+            sorted_data = sorted(data.items(), key=lambda x: x[1], reverse=True)
+            df = pd.DataFrame(sorted_data, columns=['Loại xe', 'Số lượng'])
+            df.to_excel(writer, sheet_name='Tỷ lệ xe', index=False)
+
+        # ===== LỖI THƯỜNG GẶP =====
+        if 'error_stats' in sections:
+            data = dao.get_error_stats(start_date, end_date)
+            sorted_data = sorted(data.items(), key=lambda x: x[1], reverse=True)
+            df = pd.DataFrame(sorted_data, columns=['Lỗi', 'Số lần'])
+            df.to_excel(writer, sheet_name='Lỗi thường gặp', index=False)
+
+        writer.close()
+        output.seek(0)
+
+        filename = f"bao_cao_{start_date}_den_{end_date}.xlsx"
+
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name=filename,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    @expose('/api/data')
+    def get_chart_data(self):
+        start_date = request.args.get('start')
+        end_date = request.args.get('end')
+
+        return jsonify({
+            'revenue_day': dao.get_revenue_by_day(start_date, end_date),
+            'revenue_month': dao.get_revenue_by_month(start_date, end_date),
+            'vehicle_stats': dao.get_vehicle_stats(start_date, end_date), # Thêm ở đây
+            'error_stats': dao.get_error_stats(start_date, end_date)      # Thêm ở đây
+        })
+
     @expose('/', methods=['GET', 'POST'])
     def index(self):
-        if request.method == 'POST':
+        today = datetime.now()
+        start_default = today.replace(day=1).strftime('%Y-%m-%d')
+        end_default = today.strftime('%Y-%m-%d')
 
-            sections = request.form.getlist('sections')
-            start_date_str = request.form.get('startDate')
-            end_date_str = request.form.get('endDate')
-            today = datetime.now()
-
-            if not start_date_str:
-                start_date_str = today.replace(day=1).strftime('%Y-%m-%d')
-            if not end_date_str:
-                end_date_str = today.strftime('%Y-%m-%d')
-
-            data = dao.get_report_data(start_date_str, end_date_str, sections)
-
-            if not any(data.values()):
-                flash("Không có dữ liệu trong khoảng thời gian đã chọn!", "warning")
-                return redirect(url_for('statistical-report.index'))
-
-            output = io.BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                for sheet_name, content in data.items():
-                    if content:
-                        df = pd.DataFrame(content)
-                        df.to_excel(writer, sheet_name=sheet_name, index=False)
-                        worksheet = writer.sheets[sheet_name]
-                        for i, col in enumerate(df.columns):
-                            column_len = max(df[col].astype(str).str.len().max(), len(col)) + 2
-                            worksheet.set_column(i, i, column_len)
-            output.seek(0)
-            return send_file(
-                output,
-                download_name=f"Bao_cao_Garage_{start_date_str}.xlsx",
-                as_attachment=True,
-                mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            )
-
-
-        revenue_day_raw = dao.get_revenue_by_day()
-        revenue_month_raw = dao.get_revenue_by_month()
-        vehicle_stats_raw = dao.get_vehicle_stats()
-        error_stats_raw = dao.get_error_stats()
+        revenue_day_raw = dao.get_revenue_by_day(start_default, end_default)
+        revenue_month_raw = dao.get_revenue_by_month(start_default, end_default)
+        vehicle_stats_raw = dao.get_vehicle_stats(start_default, end_default)
+        error_stats_raw = dao.get_error_stats(start_default, end_default)
 
         def format_chart_data(data):
             if isinstance(data, dict): return data
-            try: return {str(row[0]): row[1] for row in data}
-            except: return {}
+            try:
+                return {str(row[0]): row[1] for row in data}
+            except:
+                return {}
 
         return self.render('admin/statistical_report.html',
                            revenue_day=json.dumps(format_chart_data(revenue_day_raw)),

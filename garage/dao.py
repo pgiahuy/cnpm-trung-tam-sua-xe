@@ -260,8 +260,8 @@ def update_appointment_note(appointment: Appointment, note: str):
     appointment.note = note
     db.session.commit()
 
-CAR_PLATE_REGEX = r"^\d{2}[A-Z]-\d{5}$"
-MOTOR_PLATE_REGEX = r"^\d{2}[A-Z][0-9]-\d{5}$"
+CAR_PLATE_REGEX = r"^\d{2}[A-Z]{1,2}-\d{4,5}$"
+MOTOR_PLATE_REGEX = r"^\d{2}[A-Z][A-Z0-9]-\d{4,5}$"
 
 def validate_license_plate(plate, vehicle_type):
     plate = plate.upper().strip()
@@ -307,73 +307,94 @@ def get_vat_value():
             return 0.1
     return 0.1
 
-def get_revenue_by_month():
-    results = db.session.query(
-        func.month(Receipt.paid_at).label('year'),
+def get_date_range(start_date_str, end_date_str):
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+    else:
+        start_date = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59,
+                                                                       microsecond=999999)
+    else:
+        end_date = datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)
+
+    return start_date, end_date
+
+
+def get_revenue_by_month(start_date=None, end_date=None):
+    start, end = get_date_range(start_date, end_date)
+
+    query = db.session.query(
+        func.year(Receipt.paid_at).label('year'),
         func.month(Receipt.paid_at).label('month'),
         func.sum(Receipt.total_paid).label('revenue')
-    ).group_by(func.month(Receipt.paid_at)).all()
+    ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end)
+
+    results = query.group_by('year', 'month') \
+        .order_by('year', 'month').all()
 
     return {f"{r.month:02d}/{r.year}": float(r.revenue) for r in results}
 
-def get_revenue_by_day():
-    results = db.session.query(
+
+def get_revenue_by_day(start_date=None, end_date=None):
+    start, end = get_date_range(start_date, end_date)
+
+    query = db.session.query(
         func.date(Receipt.paid_at).label('date'),
         func.sum(Receipt.total_paid).label('revenue')
-    ).group_by(func.date(Receipt.paid_at)).all()
+    ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end)
 
+    results = query.group_by(func.date(Receipt.paid_at)) \
+        .order_by(func.date(Receipt.paid_at)).all()
     return {r.date.strftime('%d/%m/%Y'): float(r.revenue) for r in results if r.date}
 
 
-def get_vehicle_stats():
+def get_vehicle_stats(start_date=None, end_date=None):
+    start, end = get_date_range(start_date, end_date)
+
     results = db.session.query(
         Vehicle.vehicle_type,
         func.count(ReceptionForm.id)
     ).join(Vehicle, ReceptionForm.vehicle_id == Vehicle.id) \
+        .filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
         .group_by(Vehicle.vehicle_type).all()
+
     return {r[0]: r[1] for r in results if r[0]}
 
-def get_error_stats():
+
+def get_error_stats(start_date=None, end_date=None):
+    start, end = get_date_range(start_date, end_date)
+
     results = db.session.query(
         ReceptionForm.error_description,
         func.count(ReceptionForm.id)
-    ).group_by(ReceptionForm.error_description).limit(5).all()
-    return {r[0]: r[1] for r in results}
+    ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
+        .group_by(ReceptionForm.error_description) \
+        .order_by(func.count(ReceptionForm.id).desc()).limit(5).all()
 
-
-def is_username_exists(username):
-    return db.session.query(User).filter_by(username=username).first() is not None
-
-def is_phone_exists(phone):
-    return db.session.query(Customer).filter_by(phone=phone).first() is not None
+    return {r[0]: r[1] for r in results if r[0]}
 
 def get_report_data(start_date_str=None, end_date_str=None, sections=None):
     report_results = {}
-    today = datetime.now()
-
-    if not start_date_str:
-        start = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-    else:
-        start = datetime.strptime(start_date_str, '%Y-%m-%d')
-
-    if not end_date_str:
-        end = today.replace(hour=23, minute=59, second=59, microsecond=999999)
-    else:
-        end = datetime.strptime(end_date_str, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
+    start, end = get_date_range(start_date_str, end_date_str)
 
     if not sections:
         sections = []
-
     if 'revenue_day' in sections:
         query = db.session.query(
             func.date(Receipt.paid_at).label('ngay'),
             func.sum(Receipt.total_paid).label('tong')
-        ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end) \
-            .group_by(func.date(Receipt.paid_at)) \
-            .order_by(func.date(Receipt.paid_at))
+        ).filter(
+            Receipt.paid_at >= start,
+            Receipt.paid_at <= end
+        ).group_by(func.date(Receipt.paid_at)).order_by(func.date(Receipt.paid_at).desc())
 
         report_results['Doanh Thu Ngay'] = [
-            {'Ngày': r.ngay.strftime('%d/%m/%Y'), 'Doanh Thu (VNĐ)': float(r.tong)}
+            {
+                'Ngày': r.ngay.strftime('%d/%m/%Y'),
+                'Doanh Thu (VNĐ)': float(r.tong)
+            }
             for r in query.all()
         ]
 
@@ -381,8 +402,7 @@ def get_report_data(start_date_str=None, end_date_str=None, sections=None):
         query = db.session.query(
             func.date_format(Receipt.paid_at, '%m/%Y').label('thang'),
             func.sum(Receipt.total_paid).label('tong')
-        ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end) \
-            .group_by('thang') \
+        ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end).group_by('thang') \
             .order_by(func.min(Receipt.paid_at))
 
         report_results['Doanh Thu Thang'] = [
@@ -411,8 +431,7 @@ def get_report_data(start_date_str=None, end_date_str=None, sections=None):
             func.count(ReceptionForm.id)
         ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
             .group_by(ReceptionForm.error_description) \
-            .order_by(func.count(ReceptionForm.id).desc()) \
-            .limit(10)
+            .order_by(func.count(ReceptionForm.id).desc()).limit(10)
 
         report_results['Loi Thuong Gap'] = [
             {'Mô tả lỗi': r[0] if r[0] else "Chưa xác định", 'Số lần xuất hiện': r[1]}
@@ -420,6 +439,12 @@ def get_report_data(start_date_str=None, end_date_str=None, sections=None):
         ]
 
     return report_results
+
+def is_username_exists(username):
+    return db.session.query(User).filter_by(username=username).first() is not None
+
+def is_phone_exists(phone):
+    return db.session.query(Customer).filter_by(phone=phone).first() is not None
 if __name__ == "__main__":
     with app.app_context():
         print(load_customers())

@@ -1,73 +1,107 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<hr class="solid">
+<div class="container-fluid py-4 px-lg-4">
 
-    <div class="card">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h5 class="fw-bold mb-0">📊 Thống kê doanh thu</h5>
-            <select id="revenueMode" class="form-select w-auto">
-                <option value="month">theo tháng</option>
-                <option value="day">theo ngày</option>
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+        <div class="card-body p-3">
+            <div class="row align-items-center g-3">
+                <div class="col-xl-4 col-md-12">
+                    <h5 class="fw-bold mb-0 d-flex align-items-center">
+                         Tổng Quan Kinh Doanh
+                    </h5>
+                </div>
+                <div class="col-xl-8 col-md-12">
+                    <form id="filterForm" class="d-flex justify-content-xl-end align-items-center gap-2 flex-wrap">
+                        <div class="btn-group btn-group-sm me-2 shadow-none">
+                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle" onclick="setQuickDate('week')">Tuần này</button>
+                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle" onclick="setQuickDate('month')">Tháng này</button>
+                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle" onclick="setQuickDate('lastMonth')">Tháng trước</button>
+                        </div>
+
+                        <div class="input-group input-group-sm w-auto custom-date-picker shadow-sm">
+                            <input type="date" id="startDate" name="startDate" class="form-control border-0 bg-light px-2">
+                            <span class="input-group-text bg-light border-0 text-muted"><i class="fas fa-arrow-right small"></i></span>
+                            <input type="date" id="endDate" name="endDate" class="form-control border-0 bg-light px-2">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3 px-4">
+            <h6 class="fw-bold mb-0 text-secondary"><span class="me-2">📊</span>Thống kê doanh thu</h6>
+            <select id="revenueMode" class="form-select form-select-sm w-auto border-0 bg-light rounded-pill px-3 shadow-none">
+                <option value="month">Theo tháng</option>
+                <option value="day">Theo ngày</option>
             </select>
         </div>
-        <div class="card-body"><canvas id="revenueChart" height="100"></canvas></div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card"><div class="card-header bg-light">🚗 Tỷ lệ xe đến sửa</div><div class="card-body"><canvas id="vehicleChart"></canvas></div></div>
-        </div>
-        <div class="col-md-6">
-            <div class="card"><div class="card-header bg-light">⚠️ Lỗi thường gặp</div><div class="card-body"><canvas id="errorChart"></canvas></div></div>
+        <div class="card-body px-4 pb-4">
+            <canvas id="revenueChart" style="max-height: 320px;"></canvas>
         </div>
     </div>
 
-    <hr class="solid">
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 pt-3 px-4"><h6 class="fw-bold mb-0 text-secondary">🚗 Tỷ lệ xe đến sửa</h6></div>
+                <div class="card-body px-4 pb-4"><canvas id="vehicleChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
+                <div class="card-header bg-white border-0 pt-3 px-4"><h6 class="fw-bold mb-0 text-secondary">⚠️ Lỗi thường gặp</h6></div>
+                <div class="card-body px-4 pb-4"><canvas id="errorChart"></canvas></div>
+            </div>
+        </div>
+    </div>
 
     <div class="card border-0 shadow-sm overflow-hidden mt-4" style="border-radius: 15px;">
         <div class="card-header bg-success text-white py-3" style="background: linear-gradient(45deg, #28a745, #218838);">
-            <h5 class="mb-0 d-flex align-items-center"><i class="fas fa-file-excel me-2"></i> Xuất Báo Cáo Excel Tùy Chọn</h5>
+            <h5 class="mb-0 d-flex align-items-center small text-uppercase tracking-wider">
+                <i class="fas fa-file-excel me-2"></i> Xuất Báo Cáo Excel Tùy Chọn
+            </h5>
         </div>
         <div class="card-body bg-white p-4">
-            <form method="POST">
-                <div class="row g-4">
-                    <div class="col-lg-5">
-                        <label class="form-label fw-bold text-secondary mb-3"><i class="fas fa-list-check me-1"></i> 1. Nội dung</label>
-                        <div class="row g-2">
-                            <div class="col-6">
-                                <div class="form-check custom-checkbox">
+            <form action="/admin/statistical-report/export-excel" method="POST" id="exportForm">
+                <input type="hidden" name="startDate" id="exportStartDate">
+                <input type="hidden" name="endDate" id="exportEndDate">
+
+                <div class="row align-items-center g-4">
+                    <div class="col-lg-8">
+                        <label class="form-label fw-bold text-secondary mb-3"><i class="fas fa-list-check me-1"></i>Nội dung báo cáo</label>
+                        <div class="row g-2 px-1">
+                            <div class="col-md-3 col-6">
+                                <div class="form-check custom-checkbox-soft">
                                     <input class="form-check-input" type="checkbox" name="sections" value="revenue_day" id="c1" checked>
                                     <label class="form-check-label" for="c1">Doanh thu ngày</label>
                                 </div>
-                                <div class="form-check custom-checkbox">
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="form-check custom-checkbox-soft">
                                     <input class="form-check-input" type="checkbox" name="sections" value="revenue_month" id="c2" checked>
                                     <label class="form-check-label" for="c2">Doanh thu tháng</label>
                                 </div>
                             </div>
-                            <div class="col-6">
-                                <div class="form-check custom-checkbox">
+                            <div class="col-md-3 col-6">
+                                <div class="form-check custom-checkbox-soft">
                                     <input class="form-check-input" type="checkbox" name="sections" value="vehicle_stats" id="c3">
                                     <label class="form-check-label" for="c3">Tỷ lệ xe</label>
                                 </div>
-                                <div class="form-check custom-checkbox">
+                            </div>
+                            <div class="col-md-3 col-6">
+                                <div class="form-check custom-checkbox-soft">
                                     <input class="form-check-input" type="checkbox" name="sections" value="error_stats" id="c4">
                                     <label class="form-check-label" for="c4">Lỗi thường gặp</label>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <label class="form-label fw-bold text-secondary mb-3"><i class="fas fa-calendar-alt me-1"></i> 2. Khoảng thời gian</label>
-                        <div class="input-group shadow-sm" style="border-radius: 8px; overflow: hidden;">
-                            <input type="date" id="startDate" name="startDate" class="form-control border-0">
-                            <span class="input-group-text bg-light border-0"><i class="fas fa-arrow-right text-muted"></i></span>
-                            <input type="date" id="endDate" name="endDate" class="form-control border-0">
-                        </div>
-                    </div>
-                    <div class="col-lg-3 d-flex align-items-end">
-                        <button type="submit" class="btn btn-success w-100 shadow-sm py-2 fw-bold btn-hover-effect">
-                            TẢI BÁO CÁO
+                    <div class="col-lg-4 text-lg-end">
+                        <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-sm rounded-pill btn-hover-effect" onclick="syncExportDates()">
+                           XUẤT BÁO CÁO EXCEL
                         </button>
                     </div>
                 </div>
@@ -76,107 +110,189 @@
     </div>
 </div>
 
+<style>
+    body { background-color: #f8fafc; color: #334155; font-family: 'Inter', sans-serif; }
+    .card { border-radius: 12px !important; border: 1px solid rgba(0,0,0,0.05); transition: all 0.2s ease; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.04) !important; }
+
+    .custom-date-picker {
+        border-radius: 30px !important;
+        overflow: hidden;
+        border: 1px solid #e2e8f0 !important;
+        padding: 2px 8px;
+        background: #f8fafc;
+    }
+    .custom-date-picker input {
+        font-weight: 500;
+        color: #475569;
+        max-width: 135px;
+    }
+
+    .custom-checkbox-soft .form-check-input {
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .custom-checkbox-soft .form-check-input:checked {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+
+    .btn-hover-effect {
+        transition: all 0.3s ease;
+        border-radius: 50px;
+    }
+    .btn-hover-effect:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3) !important;
+    }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    let charts = { revenue: null, vehicle: null, error: null };
+    let dataStore = { day: {}, month: {}, vehicle: {}, error: {} };
 
-    const revenueDay = {{ revenue_day | safe }};
-    const revenueMonth = {{ revenue_month | safe }};
-    const vehicleData = {{ vehicle_stats | safe }};
-    const errorData = {{ error_stats | safe }};
+    const formatDateLocal = (date) => {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    };
 
+    const parseDate = (str) => {
+        const p = str.split('/');
+        return p.length === 3 ? new Date(p[2], p[1] - 1, p[0]) : new Date(p[1], p[0] - 1, 1);
+    };
 
-    window.addEventListener('DOMContentLoaded', () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const firstDayStr = `${year}-${month}-01`;
+    function drawRevenueChart(mode) {
+        const rawData = mode === 'day' ? dataStore.day : dataStore.month;
+        const sortedData = Object.entries(rawData)
+            .map(([label, value]) => ({ label, value }))
+            .sort((a, b) => parseDate(a.label) - parseDate(b.label));
 
-    const todayStr = now.toISOString().split('T')[0];
+        const labels = sortedData.map(d => d.label);
+        const values = sortedData.map(d => d.value);
 
-    const startInput = document.getElementById('startDate');
-    const endInput = document.getElementById('endDate');
+        if (charts.revenue) charts.revenue.destroy();
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(13, 110, 253, 0.2)');
+        gradient.addColorStop(1, 'rgba(13, 110, 253, 0)');
 
-    if (startInput) startInput.value = firstDayStr; // Sẽ luôn là YYYY-MM-01
-    if (endInput) endInput.value = todayStr;
-});
-
-    let revChart;
-    function drawRev(mode) {
-        const labels = mode === 'day' ? Object.keys(revenueDay) : Object.keys(revenueMonth);
-        const data = mode === 'day' ? Object.values(revenueDay) : Object.values(revenueMonth);
-        if(revChart) revChart.destroy();
-        revChart = new Chart(document.getElementById('revenueChart'), {
-            type: 'bar',
+        charts.revenue = new Chart(ctx, {
+            type: mode === 'day' ? 'line' : 'bar',
             data: {
                 labels,
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
-                    data,
-                    backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                    data: values,
+                    backgroundColor: mode === 'day' ? gradient : '#0d6efd',
                     borderColor: '#0d6efd',
-                    borderWidth: 1,
-                    borderRadius: 5
+                    borderWidth: 2,
+                    fill: mode === 'day',
+                    tension: 0.4,
+                    pointRadius: mode === 'day' ? 4 : 0
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: (ctx) => `Doanh thu: ${ctx.raw.toLocaleString('vi-VN')} VNĐ` } }
+                },
+                scales: {
+                    y: { ticks: { callback: (v) => v.toLocaleString('vi-VN') + ' đ' } },
+                    x: { grid: { display: false } }
+                }
+            }
         });
     }
-    drawRev('month');
-    document.getElementById('revenueMode').addEventListener('change', (e) => drawRev(e.target.value));
 
-    new Chart(document.getElementById('vehicleChart'), {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(vehicleData),
-            datasets: [{
-                data: Object.values(vehicleData),
-                backgroundColor: ['#ffc107', '#0dcaf0', '#dc3545', '#6610f2', '#fd7e14'],
-                hoverOffset: 10
-            }]
-        },
-        options: { plugins: { legend: { position: 'bottom' } } }
-    });
+    async function autoRefresh() {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        if (!start || !end) return;
 
-    new Chart(document.getElementById('errorChart'), {
-        type: 'bar',
-        data: {
-            labels: Object.keys(errorData),
-            datasets: [{
-                label: 'Số lần gặp',
-                data: Object.values(errorData),
-                backgroundColor: 'rgba(108, 117, 125, 0.8)',
-                borderRadius: 5
-            }]
-        },
-        options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+        try {
+            document.getElementById('revenueChart').style.opacity = '0.5';
+            const res = await fetch(`/admin/statistical-report/api/data?start=${start}&end=${end}`);
+            const json = await res.json();
+
+            dataStore = {
+                day: json.revenue_day,
+                month: json.revenue_month,
+                vehicle: json.vehicle_stats,
+                error: json.error_stats
+            };
+
+            drawRevenueChart(document.getElementById('revenueMode').value);
+            initSecondaryCharts();
+            document.getElementById('revenueChart').style.opacity = '1';
+        } catch (err) { console.error("Lỗi fetch:", err); }
+    }
+
+    function setQuickDate(type) {
+        const now = new Date();
+        let start = new Date();
+        let end = new Date();
+
+        if (type === 'week') {
+            const day = now.getDay();
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+            start.setDate(diff);
+        } else if (type === 'month') {
+            start = new Date(now.getFullYear(), now.getMonth(), 1);
+        } else if (type === 'lastMonth') {
+            start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            end = new Date(now.getFullYear(), now.getMonth(), 0);
+        }
+
+        document.getElementById('startDate').value = formatDateLocal(start);
+        document.getElementById('endDate').value = formatDateLocal(end);
+
+        autoRefresh();
+    }
+
+    function initSecondaryCharts() {
+        if (charts.vehicle) charts.vehicle.destroy();
+        charts.vehicle = new Chart(document.getElementById('vehicleChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(dataStore.vehicle),
+                datasets: [{ data: Object.values(dataStore.vehicle), backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'] }]
+            },
+            options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        const sortedErrors = Object.entries(dataStore.error).sort((a, b) => b[1] - a[1]);
+        if (charts.error) charts.error.destroy();
+        charts.error = new Chart(document.getElementById('errorChart'), {
+            type: 'bar',
+            data: {
+                labels: sortedErrors.map(i => i[0]),
+                datasets: [{ data: sortedErrors.map(i => i[1]), backgroundColor: '#94a3b8', borderRadius: 10 }]
+            },
+            options: { indexAxis: 'y', plugins: { legend: { display: false } } }
+        });
+    }
+
+    function syncExportDates() {
+        document.getElementById('exportStartDate').value = document.getElementById('startDate').value;
+        document.getElementById('exportEndDate').value = document.getElementById('endDate').value;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const today = formatDateLocal(new Date());
+        document.getElementById('startDate').max = today;
+        document.getElementById('endDate').max = today;
+
+        setQuickDate('month');
+
+        document.getElementById('revenueMode').onchange = (e) => drawRevenueChart(e.target.value);
+        document.getElementById('startDate').onchange = autoRefresh;
+        document.getElementById('endDate').onchange = autoRefresh;
     });
 </script>
-<style>
-.custom-checkbox .form-check-input:checked {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-.custom-checkbox label {
-    font-size: 0.95rem;
-    color: #444;
-    cursor: pointer;
-}
-
-.btn-hover-effect {
-    transition: all 0.3s ease;
-    border: none;
-}
-
-.btn-hover-effect:hover {
-    background-color: #218838 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3) !important;
-}
-
-input[type="date"] {
-    padding: 10px;
-    color: #555;
-}
-</style>
 {% endblock %}

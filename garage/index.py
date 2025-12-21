@@ -445,6 +445,8 @@ def receipt_detail(receipt_id):
 
 
 
+
+
 @app.route('/api/pay_spare_part', methods=['POST'])
 @login_required
 def pay():
@@ -508,7 +510,8 @@ def pay_repair(repair_id):
     return jsonify({'code': 200, 'pay_url': pay_url})
 
 
-# ================= VNPAY RETURN =================
+
+
 @app.route('/billing/vnpay_return')
 def vnpay_return():
     response_code = request.args.get('vnp_ResponseCode')

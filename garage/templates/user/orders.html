@@ -15,6 +15,7 @@
             <thead class="table-primary text-center">
                 <tr>
                      <th>{{ _("Mã hóa đơn") }}</th>
+                     <th>{{ _("Loại") }}</th>
                     <th>{{ _("Ngày thanh toán") }}</th>
                     <th>{{ _("Tạm tính") }}</th>
                     <th>{{ _("VAT") }} (%)</th>
@@ -31,6 +32,16 @@
                             HD{{ r.id }}
                         </a>
                     </td>
+
+                    {%if r.type == 'REPAIR'%}
+                        <td class="text-center">
+                            <span class=" badge text-white p-2 bg-warning">SỬA CHỮA</span>
+                        </td>
+                    {%else%}
+                        <td class="text-center">
+                            <span class=" badge text-white p-2 bg-primary">MUA HÀNG</span>
+                        </td>
+                    {%endif%}
 
                     <td class="text-center">
                         {{ r.paid_at.strftime('%d/%m/%Y %H:%M') }}

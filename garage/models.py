@@ -8,6 +8,8 @@ from sqlalchemy.orm import relationship
 from garage import db, app, dao
 from datetime import datetime
 
+
+
 class UserRole(Enum):
     USER = 1
     TECHNICIAN = 2
@@ -234,6 +236,7 @@ class ReceiptItem(Base):
     item_type = Column(SQLEnum(ReceiptItemType), default=ReceiptItemType.SPARE_PART)
 
     service_id = Column(Integer, ForeignKey("service.id"), nullable=True)
+    service = relationship("Service", lazy=True)
     spare_part_id = Column(Integer, ForeignKey("spare_part.id"), nullable=True)
     spare_part = relationship("SparePart", backref="receipt_details", lazy=True)
     quantity = Column(Integer, default=1)

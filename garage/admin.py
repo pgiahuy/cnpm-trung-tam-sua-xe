@@ -1,11 +1,11 @@
 from datetime import date, datetime
 
-from flask import url_for, render_template, redirect, request, send_file, flash
+from flask import url_for, render_template, redirect, request, send_file, flash, abort
 from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 
-from flask_login import current_user
+from flask_login import current_user, login_required
 from markupsafe import Markup
 from sqlalchemy import func
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField
@@ -13,7 +13,7 @@ from wtforms.validators import DataRequired, NumberRange, Optional
 from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
-                           VehicleStatus, SystemConfig, RepairStatus, Receipt)
+                           VehicleStatus, SystemConfig, RepairStatus, Receipt, ReceiptItem, ReceiptItemType)
 import json
 import pandas as pd
 import io
@@ -67,7 +67,6 @@ class MyAdminModelView(ModelView):
         )
 
     def inaccessible_callback(self, name, **kwargs):
-        # Nếu không có quyền, trả về trang 403
         return render_template('errors/403.html'), 403
 
 
@@ -80,7 +79,13 @@ class ServiceAdmin(AdminAccessMixin,MyAdminModelView):
         'price':'Giá',
         'created_date':'Ngày tạo'
     }
-
+    form_columns = ['name', 'description',  'price', 'image','active']
+    column_searchable_list = [
+        'name',
+    ]
+    column_formatters = {
+        'price': lambda v, c, m, p: f"{m.price:,.0f} ₫" if m.price else "0 ₫"
+    }
 
 class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
     column_labels = {
@@ -88,20 +93,18 @@ class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
         'phone' : 'Số điện thoại',
         'address': 'Địa chỉ',
         'active':'Trạng thái',
-        'price':'Giá',
         'created_date':'Ngày tạo',
         'user': 'Tài khoản'
     }
     column_formatters = {
         'user': lambda v, c, m, p: m.user.username if m.user else ''
     }
-    form_extra_fields = {
-        'user': QuerySelectField(
-            'User',
-            query_factory=lambda: db.session.query(User).all(),
-            get_label='username'
-        )
-    }
+    form_columns = ['full_name','phone','address','active','user']
+
+    column_searchable_list = [
+        'full_name',
+        'phone',
+    ]
 
 class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['full_name',  'phone','active', 'user']
@@ -113,9 +116,14 @@ class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
         'user': 'Tài khoản'
 
     }
+    form_columns = ['full_name',  'phone','active', 'user']
     column_formatters = {
         'user': lambda v, c, m, p: m.user.username if m.user else ''
     }
+    column_searchable_list = [
+        'full_name',
+        'phone',
+    ]
 
 class UserAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['username',  'active', 'role','created_date']
@@ -125,6 +133,13 @@ class UserAdmin(AdminAccessMixin,MyAdminModelView):
         'role':'Vai trò',
         'created_date': 'Ngày tạo'
     }
+    form_columns = ['username','password','avatar', 'role','customer','employee', 'active']
+    column_searchable_list = [
+        'username',
+    ]
+    column_filters = [
+        'role'
+    ]
 
 class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
     can_create = False
@@ -162,7 +177,7 @@ class ReceptionFormAdmin(MyAdminModelView):
     extra_js = [
         '/static/js/receive_form.js'
     ]
-    column_list = ['id','customer','vehicle','employee','receive_type','error_description']
+    column_list = ['id','customer','vehicle','employee','receive_type','error_description','active']
     column_labels = {
         'id': 'ID',
         'customer': 'Khách hàng',
@@ -348,15 +363,18 @@ class ReceptionFormAdmin(MyAdminModelView):
 
 
 class RepairFormAdmin(MyAdminModelView):
-    column_list = ['id', 'employee', 'reception_form', 'repair_status','vehicle_plate', 'total_money']
+    column_list = ['id', 'employee','customer','vehicle_plate',  'reception_form', 'repair_status', 'total_money']
     column_labels = {
-        'id': 'Mã phiếu sửa',
+        'id': 'ID',
         'employee': 'Nhân viên lập',
         'reception_form': 'PTN',
         'vehicle_plate': 'Biển số xe',
         'total_money': 'Tổng tiền',
-        'repair_status':'Trạng thái'
+        'repair_status':'Trạng thái',
+        'customer':'Khách hàng',
+        'pay':''
     }
+
 
     form_columns = ['employee', 'reception_form','repair_status', 'details']
     inline_models = [
@@ -384,6 +402,19 @@ class RepairFormAdmin(MyAdminModelView):
         "PAID": VehicleStatus.DELIVERED
     }
 
+
+
+    def _pay_formatter(view, context, model, name):
+        if model.repair_status == RepairStatus.DONE and not model.receipt:
+            return Markup(
+                f'<a class="btn btn-success btn-sm" href="{url_for("repair_pay.pay", repair_id=model.id)}">Thanh toán</a>')
+        elif model.receipt:
+            return Markup(
+                f'<a class="btn btn-info btn-sm" href="{url_for("receipt_detail.detail", receipt_id=model.receipt.id)}">Xem hóa đơn</a>')
+        return ""
+
+    column_list.append('pay')
+
     def on_model_change(self, form, model, is_created):
         with db.session.no_autoflush:
 
@@ -406,10 +437,11 @@ class RepairFormAdmin(MyAdminModelView):
                 db.session.add(model.vehicle)
 
     column_formatters = {
+        'pay': _pay_formatter,
         'id': lambda v, c, m, p: Markup(
-        f'<a href="{url_for("repair_detail.detail", repair_id=m.id)}">{m.id}</a>'
-        ),
+        f'<a href="{url_for("repair_detail.detail", repair_id=m.id)}">{m.id}</a>'),
 
+        'customer': lambda v, c, m, p:m.reception_form.vehicle.customer if m.reception_form else '',
         'total_money': lambda v, c, m, p: f"{m.total_before_vat:,.0f} ₫" if m.total_before_vat else "0 ₫",
         'vehicle_plate': lambda v, c, m, p: (
             m.reception_form.vehicle.license_plate
@@ -420,14 +452,24 @@ class RepairFormAdmin(MyAdminModelView):
 
 
     form_extra_fields = {
-        'reception_form': QuerySelectField(
-            'Chọn phiếu tiếp nhận',
-            query_factory=lambda: db.session.query(ReceptionForm).all(),
-            get_label=lambda r: f"[{r.vehicle.license_plate}] - [{r.created_date}] - [{r.vehicle.customer}]" if r.vehicle else f"PTN {r.id}",
-            allow_blank=True,
-            validators=[DataRequired()]
+            'reception_form': QuerySelectField(
+        'Chọn phiếu tiếp nhận',
+        query_factory=lambda: db.session.query(ReceptionForm).filter(ReceptionForm.active == True).all(),
+        get_label=lambda r: f"[{r.vehicle.license_plate}] - [{r.created_date}] - [{r.vehicle.customer.full_name}]"
+                            if r.vehicle else f"PTN {r.id}",
+        allow_blank=True,
+        validators=[Optional()]
         ),
     }
+
+
+    #khoá repair PAID
+    def on_form_prefill(self, form, id):
+        model = self.get_one(id)
+        if model.repair_status == RepairStatus.PAID:
+            abort(403)
+
+
 
 
 
@@ -522,7 +564,11 @@ class SparePartAdmin(AdminAccessMixin,MyAdminModelView):
         'supplier': 'Nhà cung cấp',
         'inventory': 'Tồn kho'
     }
-
+    form_columns = ['name', 'unit_price', 'unit','supplier','inventory','image_url','active']
+    column_formatters = {
+        'unit_price': lambda v, c, m, p: f"{m.unit_price:,.0f} ₫" if m.unit_price else "0 ₫"
+    }
+    column_searchable_list = ['name','unit','supplier']
 
 class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['id','value']
@@ -533,7 +579,7 @@ class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
         'value' : 'Giá trị'
     }
 
-class ReceiptAdmin(AdminAccessMixin,MyAdminModelView):
+class ReceiptAdmin(MyAdminModelView):
     column_list = ['id','customer_id','type','vat_rate','total_paid','payment_method']
     column_labels = {
         'id':'ID',
@@ -543,10 +589,25 @@ class ReceiptAdmin(AdminAccessMixin,MyAdminModelView):
         'total_paid':'Tổng tiền',
         'payment_method':'Phương thức'
     }
+    column_formatters = {
+        'id': lambda v, c, m, p: Markup(f'<a href="{url_for("receipt_detail.detail", receipt_id=m.id)}">{m.id}</a>'),
+        'total_paid': lambda v, c, m, p: f"{m.total_paid:,.0f} ₫" if m.total_paid else "0 ₫"
+    }
 
     can_edit = False
     can_create = False
 
+class ReceiptDetailAdmin(BaseView):
+
+    @expose('/')
+    def index(self):
+        return redirect(url_for('admin.index'))
+
+    @expose('/<int:receipt_id>')
+    def detail(self, receipt_id, **kwargs):
+        receipt = Receipt.query.get_or_404(receipt_id)
+        return self.render(
+            'admin/receipt_details_admin.html',receipt=receipt,enumerate=enumerate)
 
 
 class StatsView(BaseView):
@@ -608,7 +669,62 @@ class StatsView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.role == UserRole.ADMIN
 
+class RepairPayView(BaseView):
+    @expose('/')
+    def index(self):
+        return redirect(url_for('admin.index'))
 
+    @expose('/pay/<int:repair_id>')
+    @login_required
+    def pay(self, repair_id):
+        repair = RepairForm.query.get_or_404(repair_id)
+
+        if repair.receipt:
+            flash("Phiếu này đã được thanh toán", "info")
+            return redirect(url_for('receipt_detail.detail', receipt_id=repair.receipt.id))
+
+        receipt = Receipt(
+            type='REPAIR',
+            customer=repair.reception_form.vehicle.customer,
+            subtotal=repair.total_before_vat,
+            vat_rate=0.1,
+            total_paid=repair.total_before_vat * 1.1,
+            payment_method='CASH'
+        )
+        db.session.add(receipt)
+        db.session.flush()  # đảm bảo receipt.id có sẵn
+
+        for d in repair.details:
+            if d.service_price and d.service_price > 0:
+                db.session.add(ReceiptItem(
+                    receipt_id=receipt.id,
+                    repair_detail_id=d.id,
+                    item_type=ReceiptItemType.SERVICE,
+                    service_id=d.service_id,
+                    quantity=1,
+                    unit_price=d.service_price,
+                    total_price=d.service_price
+                ))
+
+            if d.spare_part_id and d.spare_part_price:
+                db.session.add(ReceiptItem(
+                    receipt_id=receipt.id,
+                    repair_detail_id=d.id,
+                    item_type=ReceiptItemType.SPARE_PART,
+                    spare_part_id=d.spare_part_id,
+                    quantity=d.quantity,
+                    unit_price=d.spare_part_price,
+                    total_price=d.quantity * d.spare_part_price
+                ))
+
+        repair.repair_status = RepairStatus.PAID
+        repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
+        repair.receipt = receipt
+
+        db.session.commit()
+
+        flash("Đã tạo hóa đơn thanh toán thành công!", "success")
+        return redirect(url_for('receipt_detail.detail', receipt_id=receipt.id))
 
 admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name='TRANG CHỦ'))
 
@@ -625,6 +741,10 @@ admin.add_view(SparePartAdmin(SparePart, db.session,name='PHỤ TÙNG'))
 admin.add_view(SystemConfigAdmin(SystemConfig, db.session,name='QUY ĐỊNH'))
 admin.add_view(ReceiptAdmin(Receipt, db.session,name='HOÁ ĐƠN'))
 
-admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
 admin.add_view(StatsView(name='BÁO CÁO THỐNG KÊ', endpoint='statistical-report'))
+admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
+admin.add_view(ReceiptDetailAdmin(name='CHI TIẾT HOÁ ĐƠN', endpoint='receipt_detail'))
+admin.add_view(RepairPayView(name="Thanh toán phiếu", endpoint="repair_pay"))
+
+
 

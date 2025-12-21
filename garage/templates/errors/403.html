@@ -3,7 +3,12 @@
         <div class="error-content">
             <div class="error-icon">⚠️</div>
             <p>Bạn không có quyền truy cập trang này !</p>
-            <a href="{{ url_for('index') }}" class="btn-home">Về Trang Chủ</a>
+            {%if current_user.role.name == 'CUSTOMER'%}
+                <a href="{{ url_for('index') }}" class="btn-home">Về Trang Chủ</a>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="btn-home" style="margin-right:11px">Về Trang Chủ</a>
+                <a href="{{ url_for('admin.index') }}" class="btn-home go-admin">Về Trang Quản Trị</a>
+            {%endif%}
         </div>
     </div>
 </body>
@@ -63,4 +68,9 @@ body {
 .btn-home:hover {
     background: #1d3557;
 }
+.go-admin{
+
+    background-color: green;
+    }
+
 </style>

@@ -1,71 +1,71 @@
 {% extends "admin/model/list.html" %}
 
 {% block head %}
-    {{ super() }}
+{{ super() }}
 {% endblock %}
 
 {% block body %}
 {% macro render_repair_status(v) %}
-    {% set v = v.value %}
-    {% if v == "QUOTED" %}
-        <span class="badge text-white p-2 bg-info">Đã báo giá</span>
-    {% elif v == "APPROVED" %}
-        <span class="badge text-white p-2 bg-primary">Đã duyệt</span>
-    {% elif v == "REPAIRING" %}
-        <span class="badge text-white p-2 bg-warning">Đang sửa</span>
-    {% elif v == "DONE" %}
-        <span class="badge text-white p-2 bg-success">Hoàn tất</span>
-    {% elif v == "PAID" %}
-        <span class="badge text-white p-2 bg-success">Đã thanh toán</span>
-    {% else %}
-        <span class="badge text-white p-2 bg-secondary">Unknown</span>
-    {% endif %}
+{% set v = v.value %}
+{% if v == "QUOTED" %}
+<span class="badge text-white p-2 bg-info">Đã báo giá</span>
+{% elif v == "APPROVED" %}
+<span class="badge text-white p-2 bg-primary">Đã duyệt</span>
+{% elif v == "REPAIRING" %}
+<span class="badge text-white p-2 bg-warning">Đang sửa</span>
+{% elif v == "DONE" %}
+<span class="badge text-white p-2 bg-success">Hoàn tất</span>
+{% elif v == "PAID" %}
+<span class="badge text-white p-2 bg-success">Đã thanh toán</span>
+{% else %}
+<span class="badge text-white p-2 bg-secondary">Unknown</span>
+{% endif %}
 {% endmacro %}
 
 
 {% macro render_status(v) %}
-    {% set value = v.value if v is not number else v %}
-    {% if value == 1 %}
-        <span class="badge text-white p-2 badge-light-text bg-info">Đã đặt lịch</span>
-    {% elif value == 2 %}
-        <span class="badge text-white p-2 badge-light-text bg-primary">Đã xác nhận</span>
-    {% elif value == 3 %}
-        <span class="badge text-white p-2 badge-light-text bg-danger">Đã hủy</span>
-    {% elif value == 4 %}
-        <span class="badge text-white p-2 badge-light-text bg-success">Đã tiếp nhận</span>
-    {% endif %}
+{% set value = v.value if v is not number else v %}
+{% if value == 1 %}
+<span class="badge text-white p-2 badge-light-text bg-info">Đã đặt lịch</span>
+{% elif value == 2 %}
+<span class="badge text-white p-2 badge-light-text bg-primary">Đã xác nhận</span>
+{% elif value == 3 %}
+<span class="badge text-white p-2 badge-light-text bg-danger">Đã hủy</span>
+{% elif value == 4 %}
+<span class="badge text-white p-2 badge-light-text bg-success">Đã tiếp nhận</span>
+{% endif %}
 {% endmacro %}
 
 {% macro render_vehicle_status(v) %}
-    {% set value = v.value if v is not number else v %}
+{% set value = v.value if v is not number else v %}
 
-    {% if value == 1 %}
-        <span class="badge text-dark p-2 bg-warning">Chờ đến gara</span>
+{% if value == 1 %}
+<span class="badge text-dark p-2 bg-warning">Chờ đến gara</span>
 
-    {% elif value == 2 %}
-        <span class="badge text-white p-2  bg-info">Đã nhận xe</span>
+{% elif value == 2 %}
+<span class="badge text-white p-2  bg-info">Đã nhận xe</span>
 
-    {% elif value == 3 %}
-        <span class="badge text-white p-2  bg-primary">Đang kiểm tra</span>
+{% elif value == 3 %}
+<span class="badge text-white p-2  bg-primary">Đang kiểm tra</span>
 
-    {% elif value == 4 %}
-        <span class="badge text-dark p-2 bg-warning">Chờ khách duyệt</span>
+{% elif value == 4 %}
+<span class="badge text-dark p-2 bg-warning">Chờ khách duyệt</span>
 
-    {% elif value == 5 %}
-        <span class="badge text-white p-2 bg-secondary">Đang sửa chữa</span>
+{% elif value == 5 %}
+<span class="badge text-white p-2 bg-secondary">Đang sửa chữa</span>
 
-    {% elif value == 6 %}
-        <span class="badge text-white p-2 bg-success">Đã xong</span>
+{% elif value == 6 %}
+<span class="badge text-white p-2 bg-success">Đã xong</span>
 
-    {% elif value == 7 %}
-        <span class="badge text-white p-2 bg-success">Đã giao xe</span>
+{% elif value == 7 %}
+<span class="badge text-white p-2 bg-success">Đã giao xe</span>
 
-    {% elif value == 8 %}
-        <span class="badge text-white p-2 badge-light-text bg-danger">Đã hủy</span>
+{% elif value == 8 %}
+<span class="badge text-white p-2 badge-light-text bg-danger">Đã hủy</span>
 
-    {% else %}
-        <span class="badge bg-secondary">{{ value }}</span>
-    {% endif %}
+{% else %}
+<span class="badge bg-secondary">{{ value }}</span>
+{% endif %}
 {% endmacro %}
 
 <div class="card shadow mb-4">
@@ -109,31 +109,39 @@
                     {% for c, name in list_columns %}
                     <td>
                         {% if c == 'active' %}
-                            {% if row[c] %}
-                                <span class="fa fa-check-circle text-success" title="active: true"></span>
-                            {% else %}
-                                <span class="fa fa-minus-circle text-danger" title="active: false"></span>
-                            {% endif %}
-                        {% elif c == 'status' %}
-                            {{ render_status(row[c]) }}
-                        {% elif c == 'vehicle_status' %}
-                            {{ render_vehicle_status(row[c]) }}
-                        {% elif c == 'repair_status' %}
-                            {{ render_repair_status(row[c]) }}
+                        {% if row[c] %}
+                        <span class="fa fa-check-circle text-success" title="active: true"></span>
                         {% else %}
-                            {{ get_value(row, c) }}
+                        <span class="fa fa-minus-circle text-danger" title="active: false"></span>
+                        {% endif %}
+                        {% elif c == 'status' %}
+                        {{ render_status(row[c]) }}
+                        {% elif c == 'vehicle_status' %}
+                        {{ render_vehicle_status(row[c]) }}
+                        {% elif c == 'repair_status' %}
+                        {{ render_repair_status(row[c]) }}
+                        {% else %}
+                        {{ get_value(row, c) }}
                         {% endif %}
                     </td>
                     {% endfor %}
 
 
                     <td class="text-center">
-                        {% if admin_view.can_edit %}
-                        <a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
-                           class="btn btn-warning btn-sm">
-                            <i class="fa fa-edit"></i>
-                        </a>
-                        {% endif %}
+                        {% if admin_view.__class__.__name__ == 'RepairFormAdmin'
+      and admin_view.can_edit
+      and row.repair_status.value != 'PAID' %}
+<a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
+   class="btn btn-warning btn-sm">
+    <i class="fa fa-edit"></i>
+</a>
+{% elif admin_view.__class__.__name__ != 'RepairFormAdmin'
+        and admin_view.can_edit %}
+<a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
+   class="btn btn-warning btn-sm">
+    <i class="fa fa-edit"></i>
+</a>
+{% endif %}
 
                         {% if admin_view.can_delete %}
                         <form action="{{ url_for(admin_view.endpoint + '.delete_view', id=row.id) }}" method="post"
@@ -186,4 +194,18 @@
     </div>
 </div>
 
+{% endblock %}
+{% block tail %}
+{{ super() }}
+<script>
+    document.querySelectorAll('tr').forEach(row => {
+        const statusCell = row.querySelector('[data-status]');
+        if (!statusCell) return;
+
+        if (statusCell.dataset.status === 'PAID') {
+            const editBtn = row.querySelector('a[title="Edit record"]');
+            if (editBtn) editBtn.remove();
+        }
+    });
+</script>
 {% endblock %}

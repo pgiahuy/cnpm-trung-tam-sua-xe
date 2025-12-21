@@ -2,59 +2,112 @@
 <html lang="{{ current_lang }}">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{{ _("Garage Center - Trung tâm sửa xe chuyên nghiệp") }}{% endblock %}</title>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body class="d-flex flex-column min-vh-100
+    {% if request.path != '/' and not request.path.startswith('/sparepart') %}pt-nav{% endif %}">
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="container mt-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message | safe }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- Header -->
+    {% block header %}
+    {% include 'layout/header.html' %}
+    {% endblock %}
+
+    <!-- Main content -->
+    <div class="flex-grow-1">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    {% block footer %}
+    {% include 'layout/footer.html' %}
+    {% endblock %}
+
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
             crossorigin="anonymous"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body class="d-flex flex-column min-vh-100
+    <script>
+        const isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
+    </script>
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-{% if request.path != '/' %}pt-nav{% endif %}">
-<!--<p style="color:red">-->
-<!--    Locale hiện tại: {{ current_lang }}-->
-<!--</p>-->
+    <!-- Nút Back to Top -->
+    <button type="button" id="backToTopBtn" class="btn btn-warning rounded-circle shadow-lg" title="{{ _("Trở về đầu trang") }}">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
 
-</head>
-<body class="d-flex flex-column min-vh-100
-{% if request.path != '/' %}
-pt-nav
-{% endif %}
-">
+    <style>
+        #backToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 999;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            border: none;
+            outline: none;
+            opacity: 0.9;
+            transition: all 0.3s ease;
+        }
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div class="container mt-3">
-    {% for category, message in messages %}
-    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message | safe }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-{% endwith %}
+        #backToTopBtn:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
 
-{% block header %}
-{% include 'layout/header.html' %}
-{% endblock %}
+        #backToTopBtn.show {
+            display: block;
+        }
+    </style>
 
-<div class="flex-grow-1" style="height:auto">
-    {% block content %}{% endblock %}
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const backToTopBtn = document.getElementById('backToTopBtn');
 
-{% block footer %}
-{% include 'layout/footer.html' %}
-{% endblock %}
+            window.addEventListener('scroll', function () {
+                if (window.scrollY > 400) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
 
-<script>
-    const isAuthenticated = {{ 'true' if current_user.is_authenticated else 'false' }};
-</script>
-<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
-<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+            backToTopBtn.addEventListener('click', function () {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

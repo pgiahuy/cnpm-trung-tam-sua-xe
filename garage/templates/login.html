@@ -13,7 +13,7 @@
             <h2 class="sign-up__title">{{ _("Đăng nhập") }}</h2>
             <input class="sign-up__inp" type="text" placeholder="{{ _('Tên đăng nhập') }}" name="username" required="required"/>
             <input class="sign-up__inp" type="password" placeholder="{{ _('Mật khẩu') }}" name="password" required="required"/>
-            <a class="forgot__password" href="/reset-password">{{ _("Quên mật khẩu?") }}</a>
+            <a class="forgot__password" href="{{ url_for('forgot_password') }}">{{ _("Quên mật khẩu?") }}</a>
         </div>
         <div class="sign-up__buttons">
             <a class="btn btn--register" href="/register">{{ _("Tạo tài khoản") }}</a>

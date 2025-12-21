@@ -69,6 +69,8 @@ class User(Base, UserMixin):
     customer = relationship("Customer", backref="user", uselist=False)
     employee = relationship("Employee", backref="user", uselist=False)
     comments = relationship("Comment", backref="user", lazy=True)
+    reset_token = Column(String(100), nullable=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
 
     def __str__(self):
         return f"{self.username}"
@@ -77,6 +79,7 @@ class User(Base, UserMixin):
 class Customer(Base):
     full_name = Column(String(255))
     phone = Column(String(10), nullable=False, unique=True)
+    email = Column(String(100), nullable=False, unique=True)
     address = Column(String(255))
     vehicles = relationship("Vehicle", backref="customer", lazy=True)
     user_id = Column(Integer, ForeignKey("user.id"), unique=True)

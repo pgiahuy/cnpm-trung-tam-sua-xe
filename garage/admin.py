@@ -93,6 +93,7 @@ class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
         'phone' : 'Số điện thoại',
         'address': 'Địa chỉ',
         'active':'Trạng thái',
+        'price':'Giá',
         'created_date':'Ngày tạo',
         'user': 'Tài khoản'
     }
@@ -597,17 +598,6 @@ class ReceiptAdmin(MyAdminModelView):
     can_edit = False
     can_create = False
 
-class ReceiptDetailAdmin(BaseView):
-
-    @expose('/')
-    def index(self):
-        return redirect(url_for('admin.index'))
-
-    @expose('/<int:receipt_id>')
-    def detail(self, receipt_id, **kwargs):
-        receipt = Receipt.query.get_or_404(receipt_id)
-        return self.render(
-            'admin/receipt_details_admin.html',receipt=receipt,enumerate=enumerate)
 
 
 class StatsView(BaseView):

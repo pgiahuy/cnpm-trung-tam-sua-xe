@@ -1,4 +1,5 @@
 from flask import Flask, session, redirect, request, url_for
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_babel import Babel, get_locale
@@ -54,6 +55,7 @@ cloudinary.config(
 db = SQLAlchemy(app)
 login = LoginManager(app)
 mail = Mail(app)
+migrate = Migrate(app, db)
+
+
 from garage import admin
-
-

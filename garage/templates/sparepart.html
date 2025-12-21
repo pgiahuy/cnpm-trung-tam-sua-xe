@@ -1,78 +1,52 @@
 {% extends 'layout/base.html' %}
 
-{% block title %}{{ _("Linh kiện ô tô - Garage Center") }}{% endblock %} {# Thêm title cho trang #}
+{% block title %}{{ _("Linh kiện ô tô - Garage Center") }}{% endblock %}
 
 {% block content %}
-
 <div class="hero-section">
-    <div class="overlay">
-        <h3 class="display-5 text-white">{{ _("LINH KIỆN Ô TÔ") }}</h3>
-        <p class="text-white-50">{{ _("Chính hãng – Giá tốt – Dễ đặt hàng") }}</p>
+    <div class="container">
+        <div class="overlay">
+            <h1 class="display-4 text-white">{{ _("LINH KIỆN Ô TÔ") }}</h1>
+            <p class="lead text-white-50">{{ _("Chính hãng – Giá tốt – Dễ đặt hàng") }}</p>
+        </div>
     </div>
 </div>
 
 <div class="sparepart-wrapper">
-    <div id="sparepart-list" class="container my-5">
-
-        <div class="row g-4 justify-content-center">
-            {% for p in spare_parts %}
-            <div class="col-lg-3 col-md-4 col-sm-6 d-flex">
-                <div class="sparepart-card w-100">
-
-                    <div class="sparepart-img-wrapper">
-                        <img src="{{ p.image_url }}" alt="{{ p.name }}">
-                    </div>
-
-                    <div class="sparepart-body d-flex flex-column p-3">
-                        <h6>{{ p.name }}</h6> {# Tên linh kiện từ DB, không dịch #}
-
-                        <p class="text-muted small">
-                            {{ p.supplier | truncate(40) }}
-                        </p>
-
-                        <div class="fw-bold text-warning mb-3">
-                            {{ "{:,.0f}".format(p.unit_price | default(0)) }} {{ _("đ") }} / {{ p.unit }}
-                        </div>
-                        <div class="d-flex gap-2 mt-auto">
-                            <a href="/sparepart/{{ p.id }}" class="btn btn-outline-warning flex-fill">
-                                {{ _("Xem chi tiết") }}
-                            </a>
-                            <a href="#"
-                               class="btn btn-warning"
-                               onclick="addToCart( {{ p.id }}, '{{ p.name }}', {{ p.unit_price }})">
-                                🛒 {# Icon giỏ hàng không cần dịch #}
-                            </a>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-
-        {% if page_of_spareparts > 1 %}
-        <nav class="mt-5">
-            <ul class="pagination justify-content-center">
-                <li class="page-item {% if page == 1 %}disabled{% endif %}">
-                    <a class="page-link" href="/sparepart?page={{ page - 1 }}#sparepart-list">{{ _("«") }}</a> {# Hoặc dùng « Previous nếu muốn #}
-                </li>
-
-                {% for i in range(1, page_of_spareparts + 1) %}
-                <li class="page-item {% if page == i %}active{% endif %}">
-                    <a class="page-link" href="/sparepart?page={{ i }}#sparepart-list">{{ i }}</a> {# Số trang không cần dịch #}
-                </li>
-                {% endfor %}
-
-                <li class="page-item {% if page == page_of_spareparts %}disabled{% endif %}">
-                    <a class="page-link" href="/sparepart?page={{ page + 1 }}#sparepart-list">{{ _("»") }}</a> {# Hoặc Next » #}
-                </li>
-            </ul>
-        </nav>
-        {% endif %}
-
+    <!-- Phần này sẽ được load bằng AJAX -->
+    <div id="sparepart-content">
+        {% include 'sparepart_list.html' %} {# Tách riêng phần list + pagination để dễ load #}
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.addEventListener('click', function(e) {
+        if (e.target.closest('a.page-link')) {
+            e.preventDefault();
+            const link = e.target.closest('a');
+            const url = link.getAttribute('href');
+
+            if (url && url !== '#') {
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('sparepart-content').innerHTML = html;
+
+                    // XÓA HOẶC COMMENT DÒNG NÀY ĐI:
+                    // document.querySelector('.sparepart-wrapper').scrollIntoView({ behavior: 'smooth' });
+
+                    // Nếu muốn giữ vị trí cố định ở đầu (nhưng không cuộn mượt), dùng:
+                    // document.getElementById('sparepart-content').scrollIntoView({ behavior: 'instant' });
+                })
+                .catch(err => console.error('Lỗi load trang:', err));
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

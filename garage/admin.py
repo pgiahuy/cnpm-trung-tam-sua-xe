@@ -174,6 +174,15 @@ class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
 
 
 class ReceptionFormAdmin(MyAdminModelView):
+    @expose('/<int:reception_id>')
+    def detail(self, reception_id, **kwargs):
+        reception = ReceptionForm.query.get_or_404(reception_id)
+        return self.render(
+            'admin/reception_detail.html',
+            reception=reception,
+            enumerate=enumerate
+        )
+
     create_template = 'admin/reception_form.html'
     edit_template = 'admin/reception_form.html'
     extra_js = [
@@ -189,14 +198,15 @@ class ReceptionFormAdmin(MyAdminModelView):
         'receive_type':'Lịch hẹn',
         'created_date':'Ngày lập'
     }
+
     column_filters = [
         DateBetweenFilter(User.created_date, 'created_date')
     ]
 
     column_formatters = {
         'customer': lambda v, c, m, p: (m.vehicle.customer.full_name if m.vehicle and m.vehicle.customer else ''),
-        'receive_type': lambda v, c, m, p: ('Có' if m.receive_type == 'appointment' else 'Không')
-
+        'receive_type': lambda v, c, m, p: ('Có' if m.receive_type == 'appointment' else 'Không'),
+        'id': lambda v, c, m, p: Markup(f'<a href="{url_for("receptionform.detail", reception_id=m.id)}">{m.id}</a>'),
     }
 
     form_columns = [
@@ -513,7 +523,7 @@ class RepairDetailView(BaseView):
     def detail(self, repair_id, **kwargs):
         repair = RepairForm.query.get_or_404(repair_id)
         return self.render(
-            'admin/custom_detail.html',
+            'admin/repair_detail.html',
             repair=repair,
             enumerate=enumerate
         )
@@ -801,7 +811,7 @@ admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
 admin.add_view(CustomerAdmin(Customer, db.session,name='KHÁCH HÀNG'))
 admin.add_view(EmployeeAdmin(Employee, db.session,name='NHÂN VIÊN'))
 admin.add_view(AppointmentAdmin(Appointment, db.session,name='LỊCH HẸN'))
-admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN'))
+admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN',endpoint='receptionform'))
 admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA CHỮA'))
 admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
 admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
@@ -813,6 +823,7 @@ admin.add_view(StatsView(name='BÁO CÁO THỐNG KÊ', endpoint='statistical-rep
 admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
 admin.add_view(ReceiptDetailAdmin(name='CHI TIẾT HOÁ ĐƠN', endpoint='receipt_detail'))
 admin.add_view(RepairPayView(name="Thanh toán phiếu", endpoint="repair_pay"))
+
 
 
 

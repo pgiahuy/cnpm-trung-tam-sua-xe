@@ -155,8 +155,8 @@ msgid "CHĂM SÓC XE CHUYÊN NGHIỆP 24/7"
 msgstr "PROFESSIONAL CAR CARE 24/7"
 
 #: garage/templates/index.html:11
-msgid "Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng."
-msgstr "Reliable and fast car repair and maintenance services."
+msgid "Dịch vụ sửa chữa và bảo dưỡng xe uy tín, nhanh chóng."
+msgstr "Reliable and fast repairing and maintenance services."
 
 #: garage/templates/index.html:14
 msgid "Đặt lịch ngay"

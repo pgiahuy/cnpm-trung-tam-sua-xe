@@ -1,10 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'layout/base.html' %}
 
-</body>
-</html>
+{% block title %}Chọn phương thức thanh toán{% endblock %}
+
+{% block content %}
+<div class="container my-5 d-flex justify-content-center">
+    <div class="card shadow-sm" style="max-width: 600px; width: 100%; background-color:#EEEEEE; padding:50px;">
+        <h3 class="text-center mb-5">Chọn phương thức thanh toán</h3>
+
+        <form method="POST" class="d-flex justify-content-center gap-5">
+            <button type="submit" name="payment_method" value="vnpay"
+                    class="vnpay btn d-flex align-items-center justify-content-center btn-outline-secondary"
+                    style="width:160px; height:160px; padding:0;background-color:#ffff; border-radius:15px; transition: transform 0.3s;"
+                    onmouseover="this.style.transform='scale(1.05)';"
+                    onmouseout="this.style.transform='scale(1)';">
+                <img src="{{ url_for('static', filename='images/vnpay.png') }}"
+                     alt="VNPAY" style="width: 100%;">
+            </button>
+
+            <button type="submit" name="payment_method" value="momo"
+                    class="momo btn d-flex align-items-center justify-content-center "
+                    style="width:160px; height:160px; padding:0; border-radius:15px; transition: transform 0.3s;"
+                    onmouseover="this.style.transform='scale(1.05)';"
+                    onmouseout="this.style.transform='scale(1)';">
+                <img src="{{ url_for('static', filename='images/momo.png') }}"
+                     alt="MoMo" style="width: 100%; border-radius:15px;">
+            </button>
+
+            {% if is_admin %}
+
+            <button type="submit" name="payment_method" value="cash"
+                    class="btn btn-outline-success d-flex align-items-center justify-content-center"
+                    style="width: 120px; height: 120px; padding: 0;">
+                <i class="bi bi-cash fs-2"></i>
+            </button>
+            {% endif %}
+
+        </form>
+    </div>
+</div>
+{% endblock %}

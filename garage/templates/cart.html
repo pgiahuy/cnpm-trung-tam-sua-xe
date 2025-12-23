@@ -45,7 +45,8 @@
         <h5>Tổng số tiền: <span id="cart-amount"> {{"{:,.1f}".format(stats_cart.total_amount)}}</span></h5>
     </div>
 
-    <input type="button" onclick="pay()" value="Thanh toán" class="btn btn-danger"/>
+    <input type="button" onclick="payCart()" value="Thanh toán" class="btn btn-danger"/>
+
 
     {%else%}
     <div class="alert alert-info">Bạn chưa thêm sản phẩm nào trong giỏ hàng!</div>

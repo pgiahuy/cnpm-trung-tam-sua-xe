@@ -6,6 +6,7 @@ from flask_babel import Babel, get_locale
 import cloudinary
 from flask_mail import Mail
 
+
 app = Flask(__name__, template_folder='templates')
 
 app.secret_key = "dwdswdw"
@@ -13,7 +14,7 @@ app.secret_key = "dwdswdw"
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:root@localhost/garage?charset=utf8mb4"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 app.config["PAGE_SIZE"] = 3
-app.config["COMMENTS_PAGE_SIZE"] = 10
+app.config["COMMENTS_PAGE_SIZE"] = 5
 app.config["VAT_RATE"] = 0.1
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587

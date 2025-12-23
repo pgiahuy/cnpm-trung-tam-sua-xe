@@ -21,7 +21,6 @@
     font-family: 'Dosis', sans-serif;
 }
 
-
 .hero-section {
     position: relative;
     background-image: url('https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg');
@@ -35,7 +34,6 @@
     margin-bottom: 30px;
 }
 
-/* Lớp phủ đen toàn bộ ảnh */
 .hero-section::before {
     content: "";
     position: absolute;
@@ -45,7 +43,6 @@
     height: 100%;
     background-color: rgba(0,0,0,0.75);
     z-index: 1;
-    border-radius: 10px;
 }
 
 /* Nội dung nằm trên lớp phủ */
@@ -56,7 +53,6 @@
     padding: 20px;
 }
 
-/* Khoảng cách và kích thước chữ */
 .hero-section h1 {
     font-weight: 700;
 }
@@ -102,7 +98,6 @@
     font-weight: 500;
     }
 
-/* Hiệu ứng khi cuộn: Đặt lại nền tối khi cuộn xuống (tùy chọn) */
 .navbar-transparent.scrolled {
     background-color: #212529 !important;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -143,8 +138,9 @@ button {
   justify-content: center;
 }
 .sign-up__form {
+    margin-top: 45px !important;
   background-color: white;
-  width: 50%;
+  width: 30%;
 
   margin: 0 auto;
   margin-bottom: 10px;
@@ -171,8 +167,8 @@ button {
 }
 .sign-up__inp {
   outline: none;
-  margin-bottom: 15px;
-  padding: 20px 20px 20px 0;
+  margin: 15px 0;
+  padding: 0;
   border: 0;
   border-bottom: 1px solid var(--gray-light);
 
@@ -316,7 +312,6 @@ button {
 }
 
 
-/* ===== DỊCH VỤ TRANG CHỦ ===== */
 .service-home-card {
     background-color: #2a2a2a;
     border-radius: 10px;
@@ -345,7 +340,6 @@ button {
     font-size: 15px;
 }
 
-/* Pagination đẹp, đồng bộ theme */
 .pagination .page-link {
     color: #0dcaf0;
     border-radius: 8px;
@@ -371,14 +365,13 @@ button {
     border-radius: 12px;
 }
 
-/* Lớp phủ đen cho chữ nổi */
+
 .featured-overlay {
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
     border-radius: 12px;
 }
-/* ===== LINH KIỆN NỔI BẬT – HOVER MƯỢT ===== */
 
 
 .sparepart-card {
@@ -387,7 +380,7 @@ button {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 430px; /* Chiều cao cố định – điều chỉnh số này để cao/thấp hơn nếu cần */
+    height: 430px;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -396,9 +389,8 @@ button {
     box-shadow: 0 18px 35px rgba(0,0,0,0.4);
 }
 
-/* Ảnh: cố định chiều cao, crop đẹp dù ảnh gốc tỷ lệ khác nhau */
 .sparepart-img-wrapper {
-    height: 210px; /* Chiều cao ảnh cố định – chiếm phần trên card */
+    height: 210px;
     overflow: hidden;
     background: #111;
     display: flex;
@@ -409,7 +401,7 @@ button {
 .sparepart-img-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Crop đẹp, full khung, không bị méo dù ảnh vuông/dài */
+    object-fit: cover;
     transition: transform 0.3s ease;
 }
 
@@ -417,13 +409,12 @@ button {
     transform: scale(1.08);
 }
 
-/* Nội dung: chiếm phần còn lại, đẩy nút xuống dưới cùng */
 .sparepart-body {
     padding: 16px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Đẩy nút xuống dưới */
+    justify-content: space-between;
     text-align: center;
 }
 
@@ -432,7 +423,7 @@ button {
     color: #fff;
     margin-bottom: 6px;
     font-size: 15px;
-    height: 40px; /* Giới hạn tên không quá dài */
+    height: 40px;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -450,11 +441,11 @@ button {
     -webkit-box-orient: vertical;
 }
 
-/* Nút luôn ở dưới cùng */
+
 .sparepart-body .d-flex {
     margin-top: auto;
 }
-/* ===== FIX LỆCH TRANG LINH KIỆN ===== */
+
 .sparepart-wrapper {
     width: 100%;
     display: flex;
@@ -490,7 +481,7 @@ button {
     color: #ffc107;
 }
 
-/* ===== FIX DẤU CHẤM TRƯỚC ICON NAVBAR / DROPDOWN ===== */
+
 .navbar ul,
 .navbar li {
     list-style: none !important;
@@ -502,7 +493,7 @@ button {
     content: "" !important;
 }
 .pt-nav {
-    padding-top: 50px; /* chiều cao navbar */
+    padding-top: 50px;
 }
 
 main {
@@ -510,7 +501,6 @@ main {
 }
 
 
-/*SEARCH*/
 .nav-search-glass {
     display: flex;
     align-items: center;
@@ -605,3 +595,13 @@ main {
     color: #198754;
 }
 
+
+.text-muted{
+    color: #770000 !important;
+}
+.text-success{
+    color: #00CC00 !important;
+}
+.nav-link.active{
+    color: #FFCC00 !important;
+}

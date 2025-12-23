@@ -37,9 +37,14 @@ class MyAdminHome(AdminIndexView):
         except:
             vat = 0.1
         today = date.today()
-        slots_today = ReceptionForm.query.filter(
+        recepted_today = ReceptionForm.query.filter(
             func.date(ReceptionForm.created_date) == today
         ).count()
+        appointed_today = Appointment.query.filter(
+            func.date(Appointment.schedule_time) == today
+        ).count()
+        slots_today = recepted_today + appointed_today
+
         return self.render('admin/index.html',
                            vat=vat,
                            slots_today=slots_today,

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-12-21 14:10+0700\n"
-"PO-Revision-Date: 2025-12-21 14:10+0700\n"
+"POT-Creation-Date: 2025-12-23 22:24+0700\n"
+"PO-Revision-Date: 2025-12-23 22:24+0700\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: es\n"
 "Language-Team: es <LL@li.org>\n"
@@ -142,6 +142,7 @@ msgid "Số điện thoại"
 msgstr ""
 
 #: garage/templates/contact.html:93 garage/templates/index.html:126
+#: garage/templates/register.html:25 garage/templates/user/profile.html:32
 msgid "Email"
 msgstr ""
 
@@ -162,7 +163,7 @@ msgid "CHĂM SÓC XE CHUYÊN NGHIỆP 24/7"
 msgstr ""
 
 #: garage/templates/index.html:11
-msgid "Dịch vụ sửa chữa và bảo dưỡng xe hơi uy tín, nhanh chóng."
+msgid "Dịch vụ sửa chữa và bảo dưỡng xe uy tín, nhanh chóng."
 msgstr ""
 
 #: garage/templates/index.html:14
@@ -185,9 +186,8 @@ msgstr ""
 msgid "VNĐ"
 msgstr ""
 
-#: garage/templates/index.html:83
-#: garage/templates/partials/sparepart_cards.html:16
-#: garage/templates/services.html:22 garage/templates/sparepart.html:39
+#: garage/templates/index.html:83 garage/templates/services.html:22
+#: garage/templates/sparepart_list.html:19
 msgid "Xem chi tiết"
 msgstr ""
 
@@ -211,7 +211,7 @@ msgstr ""
 msgid "Lời nhắn"
 msgstr ""
 
-#: garage/templates/index.html:137
+#: garage/templates/index.html:136
 msgid "Gửi"
 msgstr ""
 
@@ -249,15 +249,15 @@ msgid "Đăng ký tài khoản thành công! Nhấn OK để đăng nhập ngay!
 msgstr ""
 
 #: garage/templates/layout/header.html:68 garage/templates/register.html:19
-#: garage/templates/register.html:55
+#: garage/templates/register.html:57
 msgid "Đăng ký"
 msgstr ""
 
-#: garage/templates/register.html:47
+#: garage/templates/register.html:49
 msgid "Xác nhận mật khẩu"
 msgstr ""
 
-#: garage/templates/register.html:50
+#: garage/templates/register.html:52
 msgid "Tải ảnh avatar của bạn"
 msgstr ""
 
@@ -273,11 +273,11 @@ msgstr ""
 msgid "Chúng tôi cung cấp các dịch vụ bảo dưỡng và sửa chữa chuyên nghiệp"
 msgstr ""
 
-#: garage/templates/services.html:38 garage/templates/sparepart.html:60
+#: garage/templates/services.html:38
 msgid "«"
 msgstr ""
 
-#: garage/templates/services.html:50 garage/templates/sparepart.html:70
+#: garage/templates/services.html:50
 msgid "»"
 msgstr ""
 
@@ -293,12 +293,16 @@ msgstr ""
 msgid "Chính hãng – Giá tốt – Dễ đặt hàng"
 msgstr ""
 
-#: garage/templates/sparepart.html:35
+#: garage/templates/sparepart_list.html:15
 msgid "đ"
 msgstr ""
 
 #: garage/templates/layout/base.html:6
 msgid "Garage Center - Trung tâm sửa xe chuyên nghiệp"
+msgstr ""
+
+#: garage/templates/layout/base.html:60
+msgid "Trở về đầu trang"
 msgstr ""
 
 #: garage/templates/layout/footer.html:2 garage/templates/layout/header.html:13
@@ -377,7 +381,7 @@ msgid "Thao tác"
 msgstr ""
 
 #: garage/templates/user/appointments-history.html:40
-#: garage/templates/user/profile.html:37
+#: garage/templates/user/profile.html:43
 msgid "Chỉnh sửa"
 msgstr ""
 
@@ -398,7 +402,7 @@ msgid "Đổi mật khẩu - Garage Center"
 msgstr ""
 
 #: garage/templates/user/change-password.html:8
-#: garage/templates/user/profile.html:40
+#: garage/templates/user/profile.html:46
 msgid "Đổi mật khẩu"
 msgstr ""
 
@@ -444,26 +448,30 @@ msgid "Mã hóa đơn"
 msgstr ""
 
 #: garage/templates/user/orders.html:18
-msgid "Ngày thanh toán"
+msgid "Loại"
 msgstr ""
 
 #: garage/templates/user/orders.html:19
-msgid "Tạm tính"
+msgid "Ngày thanh toán"
 msgstr ""
 
 #: garage/templates/user/orders.html:20
-msgid "VAT"
+msgid "Tạm tính"
 msgstr ""
 
 #: garage/templates/user/orders.html:21
-msgid "Tổng thanh toán"
+msgid "VAT"
 msgstr ""
 
 #: garage/templates/user/orders.html:22
+msgid "Tổng thanh toán"
+msgstr ""
+
+#: garage/templates/user/orders.html:23
 msgid "Hình thức"
 msgstr ""
 
-#: garage/templates/user/orders.html:61
+#: garage/templates/user/orders.html:80
 msgid "Bạn chưa có lịch sử mua hàng nào."
 msgstr ""
 
@@ -471,11 +479,11 @@ msgstr ""
 msgid "Hồ sơ cá nhân - Garage Center"
 msgstr ""
 
-#: garage/templates/user/profile.html:32
+#: garage/templates/user/profile.html:37
 msgid "Địa chỉ"
 msgstr ""
 
-#: garage/templates/user/profile.html:33
+#: garage/templates/user/profile.html:38
 msgid "Chưa cập nhật"
 msgstr ""
 

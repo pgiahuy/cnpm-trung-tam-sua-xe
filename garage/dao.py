@@ -32,16 +32,27 @@ def load_customer_by_id(id):
     return Customer.query.filter_by(id=id).first()
 
 
+
 def check_slot_available(check_date=None):
     if check_date is None:
         check_date = date.today()
 
-    max_slot_obj = SystemConfig.query.get('MAX_SLOT_PER_DAY')
+    max_slot_obj = SystemConfig.query.get('MAX_SLOT_PER_DAY') #3
     max_slot = int(max_slot_obj.value) if max_slot_obj else 30
-
-    slots_today = ReceptionForm.query.filter(
+    print(f'check_date: {check_date}')
+    recepted_today = ReceptionForm.query.filter(
         func.date(ReceptionForm.created_date) == check_date
+    ).count() #0
+    print(f"recepted_today: {recepted_today}")
+
+    appointed_today = Appointment.query.filter(
+        func.date(Appointment.schedule_time) == check_date
     ).count()
+    for e in Appointment.query.all():
+        print(f'Appointment.schedule_time: {e.schedule_time}')
+
+    print(f"appointed_today: {appointed_today}")
+    slots_today = recepted_today + appointed_today
 
     remaining = max_slot - slots_today
     success = remaining > 0

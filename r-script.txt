@@ -1,3 +1,7 @@
 pybabel extract -F babel.cfg -o messages.pot  .
 pybabel init -i messages.pot -d translations -l es
 pybabel compile -d translations
+
+
+
+ngrok http 5000

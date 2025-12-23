@@ -19,7 +19,6 @@ from garage.models import UserRole, AppointmentStatus, Service, SparePart, Payme
     RepairForm, SystemConfig, Vehicle, Customer, User, VehicleStatus, RepairStatus, ReceiptItemType
 from garage.vnpay import build_vnpay_url
 
-
 @app.route("/")
 def index():
 
@@ -191,8 +190,7 @@ def booking():
 
             slot_check = dao.check_slot_available(check_date=selected_date)
             if not slot_check["success"]:
-                flash(f"Hôm nay đã đủ số lượt tiếp nhận [ {slot_check['max_slot']} xe ],"
-                      f" quay lại vào ngày mai!","danger")
+                flash(f"Hôm nay đã đủ số lượt tiếp nhận, quay lại vào ngày mai!","danger")
             elif not vehicle_type or not license_plate:
                 flash("Vui lòng nhập đầy đủ loại xe và biển số!", "warning")
             else:
@@ -455,60 +453,63 @@ def receipt_detail(receipt_id):
 
 
 
+#
+#
+# @app.route('/api/pay_spare_part', methods=['POST'])
+# @login_required
+# def pay():
+#     cart = session.get('cart')
+#     if not cart:
+#         return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+#     txn_ref = f"{current_user.id}_{int(time.time())}"
+#
+#     vat_rate = 0 #dao.get_vat_value()
+#
+#     total = utils.count_cart(cart)['total_amount']
+#     total += vat_rate*total
+#
+#     payment = Payment(
+#         user_id=current_user.id,
+#         amount=total,
+#         vat_rate=vat_rate,
+#         method='VNPAY',
+#         type='BUY',
+#         transaction_ref=txn_ref,
+#         status=PaymentStatus.PENDING,
+#         cart_snapshot=json.dumps(cart)
+#     )
+#     db.session.add(payment)
+#     db.session.commit()
+#
+#     pay_url = build_vnpay_url(total, txn_ref)
+#
+#     return jsonify({
+#         'code': 200,
+#         'pay_url': pay_url
+#     })
 
 
-@app.route('/api/pay_spare_part', methods=['POST'])
-@login_required
-def pay():
-    cart = session.get('cart')
-    if not cart:
-        return jsonify({'code': 400, 'msg': 'Cart rỗng'})
-    txn_ref = f"{current_user.id}_{int(time.time())}"
 
-    vat_rate = 0 #dao.get_vat_value()
 
-    total = utils.count_cart(cart)['total_amount']
-    total += vat_rate*total
 
-    payment = Payment(
-        user_id=current_user.id,
-        amount=total,
-        vat_rate=vat_rate,
-        method='VNPAY',
-        type='BUY',
-        transaction_ref=txn_ref,
-        status=PaymentStatus.PENDING,
-        cart_snapshot=json.dumps(cart)
-    )
-    db.session.add(payment)
-    db.session.commit()
 
-    pay_url = build_vnpay_url(total, txn_ref)
-
-    return jsonify({
-        'code': 200,
-        'pay_url': pay_url
-    })
 
 
 @app.route('/api/pay_repair/<int:repair_id>', methods=['POST'])
 @login_required
 def pay_repair(repair_id):
     repair = RepairForm.query.get_or_404(repair_id)
-    total_before_vat = repair.total_before_vat
 
     vat_rate = dao.get_vat_value()
+    total = repair.total_before_vat * (1 + vat_rate)
 
-    total_amount = total_before_vat + total_before_vat * vat_rate
-
-    txn_ref = f"{repair.id}_{int(time.time())}"
+    txn_ref = f"REPAIR_{repair.id}_{int(time.time())}"
 
     payment = Payment(
         user_id=current_user.id,
         repair_id=repair.id,
-        amount=total_amount,
+        amount=total,
         vat_rate=vat_rate,
-        method="VNPAY",
         type="REPAIR",
         status=PaymentStatus.PENDING,
         transaction_ref=txn_ref
@@ -516,68 +517,64 @@ def pay_repair(repair_id):
     db.session.add(payment)
     db.session.commit()
 
-    pay_url = build_vnpay_url(total_amount, txn_ref)
-    return jsonify({'code': 200, 'pay_url': pay_url})
+    return jsonify({
+        "code": 200,
+        "redirect": url_for("choose_payment", payment_id=payment.id)
+    })
 
 
-@app.route('/billing/vnpay_return')
-@login_required
-def vnpay_return():
-    response_code = request.args.get('vnp_ResponseCode')
-    txn_ref = request.args.get('vnp_TxnRef')
-    vnp_trans_no = request.args.get('vnp_TransactionNo')
 
-    payment = Payment.query.filter_by(
-        transaction_ref=txn_ref,
-        method='VNPAY'
-    ).first()
+def create_receipt(payment):
+    subtotal = payment.amount / (1 + payment.vat_rate)
 
-    if not payment:
-        return "Payment không tồn tại", 404
-
-    if response_code != '00':
-        payment.status = PaymentStatus.FAILED
-        db.session.commit()
-        return render_template("payment_failed.html")
-
-    # Thanh toán thành công
-    payment.status = PaymentStatus.SUCCESS
-    payment.vnp_transaction_no = vnp_trans_no
-    type = getattr(payment, 'type')
-    subtotal = payment.amount/(1+payment.vat_rate)
     receipt = Receipt(
         customer_id=payment.user.customer.id,
         subtotal=subtotal,
         vat_rate=payment.vat_rate,
         total_paid=payment.amount,
-        payment_method="VNPAY",
-        type=type  # BUY hoặc REPAIR
+        payment_method=payment.method,
+        type=payment.type  # BUY hoặc REPAIR
     )
     db.session.add(receipt)
-    db.session.flush()  # để có receipt.id
+    db.session.flush()  # có receipt.id
 
-
-    # Tạo receipt item
-    if type == "BUY":
-
-        cart = json.loads(payment.cart_snapshot)
+    if payment.type == "BUY":
+        cart = json.loads(payment.cart_snapshot or '{}')
 
         if not cart:
-            return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+            raise ValueError("Giỏ hàng trống hoặc dữ liệu bị lỗi")
 
-        for c in cart.values():
-            item = ReceiptItem(
+        for item_id, item in cart.items():
+            sparepart = SparePart.query.get(int(item_id))
+            if not sparepart:
+                raise ValueError(f"Sản phẩm ID {item_id} không tồn tại")
+            if sparepart.inventory < item['quantity']:
+                raise ValueError(f"Sản phẩm '{sparepart.name}' chỉ còn {sparepart.inventory} trong kho")
+
+        receipt_items = []
+        for item_id, item in cart.items():
+            sparepart = SparePart.query.get(int(item_id))
+            receipt_item = ReceiptItem(
                 receipt_id=receipt.id,
-                spare_part_id=int(c['id']),
-                quantity=c['quantity'],
-                unit_price=c['unit_price'],
-                total_price=c['quantity'] * c['unit_price']
+                spare_part_id=sparepart.id,
+                item_type=ReceiptItemType.SPARE_PART,
+                quantity=item['quantity'],
+                unit_price=item['unit_price'],
+                total_price=item['quantity'] * item['unit_price']
             )
-            db.session.add(item)
-        session.pop('cart', None)
+            receipt_items.append(receipt_item)
+            db.session.add(receipt_item)
 
-    elif type == "REPAIR":
+        for item_id, item in cart.items():
+            sparepart = SparePart.query.get(int(item_id))
+            sparepart.inventory -= item['quantity']
+
+
+
+    elif payment.type == "REPAIR":
+
         repair = payment.repair
+
         for d in repair.details:
 
             if d.service_price and d.service_price > 0:
@@ -600,15 +597,230 @@ def vnpay_return():
                     quantity=d.quantity,
                     unit_price=d.spare_part_price,
                     total_price=d.quantity * d.spare_part_price
+
                 ))
         repair.repair_status = RepairStatus.PAID
         repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
 
-
     payment.receipt_id = receipt.id
     db.session.commit()
+    return receipt
 
+
+@app.route("/checkout", methods=["POST"])
+@login_required
+def checkout():
+    cart = session.get('cart')
+    if not cart:
+        flash("Giỏ hàng rỗng", "danger")
+        return redirect(url_for("cart_page"))
+
+    txn_ref = f"{current_user.id}_{int(time.time())}"
+    total = utils.count_cart(cart)['total_amount']
+    vat_rate = 0  # dao.get_vat_value()
+
+    payment = Payment(
+        user_id=current_user.id,
+        amount=total + total * vat_rate,
+        vat_rate=vat_rate,
+        type='BUY',  # mua hàng
+        status=PaymentStatus.PENDING,
+        cart_snapshot=json.dumps(cart),
+        transaction_ref=txn_ref
+    )
+    db.session.add(payment)
+    db.session.commit()
+
+    return redirect(url_for("choose_payment", payment_id=payment.id))
+
+
+@app.route("/choose_payment/<int:payment_id>", methods=["GET", "POST"])
+@login_required
+def choose_payment(payment_id):
+    payment = Payment.query.get_or_404(payment_id)
+    is_admin = current_user.role == 'ADMIN'
+
+    if request.method == "POST":
+        method = request.form.get("payment_method")
+
+        if method == "vnpay":
+            payment.method = "VNPAY"
+            db.session.commit()
+            pay_url = build_vnpay_url(payment.amount, payment.transaction_ref)
+            return redirect(pay_url)
+
+        elif method == "momo":
+            payment.method = "MOMO"
+
+            db.session.commit()
+            return redirect(url_for("pay_momo", payment_id=payment.id))
+
+        elif method == "cash" and is_admin:
+            payment.method = "CASH"
+            payment.status = PaymentStatus.SUCCESS
+            db.session.commit()
+            return create_receipt(payment)  # tạo Receipt ngay
+
+    return render_template("choose_payment.html", payment=payment, is_admin=is_admin)
+
+
+@app.route('/billing/vnpay_return')
+@login_required
+def vnpay_return():
+    response_code = request.args.get('vnp_ResponseCode')
+    txn_ref = request.args.get('vnp_TxnRef')
+    vnp_trans_no = request.args.get('vnp_TransactionNo')
+
+    payment = Payment.query.filter_by(
+        transaction_ref=txn_ref,
+        method='VNPAY'
+    ).first()
+
+    if not payment:
+        return "Payment không tồn tại", 404
+
+    if payment.status == PaymentStatus.SUCCESS:
+        receipt = Receipt.query.get(payment.receipt_id)
+        return render_template("payment_success.html", receipt=receipt)
+
+    if response_code != '00':
+        payment.status = PaymentStatus.FAILED
+        db.session.commit()
+        return render_template("payment_failed.html")
+
+    # lần đầu
+    payment.status = PaymentStatus.SUCCESS
+    payment.vnp_transaction_no = vnp_trans_no
+
+    create_receipt(payment)
+
+    receipt = Receipt.query.get(payment.receipt_id)
+    if payment.type == 'BUY':
+        session.pop('cart', None)
     return render_template("payment_success.html", receipt=receipt)
+
+
+
+
+
+@app.route("/pay_momo/<int:payment_id>")
+@login_required
+def pay_momo(payment_id):
+    payment = Payment.query.get_or_404(payment_id)
+
+    import uuid, hmac, hashlib, requests, json
+
+    # Sandbox MoMo credentials
+    accessKey = "F8BBA842ECF85"
+    secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
+    endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
+    partnerCode = "MOMO"  # Sandbox partnerCode
+
+    # Tạo thông tin đơn hàng
+    orderId = str(uuid.uuid4())
+    requestId = str(uuid.uuid4())
+    amount = str(int(payment.amount))
+    orderInfo = f"Thanh toán phiếu #{payment.id}"
+    redirectUrl = "http://127.0.0.1:5000/momo_return"
+    ipnUrl = "https://preaortic-hokily-bayleigh.ngrok-free.dev/momo_ipn"
+    extraData = ""
+    requestType = "captureWallet"  # Đúng cho thanh toán Ví MoMo (hoặc đổi thành "payWithATM" nếu muốn ATM)
+
+    # Tạo chữ ký theo đúng thứ tự MoMo yêu cầu (KHÔNG có paymentCode)
+    rawSignature = (
+        f"accessKey={accessKey}"
+        f"&amount={amount}"
+        f"&extraData={extraData}"
+        f"&ipnUrl={ipnUrl}"
+        f"&orderId={orderId}"
+        f"&orderInfo={orderInfo}"
+        f"&partnerCode={partnerCode}"
+        f"&redirectUrl={redirectUrl}"
+        f"&requestId={requestId}"
+        f"&requestType={requestType}"
+    )
+
+    signature = hmac.new(
+        bytes(secretKey, 'utf-8'),
+        bytes(rawSignature, 'utf-8'),
+        hashlib.sha256
+    ).hexdigest()
+
+    data = {
+        "partnerCode": partnerCode,
+        "partnerName": "Demo Store",
+        "storeId": "TestStore",
+        "requestId": requestId,
+        "amount": amount,
+        "orderId": orderId,
+        "orderInfo": orderInfo,
+        "redirectUrl": redirectUrl,
+        "ipnUrl": ipnUrl,
+        "lang": "vi",
+        "autoCapture": True,
+        "requestType": requestType,
+        "extraData": extraData,
+        "orderGroupId": "",
+        "signature": signature
+    }
+
+    try:
+        response = requests.post(endpoint, json=data, headers={'Content-Type': 'application/json'})
+        res_data = response.json()
+    except Exception as e:
+        return f"Lỗi kết nối tới MoMo: {e}"
+
+    # Lưu orderId vào Payment
+    payment.momo_order_id = orderId
+    db.session.commit()
+
+    if 'payUrl' in res_data:
+        return redirect(res_data['payUrl'])
+    else:
+        return f"Error khi tạo MoMo payment: {res_data}"
+
+@app.route("/momo_ipn", methods=["POST"])
+def momo_ipn():
+    data = request.get_json()
+    orderId = data.get("orderId")
+    resultCode = data.get("resultCode")
+
+    payment = Payment.query.filter_by(momo_order_id=orderId).first()
+    if not payment:
+        return jsonify({"resultCode": 1})
+
+    if payment.status == PaymentStatus.SUCCESS:
+        return jsonify({"resultCode": 0})
+
+    if resultCode == 0:
+        payment.status = PaymentStatus.SUCCESS
+        create_receipt(payment)
+    else:
+        payment.status = PaymentStatus.FAILED
+        db.session.commit()
+
+    return jsonify({"resultCode": 0})
+
+@app.route("/momo_return")
+@login_required
+def momo_return():
+    orderId = request.args.get("orderId")
+    payment = Payment.query.filter_by(momo_order_id=orderId).first()
+
+    if not payment or payment.status != PaymentStatus.SUCCESS:
+        return render_template("payment_failed.html")
+
+    receipt = Receipt.query.get(payment.receipt_id)
+    if payment.type == 'BUY':
+        session.pop('cart', None)
+    return render_template("payment_success.html", receipt=receipt)
+
+
+
+
+
+
+
 
 
 @app.route("/user/appointments/<int:appointment_id>/cancel", methods=["POST"])

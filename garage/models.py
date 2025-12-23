@@ -258,6 +258,7 @@ class Payment(Base):
     vat_rate = Column(DOUBLE, default=0)
     transaction_ref = Column(String(100), unique=True)      # txn_ref gửi VNPAY
     vnp_transaction_no = Column(String(100))                # mã VNPAY trả về
+    momo_order_id  = Column(String(200))
 
     status = Column(
         SQLEnum(PaymentStatus),

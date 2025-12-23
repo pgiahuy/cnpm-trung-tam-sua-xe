@@ -31,6 +31,30 @@ def load_customers():
 def load_customer_by_id(id):
     return Customer.query.filter_by(id=id).first()
 
+
+def check_slot_available(check_date=None):
+    if check_date is None:
+        check_date = date.today()
+
+    max_slot_obj = SystemConfig.query.get('MAX_SLOT_PER_DAY')
+    max_slot = int(max_slot_obj.value) if max_slot_obj else 30
+
+    slots_today = ReceptionForm.query.filter(
+        func.date(ReceptionForm.created_date) == check_date
+    ).count()
+
+    remaining = max_slot - slots_today
+    success = remaining > 0
+
+    return {
+        "success": success,
+        "max_slot": max_slot,
+        "used_slots": slots_today,
+        "remaining": remaining,
+        "date": check_date
+    }
+
+
 def load_confirmed_appointments():
     query = db.session.query(Appointment).filter(Appointment.status == AppointmentStatus.CONFIRMED)
     return query.all()

@@ -307,17 +307,10 @@ class ReceptionFormAdmin(MyAdminModelView):
         try:
             with db.session.no_autoflush:
                 if is_created:
-                    max_slot_obj = SystemConfig.query.get('MAX_SLOT_PER_DAY')
-                    max_slot = int(max_slot_obj.value) if max_slot_obj else 30
-
-                    today = date.today()
-                    slots_today = ReceptionForm.query.filter(
-                        func.date(ReceptionForm.created_date) == today
-                    ).count()
-
-                    if slots_today >= max_slot:
+                    result = dao.check_slot_available()
+                    if not result["success"]:
                         raise ValidationError(
-                            "Hôm nay đã đủ số lượt tiếp nhận, quay lại vào ngày mai!"
+                            f"Hôm nay đã đủ số lượt tiếp nhận [ {result['max_slot']} xe ], quay lại vào ngày mai!"
                         )
 
                 receive_type = form.receive_type.data

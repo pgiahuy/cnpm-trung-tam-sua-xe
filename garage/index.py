@@ -162,7 +162,6 @@ def unauthorized_callback():
     flash("Bạn cần đăng nhập để tiếp tục!", "warning")
     return redirect('/login?next=' + request.path)
 
-
 @app.route("/bookrepair", methods=["GET", "POST"])
 @login_required
 def booking():
@@ -190,7 +189,11 @@ def booking():
             description = form_data['description']
             time_slot = form_data['scheduleTime']
 
-            if not vehicle_type or not license_plate:
+            slot_check = dao.check_slot_available(check_date=selected_date)
+            if not slot_check["success"]:
+                flash(f"Hôm nay đã đủ số lượt tiếp nhận [ {slot_check['max_slot']} xe ],"
+                      f" quay lại vào ngày mai!","danger")
+            elif not vehicle_type or not license_plate:
                 flash("Vui lòng nhập đầy đủ loại xe và biển số!", "warning")
             else:
                 ok = dao.add_appointment(
@@ -202,6 +205,7 @@ def booking():
                 )
 
                 if ok:
+                    flash("Đặt lịch thành công!", "success")
                     return redirect(url_for("index"))
                 else:
                     flash(

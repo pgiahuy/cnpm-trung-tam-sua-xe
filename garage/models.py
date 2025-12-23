@@ -128,6 +128,7 @@ class ReceptionForm(Base):
 
 
 
+
 class RepairForm(Base):
     reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False)
     vehicle_id = Column(Integer, ForeignKey("vehicle.id"), nullable=False)

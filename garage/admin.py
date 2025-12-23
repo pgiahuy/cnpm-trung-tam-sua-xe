@@ -4,6 +4,7 @@ from flask import url_for, render_template, redirect, request, send_file, flash,
 from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
+from flask_admin.contrib.sqla.filters import DateBetweenFilter, FilterEqual
 
 from flask_login import current_user, login_required
 from markupsafe import Markup
@@ -139,7 +140,7 @@ class UserAdmin(AdminAccessMixin,MyAdminModelView):
         'username',
     ]
     column_filters = [
-        'role'
+        FilterEqual(User.role, 'role', options=[(r.name, r.name) for r in UserRole])
     ]
 
 class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
@@ -178,15 +179,19 @@ class ReceptionFormAdmin(MyAdminModelView):
     extra_js = [
         '/static/js/receive_form.js'
     ]
-    column_list = ['id','customer','vehicle','employee','receive_type','error_description','active']
+    column_list = ['id','customer','vehicle','employee','receive_type','error_description','active','created_date']
     column_labels = {
         'id': 'ID',
         'customer': 'Khách hàng',
         'vehicle': 'Biển số xe',
         'employee': 'Nhân viên tiếp nhận',
         'error_description': 'Mô tả lỗi',
-        'receive_type':'Lịch hẹn'
+        'receive_type':'Lịch hẹn',
+        'created_date':'Ngày lập'
     }
+    column_filters = [
+        DateBetweenFilter(User.created_date, 'created_date')
+    ]
 
     column_formatters = {
         'customer': lambda v, c, m, p: (m.vehicle.customer.full_name if m.vehicle and m.vehicle.customer else ''),
@@ -212,6 +217,7 @@ class ReceptionFormAdmin(MyAdminModelView):
 
         'error_description'
     ]
+
 
     form_extra_fields = {
 
@@ -364,7 +370,7 @@ class ReceptionFormAdmin(MyAdminModelView):
 
 
 class RepairFormAdmin(MyAdminModelView):
-    column_list = ['id', 'employee','customer','vehicle_plate',  'reception_form', 'repair_status', 'total_money']
+    column_list = ['id', 'employee','customer','vehicle_plate',  'reception_form', 'repair_status', 'total_money','created_date']
     column_labels = {
         'id': 'ID',
         'employee': 'Nhân viên lập',
@@ -373,6 +379,7 @@ class RepairFormAdmin(MyAdminModelView):
         'total_money': 'Tổng tiền',
         'repair_status':'Trạng thái',
         'customer':'Khách hàng',
+        'created_date':'Ngày lập',
         'pay':''
     }
 
@@ -395,7 +402,10 @@ class RepairFormAdmin(MyAdminModelView):
             }
         ))
     ]
-
+    column_filters = [
+        FilterEqual(RepairForm.repair_status, 'Trạng thái'),
+       # FilterBetween(RepairForm.created_date, 'Ngày lập')
+    ]
     REPAIR_TO_VEHICLE_STATUS = {
         "QUOTED": VehicleStatus.WAITING_APPROVAL,
         "REPAIRING": VehicleStatus.REPAIRING,
@@ -435,6 +445,7 @@ class RepairFormAdmin(MyAdminModelView):
 
             if new_vehicle_status and model.vehicle.vehicle_status != new_vehicle_status:
                 model.vehicle.vehicle_status = new_vehicle_status
+
                 db.session.add(model.vehicle)
 
     column_formatters = {
@@ -455,11 +466,11 @@ class RepairFormAdmin(MyAdminModelView):
     form_extra_fields = {
             'reception_form': QuerySelectField(
         'Chọn phiếu tiếp nhận',
-        query_factory=lambda: db.session.query(ReceptionForm).filter(ReceptionForm.active == True).all(),
+        query_factory=lambda: db.session.query(ReceptionForm).filter(ReceptionForm.repair_form == None).all(),
         get_label=lambda r: f"[{r.vehicle.license_plate}] - [{r.created_date}] - [{r.vehicle.customer.full_name}]"
                             if r.vehicle else f"PTN {r.id}",
         allow_blank=True,
-        validators=[Optional()]
+        validators=[DataRequired()]
         ),
     }
 

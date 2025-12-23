@@ -5,7 +5,6 @@
 {% block content %}
 <div class="container sparepart-detail-container my-5 pt-2">
 
-
     <div class="text-center mt-5 p-5 bg-dark rounded shadow-lg">
         <h2 class="display-4 fw-bold text-warning">Chi tiết linh kiện</h2>
         <p class="lead" style="color: #f8f9fa;">Thông tin sản phẩm và bảng giá tham khảo</p>
@@ -40,27 +39,48 @@
                 </div>
 
                 <ul class="list-unstyled mb-4">
-                    <li><strong>Tình trạng:</strong> <span class="text-success">Còn hàng</span></li>
+                    <li>
+                        <strong>Tình trạng:</strong>
+                        {% if (sparepart.inventory or 0) > 0 %}
+                            <span class="text-success fw-bold">Còn hàng ({{ sparepart.inventory }} sản phẩm)</span>
+                        {% else %}
+                            <span class="text-danger fw-bold">Hết hàng</span>
+                        {% endif %}
+                    </li>
                     <li><strong>Bảo hành:</strong> 6 tháng</li>
                 </ul>
 
-                <div class="d-flex justify-content-between flex-wrap">
-                    <a href="/services" class="btn btn-outline-warning px-4 py-2 fw-bold">
-                        Xem sản phẩm linh kiện khác &raquo;
-                    </a>
-                    <button class="btn btn-warning px-4 py-2 fw-bold"
-                            onclick="addToCart({{ sparepart.id }}, '{{ sparepart.name }}', {{ sparepart.unit_price }})">
-                        <i class="fa-solid fa-cart-plus me-2"></i> Thêm vào giỏ
-                    </button>
+                <!-- Thông báo hết hàng nổi bật -->
+                {% if (sparepart.inventory or 0) <= 0 %}
+                <div class="alert alert-danger text-center mb-4 py-3">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    <strong>Sản phẩm hiện đã hết hàng!</strong><br>
+                    <small>Vui lòng quay lại sau hoặc liên hệ để được thông báo khi có hàng.</small>
                 </div>
+                {% endif %}
 
+                <div class="d-flex justify-content-between flex-wrap gap-3">
+                    <a href="/sparepart" class="btn btn-outline-warning px-4 py-2 fw-bold">
+                        Xem linh kiện khác &raquo;
+                    </a>
 
+                    {% if (sparepart.inventory or 0) > 0 %}
+                        <button class="btn btn-warning px-5 py-3 fw-bold text-dark"
+                                onclick="addToCart({{ sparepart.id }}, '{{ sparepart.name|escape|replace("'", "\\'") }}', {{ sparepart.unit_price }})">
+                            <i class="fa-solid fa-cart-plus me-2"></i> Thêm vào giỏ hàng
+                        </button>
+                    {% else %}
+                        <button class="btn btn-secondary px-5 py-3 fw-bold" disabled>
+                            <i class="fa-solid fa-ban me-2"></i> Hết hàng
+                        </button>
+                    {% endif %}
+                </div>
             </div>
         </div>
-
     </div>
-    <div class="mt-5 p-4 bg-dark rounded shadow-lg">
 
+
+    <div class="mt-5 p-4 bg-dark rounded shadow-lg">
         <h4 class="text-warning fw-bold mb-4">
             <i class="fa-solid fa-comments me-2"></i>
             Bình luận & đánh giá
@@ -69,13 +89,12 @@
         {% if current_user.is_authenticated %}
         <form id="comment-form" class="mb-4">
             <div class="mb-3">
-            <textarea class="form-control bg-dark text-white border-secondary"
-                      id="commentId"
-                      rows="3"
-                      placeholder="Nhập bình luận của bạn..."
-                      required></textarea>
+                <textarea class="form-control bg-dark text-white border-secondary"
+                          id="commentId"
+                          rows="3"
+                          placeholder="Nhập bình luận của bạn..."
+                          required></textarea>
             </div>
-
             <div class="d-flex justify-content-end">
                 <button type="submit"
                         class="btn btn-warning fw-bold px-4"
@@ -98,43 +117,38 @@
 
         <div id="comments-list">
             {% if comments %}
-            {% for comment in comments %}
-            <div class="comment-item mb-4 p-3 rounded bg-secondary bg-opacity-10 border-left-warning">
-                <div class="d-flex justify-content-between mb-2">
-                    <strong class="text-warning">
-                        <i class="fa-solid fa-user me-1"></i> {{ comment.user.username }}
-                    </strong>
-                    <small class="text-muted">{{ comment.created_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                {% for comment in comments %}
+                <div class="comment-item mb-4 p-3 rounded bg-secondary bg-opacity-10 border-left-warning">
+                    <div class="d-flex justify-content-between mb-2">
+                        <strong class="text-warning">
+                            <i class="fa-solid fa-user me-1"></i> {{ comment.user.username }}
+                        </strong>
+                        <small class="text-muted">{{ comment.created_date.strftime('%d/%m/%Y %H:%M') }}</small>
+                    </div>
+                    <p class="text-light mb-0">{{ comment.content }}</p>
                 </div>
-                <p class="text-light mb-0">{{ comment.content }}</p>
-            </div>
-            {% endfor %}
+                {% endfor %}
             {% else %}
-            <p class="text-muted fst-italic text-center py-4">
-                Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận!
-            </p>
+                <p class="text-muted fst-italic text-center py-4">
+                    Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận!
+                </p>
             {% endif %}
         </div>
+
         {% if pagination.total_pages > 1 %}
         <nav class="mt-5" aria-label="Page navigation">
             <ul class="pagination justify-content-center">
-
                 <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
                     <a class="page-link" href="{{ url_for('sparepart_detail', id=sparepart.id, page=current_page-1) }}"
-                       tabindex="-1" aria-disabled="true">« Trước</a>
+                       tabindex="-1">« Trước</a>
                 </li>
 
-
-                {% set start_page = 1 if current_page - 2 < 1 else current_page - 2 %}
-                {% set end_page = pagination.total_pages if current_page + 2 > pagination.total_pages else current_page
-                + 2 %}
+                {% set start_page = [current_page - 2, 1] | max %}
+                {% set end_page = [current_page + 2, pagination.total_pages] | min %}
 
                 {% if start_page > 1 %}
-                <li class="page-item"><a class="page-link"
-                                         href="{{ url_for('sparepart_detail', id=sparepart.id, page=1) }}">1</a></li>
-                {% if start_page > 2 %}
-                <li class="page-item disabled"><span class="page-link">...</span></li>
-                {% endif %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('sparepart_detail', id=sparepart.id, page=1) }}">1</a></li>
+                {% if start_page > 2 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
                 {% endif %}
 
                 {% for p in range(start_page, end_page + 1) %}
@@ -144,108 +158,79 @@
                 {% endfor %}
 
                 {% if end_page < pagination.total_pages %}
-                {% if end_page < pagination.total_pages - 1 %}
-                <li class="page-item disabled"><span class="page-link">...</span></li>
+                {% if end_page < pagination.total_pages - 1 %}<li class="page-item disabled"><span class="page-link">...</span></li>{% endif %}
+                <li class="page-item"><a class="page-link" href="{{ url_for('sparepart_detail', id=sparepart.id, page=pagination.total_pages) }}">{{ pagination.total_pages }}</a></li>
                 {% endif %}
-                <li class="page-item"><a class="page-link"
-                                         href="{{ url_for('sparepart_detail', id=sparepart.id, page=pagination.total_pages) }}">{{
-                    pagination.total_pages }}</a></li>
-                {% endif %}
-
 
                 <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                    <a class="page-link" href="{{ url_for('sparepart_detail', id=sparepart.id, page=current_page+1) }}">Sau
-                        »</a>
+                    <a class="page-link" href="{{ url_for('sparepart_detail', id=sparepart.id, page=current_page+1) }}">Sau »</a>
                 </li>
             </ul>
         </nav>
         {% endif %}
     </div>
 
-
     <div class="text-center mt-2 p-5 bg-dark rounded shadow-lg" style="background: pink">
         <h3 class="text-warning">Cần tư vấn thêm?</h3>
         <p class="text-light">Liên hệ ngay với đội ngũ kỹ thuật để được hỗ trợ nhanh chóng!</p>
         <a href="/contact" class="btn btn-outline-warning btn-lg fw-bold">Liên hệ</a>
     </div>
+</div>
+{% endblock %}
 
+{% block extra_css %}
+<style>
+    .sparepart-detail-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
 
-    {% endblock %}
+    .sparepart-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: #1a1a1a !important;
+        color: #fff;
+    }
 
+    .sparepart-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
 
-    {% block extra_css %}
-    <style>
-        /* Container gom giữa */
-        .sparepart-detail-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
+    .sparepart-img-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        max-height: 400px;
+        overflow: hidden;
+        background: #111;
+    }
 
-        /* Card linh kiện */
-        .sparepart-card {
-            border-radius: 15px;
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            background: #1a1a1a !important; /* background tối */
-            color: #fff;
-        }
+    .sparepart-img-wrapper img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        border-radius: 12px;
+    }
 
-        .sparepart-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-        }
+    .sparepart-card .btn {
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
 
-        /* Ảnh linh kiện */
-        .sparepart-img-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-height: 400px;
-            overflow: hidden;
-            background: #111;
-        }
-
-        .sparepart-img-wrapper img {
-            width: 100%;
-            height: auto;
-            object-fit: contain;
-            border-radius: 12px;
-        }
-
-        /* Text */
-        .sparepart-card h3, .sparepart-card h5 {
-            font-weight: 700;
-        }
-
-        .sparepart-card p, .sparepart-card li {
-            font-size: 16px;
-            color: #ddd;
-        }
-
-        /* Button */
-        .sparepart-card .btn {
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .sparepart-card .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255,193,7,0.4);
-        }
+    .sparepart-card .btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(255,193,7,0.4);
+    }
 
     .comment-item {
         border-left: 4px solid #ffc107;
     }
 
-    .comment-item p {
-        font-size: 15px;
-        line-height: 1.6;
-    }
-
     textarea.form-control::placeholder {
         color: #aaa;
     }
-
-    </style>
-    {% endblock %}
+</style>
+{% endblock %}

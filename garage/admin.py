@@ -92,6 +92,33 @@ class ServiceAdmin(AdminAccessMixin,MyAdminModelView):
     column_formatters = {
         'price': lambda v, c, m, p: f"{m.price:,.0f} ₫" if m.price else "0 ₫"
     }
+    def create_form(self):
+        form = super().create_form()
+        self._populate_choices(form)
+        return form
+
+    def edit_form(self):
+        form = super().edit_form()
+        self._populate_choices(form)
+        return form
+
+    def _populate_choices(self, form):
+        pass
+        # form.customer_id.choices = [('', '-- Chọn khách hàng --')] + [
+        #     (c.id, f"{c.full_name} - {c.phone}")
+        #     for c in Customer.query.order_by(Customer.full_name).all()
+        # ]
+        #
+        # appointments = Appointment.query.filter_by(status=AppointmentStatus.CONFIRMED).all()
+        # form.appointment_id.choices = [('', '-- Chọn lịch hẹn --')] + [
+        #     (a.id, f"{a.vehicle.license_plate} - {a.customer.full_name} ({a.schedule_time.strftime('%d/%m %H:%M')})")
+        #     for a in appointments
+        # ]
+        #
+        # form.vehicle_id.choices = [('', '-- Chọn xe --')]
+        #
+        # return form
+
 
 class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
     column_labels = {

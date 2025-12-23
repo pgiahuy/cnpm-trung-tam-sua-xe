@@ -19,6 +19,7 @@ from garage.models import UserRole, AppointmentStatus, Service, SparePart, Payme
     RepairForm, SystemConfig, Vehicle, Customer, User, VehicleStatus, RepairStatus, ReceiptItemType
 from garage.vnpay import build_vnpay_url
 
+
 @app.route("/")
 def index():
 
@@ -323,7 +324,6 @@ def site_spareparts():
                                page=page,
                                page_of_spareparts=page_of_spareparts)
 
-    # Bình thường → render full page
     return render_template("sparepart.html",
                            spare_parts=spare_parts,
                            page=page,
@@ -390,20 +390,30 @@ def change_password():
     return render_template("user/change-password.html")
 
 
+
 @app.route("/api/carts", methods=['post'])
+@login_required
 def add_to_cart():
-    cart = session.get('cart')
+    cart = session.get('cart', {})
 
-    if not cart:
-        cart = {}
+    sparepart_id = str(request.json.get('id'))
+    sparepart = dao.get_sparepart_by_id(int(sparepart_id))
 
-    id = str(request.json.get('id'))
+    if not sparepart:
+        return jsonify({'error': 'Sản phẩm không tồn tại'}), 404
 
-    if id in cart:
-        cart[id]["quantity"] += 1
+    if sparepart.inventory <= 0:
+        return jsonify({'error': 'Sản phẩm đã hết hàng'}), 400
+
+    current_quantity = cart.get(sparepart_id, {"quantity": 0})["quantity"]
+    if current_quantity + 1 > sparepart.inventory:
+        return jsonify({'error': f'Chỉ còn {sparepart.inventory} sản phẩm trong kho'}), 400
+
+    if sparepart_id in cart:
+        cart[sparepart_id]["quantity"] += 1
     else:
-        cart[id] = {
-            "id": id,
+        cart[sparepart_id] = {
+            "id": sparepart_id,
             "name": request.json.get('name'),
             "unit_price": request.json.get('unit_price'),
             "quantity": 1
@@ -411,10 +421,7 @@ def add_to_cart():
 
     session['cart'] = cart
 
-    print(session['cart'])
-
     return jsonify(utils.count_cart(cart=cart))
-
 
 @app.route('/cart')
 def cart():
@@ -771,12 +778,6 @@ def momo_return():
     if payment.type == 'BUY':
         session.pop('cart', None)
     return render_template("payment_success.html", receipt=receipt)
-
-
-
-
-
-
 
 
 

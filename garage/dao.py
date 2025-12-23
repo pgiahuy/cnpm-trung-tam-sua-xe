@@ -3,7 +3,7 @@ import json
 
 from garage import db, app
 from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus,
-                           Receipt, ReceptionForm, RepairForm, SystemConfig)
+                           Receipt, ReceptionForm, RepairForm, SystemConfig, RepairDetail)
 from datetime import datetime, date, time
 from flask_login import current_user
 import re
@@ -249,9 +249,6 @@ def load_sparepart(page=None):
 def count_sparepart():
     return SparePart.query.count()
 
-def get_appointment_by_id(appointment_id):
-    return Appointment.query.get(appointment_id)
-
 def cancel_appointment(appointment: Appointment):
     appointment.status = AppointmentStatus.CANCELLED
     db.session.commit()
@@ -365,78 +362,36 @@ def get_vehicle_stats(start_date=None, end_date=None):
 
 def get_error_stats(start_date=None, end_date=None):
     start, end = get_date_range(start_date, end_date)
-
     results = db.session.query(
-        ReceptionForm.error_description,
-        func.count(ReceptionForm.id)
-    ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
-        .group_by(ReceptionForm.error_description) \
-        .order_by(func.count(ReceptionForm.id).desc()).limit(5).all()
+        Service.error,
+        func.count(RepairDetail.id).label('count')
+    ).join(RepairDetail, Service.id == RepairDetail.service_id) \
+     .join(RepairForm, RepairDetail.repair_id == RepairForm.id) \
+     .filter(RepairForm.created_date >= start, RepairForm.created_date <= end) \
+     .group_by(Service.error) \
+     .order_by(func.count(RepairDetail.id).desc()) \
+     .limit(5).all()
 
-    return {r[0]: r[1] for r in results if r[0]}
+    return {r.error: r.count for r in results if r.error}
+
 
 def get_report_data(start_date_str=None, end_date_str=None, sections=None):
     report_results = {}
-    start, end = get_date_range(start_date_str, end_date_str)
+    if not sections: return report_results
 
-    if not sections:
-        sections = []
-    if 'revenue_day' in sections:
-        query = db.session.query(
-            func.date(Receipt.paid_at).label('ngay'),
-            func.sum(Receipt.total_paid).label('tong')
-        ).filter(
-            Receipt.paid_at >= start,
-            Receipt.paid_at <= end
-        ).group_by(func.date(Receipt.paid_at)).order_by(func.date(Receipt.paid_at).desc())
+    mapping = {
+        'revenue_day': ('Doanh Thu Ngay', get_revenue_by_day, 'Ngày', 'Doanh Thu (VNĐ)'),
+        'revenue_month': ('Doanh Thu Thang', get_revenue_by_month, 'Tháng', 'Doanh Thu (VNĐ)'),
+        'vehicle_stats': ('Thống Kê Lượt Xe', get_vehicle_stats, 'Loại xe', 'Số lượt đến sửa'),
+        'error_stats': ('Lỗi Thường Gặp', get_error_stats, 'Mô tả lỗi', 'Số lần sửa')
+    }
 
-        report_results['Doanh Thu Ngay'] = [
-            {
-                'Ngày': r.ngay.strftime('%d/%m/%Y'),
-                'Doanh Thu (VNĐ)': float(r.tong)
-            }
-            for r in query.all()
-        ]
-
-    if 'revenue_month' in sections:
-        query = db.session.query(
-            func.date_format(Receipt.paid_at, '%m/%Y').label('thang'),
-            func.sum(Receipt.total_paid).label('tong')
-        ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end).group_by('thang') \
-            .order_by(func.min(Receipt.paid_at))
-
-        report_results['Doanh Thu Thang'] = [
-            {'Tháng': r.thang, 'Doanh Thu (VNĐ)': float(r.tong)}
-            for r in query.all()
-        ]
-
-    if 'vehicle_stats' in sections:
-        query = db.session.query(
-            Vehicle.vehicle_type,
-            func.count(ReceptionForm.id)
-        ).join(Vehicle, ReceptionForm.vehicle_id == Vehicle.id) \
-            .filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
-            .group_by(Vehicle.vehicle_type).all()
-
-        report_results['Thống kê lượt xe'] = [
-            {
-                'Loại xe': r[0] if r[0] else "Chưa xác định",
-                'Số lượt đến sửa': r[1]
-            } for r in query
-        ]
-
-    if 'error_stats' in sections:
-        query = db.session.query(
-            ReceptionForm.error_description,
-            func.count(ReceptionForm.id)
-        ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
-            .group_by(ReceptionForm.error_description) \
-            .order_by(func.count(ReceptionForm.id).desc()).limit(10)
-
-        report_results['Loi Thuong Gap'] = [
-            {'Mô tả lỗi': r[0] if r[0] else "Chưa xác định", 'Số lần xuất hiện': r[1]}
-            for r in query.all()
-        ]
+    for key, (sheet_name, func_ptr, col1, col2) in mapping.items():
+        if key in sections:
+            raw_data = func_ptr(start_date_str, end_date_str)
+            report_results[sheet_name] = [
+                {col1: k, col2: v} for k, v in raw_data.items()
+            ]
 
     return report_results
 

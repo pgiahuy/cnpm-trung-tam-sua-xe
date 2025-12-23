@@ -1,6 +1,9 @@
 {% extends 'admin/master.html' %}
-
 {% block body %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<div id="flash-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 320px;"></div>
+
 <div class="container-fluid py-4 px-lg-4">
 
     <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
@@ -8,20 +11,28 @@
             <div class="row align-items-center g-3">
                 <div class="col-xl-4 col-md-12">
                     <h5 class="fw-bold mb-0 d-flex align-items-center">
-                         Tổng Quan Kinh Doanh
+                        Tổng Quan Kinh Doanh
                     </h5>
                 </div>
                 <div class="col-xl-8 col-md-12">
                     <form id="filterForm" class="d-flex justify-content-xl-end align-items-center gap-2 flex-wrap">
                         <div class="btn-group btn-group-sm me-2 shadow-none">
-                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle" onclick="setQuickDate('week')">Tuần này</button>
-                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle" onclick="setQuickDate('month')">Tháng này</button>
-                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle" onclick="setQuickDate('lastMonth')">Tháng trước</button>
+                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle"
+                                    onclick="setQuickDate('week')">Tuần này
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle"
+                                    onclick="setQuickDate('month')">Tháng này
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary border-secondary-subtle"
+                                    onclick="setQuickDate('lastMonth')">Tháng trước
+                            </button>
                         </div>
 
                         <div class="input-group input-group-sm w-auto custom-date-picker shadow-sm">
-                            <input type="date" id="startDate" name="startDate" class="form-control border-0 bg-light px-2">
-                            <span class="input-group-text bg-light border-0 text-muted"><i class="fas fa-arrow-right small"></i></span>
+                            <input type="date" id="startDate" name="startDate"
+                                   class="form-control border-0 bg-light px-2">
+                            <span class="input-group-text bg-light border-0 text-muted"><i
+                                    class="fas fa-arrow-right small"></i></span>
                             <input type="date" id="endDate" name="endDate" class="form-control border-0 bg-light px-2">
                         </div>
                     </form>
@@ -32,8 +43,9 @@
 
     <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
         <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3 px-4">
-            <h6 class="fw-bold mb-0 text-secondary"><span class="me-2">📊</span>Thống kê doanh thu</h6>
-            <select id="revenueMode" class="form-select form-select-sm w-auto border-0 bg-light rounded-pill px-3 shadow-none">
+            <h6 class="fw-bold mb-0 text-secondary"><b>Thống kê doanh thu</b></h6>
+            <select id="revenueMode"
+                    class="form-select form-select-sm w-auto border-0 bg-light rounded-pill px-3 shadow-none">
                 <option value="month">Theo tháng</option>
                 <option value="day">Theo ngày</option>
             </select>
@@ -46,22 +58,29 @@
     <div class="row g-4 mb-4">
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
-                <div class="card-header bg-white border-0 pt-3 px-4"><h6 class="fw-bold mb-0 text-secondary">🚗 Tỷ lệ xe đến sửa</h6></div>
-                <div class="card-body px-4 pb-4"><canvas id="vehicleChart"></canvas></div>
+                <div class="card-header bg-white border-0 pt-3 px-4"><h6 class="fw-bold mb-0 text-secondary"><b>Tỷ lệ xe
+                    đến sửa</b></h6></div>
+                <div class="card-body px-4 pb-4">
+                    <canvas id="vehicleChart"></canvas>
+                </div>
             </div>
         </div>
         <div class="col-lg-6">
             <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
-                <div class="card-header bg-white border-0 pt-3 px-4"><h6 class="fw-bold mb-0 text-secondary">⚠️ Lỗi thường gặp</h6></div>
-                <div class="card-body px-4 pb-4"><canvas id="errorChart"></canvas></div>
+                <div class="card-header bg-white border-0 pt-3 px-4"><h6 class="fw-bold mb-0 text-secondary"><b>Lỗi
+                    thường gặp</b></h6></div>
+                <div class="card-body px-4 pb-4">
+                    <canvas id="errorChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="card border-0 shadow-sm overflow-hidden mt-4" style="border-radius: 15px;">
-        <div class="card-header bg-success text-white py-3" style="background: linear-gradient(45deg, #28a745, #218838);">
+        <div class="card-header bg-success text-white py-3"
+             style="background: linear-gradient(45deg, #28a745, #218838);">
             <h5 class="mb-0 d-flex align-items-center small text-uppercase tracking-wider">
-                <i class="fas fa-file-excel me-2"></i> Xuất Báo Cáo Excel Tùy Chọn
+                Xuất Báo Cáo Excel Tùy Chọn
             </h5>
         </div>
         <div class="card-body bg-white p-4">
@@ -71,37 +90,42 @@
 
                 <div class="row align-items-center g-4">
                     <div class="col-lg-8">
-                        <label class="form-label fw-bold text-secondary mb-3"><i class="fas fa-list-check me-1"></i>Nội dung báo cáo</label>
+                        <label class="form-label fw-bold text-secondary mb-3">Nội dung báo cáo</label>
                         <div class="row g-2 px-1">
                             <div class="col-md-3 col-6">
                                 <div class="form-check custom-checkbox-soft">
-                                    <input class="form-check-input" type="checkbox" name="sections" value="revenue_day" id="c1" checked>
+                                    <input class="form-check-input" type="checkbox" name="sections" value="revenue_day"
+                                           id="c1" checked>
                                     <label class="form-check-label" for="c1">Doanh thu ngày</label>
                                 </div>
                             </div>
                             <div class="col-md-3 col-6">
                                 <div class="form-check custom-checkbox-soft">
-                                    <input class="form-check-input" type="checkbox" name="sections" value="revenue_month" id="c2" checked>
+                                    <input class="form-check-input" type="checkbox" name="sections"
+                                           value="revenue_month" id="c2" checked>
                                     <label class="form-check-label" for="c2">Doanh thu tháng</label>
                                 </div>
                             </div>
                             <div class="col-md-3 col-6">
                                 <div class="form-check custom-checkbox-soft">
-                                    <input class="form-check-input" type="checkbox" name="sections" value="vehicle_stats" id="c3">
+                                    <input class="form-check-input" type="checkbox" name="sections"
+                                           value="vehicle_stats" id="c3">
                                     <label class="form-check-label" for="c3">Tỷ lệ xe</label>
                                 </div>
                             </div>
                             <div class="col-md-3 col-6">
                                 <div class="form-check custom-checkbox-soft">
-                                    <input class="form-check-input" type="checkbox" name="sections" value="error_stats" id="c4">
+                                    <input class="form-check-input" type="checkbox" name="sections" value="error_stats"
+                                           id="c4">
                                     <label class="form-check-label" for="c4">Lỗi thường gặp</label>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-4 text-lg-end">
-                        <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-sm rounded-pill btn-hover-effect" onclick="syncExportDates()">
-                           XUẤT BÁO CÁO EXCEL
+                        <button type="submit"
+                                class="btn btn-success px-5 py-2 fw-bold shadow-sm rounded-pill btn-hover-effect">
+                            XUẤT BÁO CÁO EXCEL
                         </button>
                     </div>
                 </div>
@@ -256,33 +280,88 @@
     }
 
     function initSecondaryCharts() {
-        if (charts.vehicle) charts.vehicle.destroy();
-        charts.vehicle = new Chart(document.getElementById('vehicleChart'), {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(dataStore.vehicle),
-                datasets: [{ data: Object.values(dataStore.vehicle), backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'] }]
-            },
-            options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
-        });
+    if (charts.vehicle) charts.vehicle.destroy();
+    charts.vehicle = new Chart(document.getElementById('vehicleChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(dataStore.vehicle),
+            datasets: [{ data: Object.values(dataStore.vehicle), backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'] }]
+        },
+        options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+    });
 
-        const sortedErrors = Object.entries(dataStore.error).sort((a, b) => b[1] - a[1]);
-        if (charts.error) charts.error.destroy();
-        charts.error = new Chart(document.getElementById('errorChart'), {
-            type: 'bar',
-            data: {
-                labels: sortedErrors.map(i => i[0]),
-                datasets: [{ data: sortedErrors.map(i => i[1]), backgroundColor: '#94a3b8', borderRadius: 10 }]
-            },
-            options: { indexAxis: 'y', plugins: { legend: { display: false } } }
-        });
+    let errorEntries = Object.entries(dataStore.error);
+    const otherLabel = "Các lỗi khác";
+    const otherItem = errorEntries.find(item => item[0] === otherLabel);
+    const specificErrors = errorEntries.filter(item => item[0] !== otherLabel);
+
+    specificErrors.sort((a, b) => b[1] - a[1]);
+    if (otherItem) {
+        specificErrors.push(otherItem);
     }
+
+    if (charts.error) charts.error.destroy();
+    charts.error = new Chart(document.getElementById('errorChart'), {
+        type: 'bar',
+        data: {
+            labels: specificErrors.map(i => i[0]),
+            datasets: [{
+                data: specificErrors.map(i => i[1]),
+                backgroundColor: '#94a3b8',
+                borderRadius: 10
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
 
     function syncExportDates() {
-        document.getElementById('exportStartDate').value = document.getElementById('startDate').value;
-        document.getElementById('exportEndDate').value = document.getElementById('endDate').value;
+    document.getElementById('exportStartDate').value = document.getElementById('startDate').value;
+    document.getElementById('exportEndDate').value = document.getElementById('endDate').value;
+}
+
+
+    document.getElementById('exportForm').addEventListener('submit', function(event) {
+    syncExportDates();
+
+    const selectedCheckboxes = document.querySelectorAll('input[name="sections"]:checked');
+
+    if (selectedCheckboxes.length === 0) {
+        event.preventDefault();
+        showJSFlash("Vui lòng chọn ít nhất một nội dung để xuất báo cáo!", "warning");
+        return;
     }
 
+    let hasSelectedData = false;
+    let missingSections = [];
+
+    selectedCheckboxes.forEach(cb => {
+        const sectionValue = cb.value;
+        let isEmpty = false;
+
+        if (sectionValue === 'revenue_day' && Object.keys(dataStore.day).length === 0) isEmpty = true;
+        if (sectionValue === 'revenue_month' && Object.keys(dataStore.month).length === 0) isEmpty = true;
+        if (sectionValue === 'vehicle_stats' && Object.keys(dataStore.vehicle).length === 0) isEmpty = true;
+        if (sectionValue === 'error_stats' && Object.keys(dataStore.error).length === 0) isEmpty = true;
+
+        if (!isEmpty) {
+            hasSelectedData = true;
+        } else {
+            missingSections.push(cb.nextElementSibling.innerText);
+        }
+    });
+
+    if (!hasSelectedData) {
+        event.preventDefault();
+        const sectionNames = missingSections.join(", ");
+        showJSFlash(`Lỗi: Các mục bạn chọn (${sectionNames}) không có dữ liệu để xuất!`, "danger");
+    }
+});
     window.addEventListener('DOMContentLoaded', () => {
         const today = formatDateLocal(new Date());
         document.getElementById('startDate').max = today;
@@ -294,5 +373,33 @@
         document.getElementById('startDate').onchange = autoRefresh;
         document.getElementById('endDate').onchange = autoRefresh;
     });
+
+    function showJSFlash(message, category = 'danger') {
+        const container = document.getElementById('flash-container');
+        if (!container) return;
+
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${category} alert-dismissible fade show shadow-lg border-0`;
+        toast.style.borderRadius = "12px";
+
+        toast.innerHTML = `
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <div>${message.trim()}</div>
+                </div>
+                <span style="cursor:pointer; margin-left: 15px; font-weight: bold; line-height: 1;" onclick="this.parentElement.parentElement.remove()">&times;</span>
+            </div>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }
+        }, 3000);
+    }
 </script>
 {% endblock %}

@@ -3,12 +3,12 @@ import json
 
 from garage import db, app
 from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus,
-                           Receipt, ReceptionForm, RepairForm, SystemConfig)
+                           Receipt, ReceptionForm, RepairForm, SystemConfig, RepairDetail)
 from datetime import datetime, date, time
 from flask_login import current_user
 import re
 from flask import flash
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 def md5_hash(password: str):
     return hashlib.md5(password.encode("utf-8")).hexdigest()
@@ -30,6 +30,30 @@ def load_customers():
 
 def load_customer_by_id(id):
     return Customer.query.filter_by(id=id).first()
+
+
+def check_slot_available(check_date=None):
+    if check_date is None:
+        check_date = date.today()
+
+    max_slot_obj = SystemConfig.query.get('MAX_SLOT_PER_DAY')
+    max_slot = int(max_slot_obj.value) if max_slot_obj else 30
+
+    slots_today = ReceptionForm.query.filter(
+        func.date(ReceptionForm.created_date) == check_date
+    ).count()
+
+    remaining = max_slot - slots_today
+    success = remaining > 0
+
+    return {
+        "success": success,
+        "max_slot": max_slot,
+        "used_slots": slots_today,
+        "remaining": remaining,
+        "date": check_date
+    }
+
 
 def load_confirmed_appointments():
     query = db.session.query(Appointment).filter(Appointment.status == AppointmentStatus.CONFIRMED)
@@ -249,9 +273,6 @@ def load_sparepart(page=None):
 def count_sparepart():
     return SparePart.query.count()
 
-def get_appointment_by_id(appointment_id):
-    return Appointment.query.get(appointment_id)
-
 def cancel_appointment(appointment: Appointment):
     appointment.status = AppointmentStatus.CANCELLED
     db.session.commit()
@@ -363,80 +384,56 @@ def get_vehicle_stats(start_date=None, end_date=None):
     return {r[0]: r[1] for r in results if r[0]}
 
 
-def get_error_stats(start_date=None, end_date=None):
+def get_error_stats(start_date=None, end_date=None, limit=5):
     start, end = get_date_range(start_date, end_date)
-
     results = db.session.query(
-        ReceptionForm.error_description,
-        func.count(ReceptionForm.id)
-    ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
-        .group_by(ReceptionForm.error_description) \
-        .order_by(func.count(ReceptionForm.id).desc()).limit(5).all()
+        Service.error,
+        func.count(RepairDetail.id).label('count')
+    ).join(RepairDetail, Service.id == RepairDetail.service_id) \
+        .join(RepairForm, RepairDetail.repair_id == RepairForm.id) \
+        .filter(RepairForm.created_date >= start, RepairForm.created_date <= end) \
+        .group_by(Service.error) \
+        .order_by(desc('count')).all()
 
-    return {r[0]: r[1] for r in results if r[0]}
+    if not results: return {}
+
+    if limit is None:
+        return {r.error: r.count for r in results if r.error}
+    top_n = results[:limit]
+    others = results[limit:]
+    data = {}
+
+    for r in top_n:
+        if r.error:
+            data[r.error] = r.count
+
+    if others:
+        others_count = sum(r.count for r in others)
+        if others_count > 0:
+            data["Các lỗi khác"] = others_count
+
+    return data
 
 def get_report_data(start_date_str=None, end_date_str=None, sections=None):
     report_results = {}
-    start, end = get_date_range(start_date_str, end_date_str)
+    if not sections: return report_results
+    start, end = start_date_str, end_date_str
 
-    if not sections:
-        sections = []
     if 'revenue_day' in sections:
-        query = db.session.query(
-            func.date(Receipt.paid_at).label('ngay'),
-            func.sum(Receipt.total_paid).label('tong')
-        ).filter(
-            Receipt.paid_at >= start,
-            Receipt.paid_at <= end
-        ).group_by(func.date(Receipt.paid_at)).order_by(func.date(Receipt.paid_at).desc())
-
-        report_results['Doanh Thu Ngay'] = [
-            {
-                'Ngày': r.ngay.strftime('%d/%m/%Y'),
-                'Doanh Thu (VNĐ)': float(r.tong)
-            }
-            for r in query.all()
-        ]
+        raw = get_revenue_by_day(start, end)
+        report_results['Doanh Thu Ngay'] = [{'Ngày': k, 'Doanh Thu (VNĐ)': v} for k, v in raw.items()]
 
     if 'revenue_month' in sections:
-        query = db.session.query(
-            func.date_format(Receipt.paid_at, '%m/%Y').label('thang'),
-            func.sum(Receipt.total_paid).label('tong')
-        ).filter(Receipt.paid_at >= start, Receipt.paid_at <= end).group_by('thang') \
-            .order_by(func.min(Receipt.paid_at))
-
-        report_results['Doanh Thu Thang'] = [
-            {'Tháng': r.thang, 'Doanh Thu (VNĐ)': float(r.tong)}
-            for r in query.all()
-        ]
+        raw = get_revenue_by_month(start, end)
+        report_results['Doanh Thu Thang'] = [{'Tháng': k, 'Doanh Thu (VNĐ)': v} for k, v in raw.items()]
 
     if 'vehicle_stats' in sections:
-        query = db.session.query(
-            Vehicle.vehicle_type,
-            func.count(ReceptionForm.id)
-        ).join(Vehicle, ReceptionForm.vehicle_id == Vehicle.id) \
-            .filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
-            .group_by(Vehicle.vehicle_type).all()
-
-        report_results['Thống kê lượt xe'] = [
-            {
-                'Loại xe': r[0] if r[0] else "Chưa xác định",
-                'Số lượt đến sửa': r[1]
-            } for r in query
-        ]
+        raw = get_vehicle_stats(start, end)
+        report_results['Thống Kê Lượt Xe'] = [{'Loại xe': k, 'Số lượt đến sửa': v} for k, v in raw.items()]
 
     if 'error_stats' in sections:
-        query = db.session.query(
-            ReceptionForm.error_description,
-            func.count(ReceptionForm.id)
-        ).filter(ReceptionForm.created_date >= start, ReceptionForm.created_date <= end) \
-            .group_by(ReceptionForm.error_description) \
-            .order_by(func.count(ReceptionForm.id).desc()).limit(10)
-
-        report_results['Loi Thuong Gap'] = [
-            {'Mô tả lỗi': r[0] if r[0] else "Chưa xác định", 'Số lần xuất hiện': r[1]}
-            for r in query.all()
-        ]
+        raw = get_error_stats(start, end, limit=None)
+        report_results['Lỗi Thường Gặp'] = [{'Mô tả lỗi': k, 'Số lần sửa': v} for k, v in raw.items()]
 
     return report_results
 

@@ -4,12 +4,13 @@ from flask import url_for, render_template, redirect, request, send_file, flash,
 from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.fields import QuerySelectField
+from flask_admin.contrib.sqla.filters import DateBetweenFilter, FilterEqual
 
 from flask_login import current_user, login_required
 from markupsafe import Markup
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField
-from wtforms.validators import DataRequired, NumberRange, Optional
+from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
 from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
@@ -166,7 +167,7 @@ class UserAdmin(AdminAccessMixin,MyAdminModelView):
         'username',
     ]
     column_filters = [
-        'role'
+        FilterEqual(User.role, 'role', options=[(r.name, r.name) for r in UserRole])
     ]
 
 class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
@@ -200,25 +201,39 @@ class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
 
 
 class ReceptionFormAdmin(MyAdminModelView):
+    @expose('/<int:reception_id>')
+    def detail(self, reception_id, **kwargs):
+        reception = ReceptionForm.query.get_or_404(reception_id)
+        return self.render(
+            'admin/reception_detail.html',
+            reception=reception,
+            enumerate=enumerate
+        )
+
     create_template = 'admin/reception_form.html'
     edit_template = 'admin/reception_form.html'
     extra_js = [
         '/static/js/receive_form.js'
     ]
-    column_list = ['id','customer','vehicle','employee','receive_type','error_description','active']
+    column_list = ['id','customer','vehicle','employee','receive_type','error_description','active','created_date']
     column_labels = {
         'id': 'ID',
         'customer': 'Khách hàng',
         'vehicle': 'Biển số xe',
         'employee': 'Nhân viên tiếp nhận',
         'error_description': 'Mô tả lỗi',
-        'receive_type':'Lịch hẹn'
+        'receive_type':'Lịch hẹn',
+        'created_date':'Ngày lập'
     }
+
+    column_filters = [
+        DateBetweenFilter(User.created_date, 'created_date')
+    ]
 
     column_formatters = {
         'customer': lambda v, c, m, p: (m.vehicle.customer.full_name if m.vehicle and m.vehicle.customer else ''),
-        'receive_type': lambda v, c, m, p: ('Có' if m.receive_type == 'appointment' else 'Không')
-
+        'receive_type': lambda v, c, m, p: ('Có' if m.receive_type == 'appointment' else 'Không'),
+        'id': lambda v, c, m, p: Markup(f'<a href="{url_for("receptionform.detail", reception_id=m.id)}">{m.id}</a>'),
     }
 
     form_columns = [
@@ -239,6 +254,7 @@ class ReceptionFormAdmin(MyAdminModelView):
 
         'error_description'
     ]
+
 
     form_extra_fields = {
 
@@ -286,14 +302,16 @@ class ReceptionFormAdmin(MyAdminModelView):
     }
 
     def create_form(self):
+
         form = super().create_form()
         self._populate_choices(form)
         return form
 
-    def edit_form(self):
-        form = super().edit_form()
-        self._populate_choices(form)
-        return form
+    # def edit_form(self,obj=None):
+    #     form = super().edit_form(obj)
+    #     self._populate_choices(form)
+    #     return form
+    can_edit = False
 
     def _populate_choices(self, form):
         form.customer_id.choices = [('', '-- Chọn khách hàng --')] + [
@@ -311,9 +329,17 @@ class ReceptionFormAdmin(MyAdminModelView):
 
         return form
 
+
     def on_model_change(self, form, model, is_created):
         try:
             with db.session.no_autoflush:
+                if is_created:
+                    result = dao.check_slot_available()
+                    if not result["success"]:
+                        raise ValidationError(
+                            f"Hôm nay đã đủ số lượt tiếp nhận [ {result['max_slot']} xe ], quay lại vào ngày mai!"
+                        )
+
                 receive_type = form.receive_type.data
                 model.employee_id = form.employee.data.id
                 model.error_description = form.error_description.data or ""
@@ -353,7 +379,7 @@ class ReceptionFormAdmin(MyAdminModelView):
                         customer = db.session.get(Customer, int(form.customer_id.data))
 
 
-                    # === Xe ===
+                    #  Xe
                     if form.is_new_vehicle.data:
                         if not form.new_vehicle_plate.data or not form.new_vehicle_type.data:
                             raise ValueError("Vui lòng nhập biển số và loại xe mới!")
@@ -373,25 +399,25 @@ class ReceptionFormAdmin(MyAdminModelView):
                         if not form.vehicle_id.data:
                             raise ValueError("Vui lòng chọn xe!")
                         vehicle = db.session.get(Vehicle, int(form.vehicle_id.data))
-                        # if not vehicle:
-                        #     raise ValueError("Xe không tồn tại!")
-                        # if vehicle.customer_id != customer.id:
-                        #     raise ValueError("Xe không thuộc khách hàng này!")
 
                         vehicle.vehicle_status = VehicleStatus.RECEIVED
                         db.session.add(vehicle)
 
-                # === QUAN TRỌNG NHẤT: Gán object vehicle cho model ===
-                model.vehicle = vehicle  # <--- Dòng này fix tất cả!
+                model.vehicle = vehicle
+
+
+        except ValidationError:
+            db.session.rollback()
+            raise
 
         except Exception as e:
             db.session.rollback()
-            raise ValueError(f"Lỗi tạo phiếu: {str(e)}")
+            raise ValidationError(f"Lỗi tạo phiếu: {str(e)}")
 
 
 
 class RepairFormAdmin(MyAdminModelView):
-    column_list = ['id', 'employee','customer','vehicle_plate',  'reception_form', 'repair_status', 'total_money']
+    column_list = ['id', 'employee','customer','vehicle_plate',  'reception_form', 'repair_status', 'total_money','created_date']
     column_labels = {
         'id': 'ID',
         'employee': 'Nhân viên lập',
@@ -400,6 +426,7 @@ class RepairFormAdmin(MyAdminModelView):
         'total_money': 'Tổng tiền',
         'repair_status':'Trạng thái',
         'customer':'Khách hàng',
+        'created_date':'Ngày lập',
         'pay':''
     }
 
@@ -422,7 +449,10 @@ class RepairFormAdmin(MyAdminModelView):
             }
         ))
     ]
-
+    column_filters = [
+        FilterEqual(RepairForm.repair_status, 'Trạng thái'),
+       # FilterBetween(RepairForm.created_date, 'Ngày lập')
+    ]
     REPAIR_TO_VEHICLE_STATUS = {
         "QUOTED": VehicleStatus.WAITING_APPROVAL,
         "REPAIRING": VehicleStatus.REPAIRING,
@@ -446,8 +476,8 @@ class RepairFormAdmin(MyAdminModelView):
     def on_model_change(self, form, model, is_created):
         with db.session.no_autoflush:
 
-            if not model.reception_form or not model.reception_form.vehicle:
-                raise ValueError("Phiếu tiếp nhận chưa gắn xe")
+            if not model.reception_form :
+                raise ValidationError("Vui lòng chọn phiếu tiếp nhận!")
 
             if is_created:
                 model.vehicle = model.reception_form.vehicle
@@ -462,6 +492,7 @@ class RepairFormAdmin(MyAdminModelView):
 
             if new_vehicle_status and model.vehicle.vehicle_status != new_vehicle_status:
                 model.vehicle.vehicle_status = new_vehicle_status
+
                 db.session.add(model.vehicle)
 
     column_formatters = {
@@ -478,18 +509,32 @@ class RepairFormAdmin(MyAdminModelView):
         'reception_form': lambda v, c, m, p: f"PTN {m.reception_form.id}" if m.reception_form else '-'
     }
 
+    def _reception_label(self, r):
+        return (
+            f"[{r.vehicle.license_plate}] - "
+            f"[{r.created_date.strftime('%d/%m/%Y %H:%M')}] - "
+            f"[{r.vehicle.customer.full_name}]"
+            if r.vehicle else f"PTN {r.id}"
+        )
 
-    form_extra_fields = {
-            'reception_form': QuerySelectField(
-        'Chọn phiếu tiếp nhận',
-        query_factory=lambda: db.session.query(ReceptionForm).filter(ReceptionForm.active == True).all(),
-        get_label=lambda r: f"[{r.vehicle.license_plate}] - [{r.created_date}] - [{r.vehicle.customer.full_name}]"
-                            if r.vehicle else f"PTN {r.id}",
-        allow_blank=True,
-        validators=[Optional()]
-        ),
-    }
+    def create_form(self):
+        form = super().create_form()
+        form.reception_form.query_factory = lambda: (
+            db.session.query(ReceptionForm)
+            .filter(ReceptionForm.repair_form == None)
+            .order_by(ReceptionForm.created_date.desc())
+        )
+        form.reception_form.get_label = self._reception_label
+        return form
 
+    def edit_form(self,obj):
+        form = super().create_form()
+        form.reception_form.query_factory = lambda: (
+            db.session.query(ReceptionForm)
+            .filter(ReceptionForm.repair_form.has(id=obj.id))
+        )
+        form.reception_form.get_label = self._reception_label
+        return form
 
     #khoá repair PAID
     def on_form_prefill(self, form, id):
@@ -511,7 +556,7 @@ class RepairDetailView(BaseView):
     def detail(self, repair_id, **kwargs):
         repair = RepairForm.query.get_or_404(repair_id)
         return self.render(
-            'admin/custom_detail.html',
+            'admin/repair_detail.html',
             repair=repair,
             enumerate=enumerate
         )
@@ -650,45 +695,27 @@ class StatsView(BaseView):
             flash("Vui lòng chọn ít nhất 1 nội dung để xuất báo cáo", "warning")
             return redirect(request.referrer)
 
+        report_results = dao.get_report_data(start_date, end_date, sections)
+
         output = io.BytesIO()
-        writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            workbook = writer.book
+            header_format = workbook.add_format({'bold': True, 'bg_color': '#D7E4BC', 'border': 1})
 
-        # ===== DOANH THU THEO NGÀY =====
-        if 'revenue_day' in sections:
-            data = dao.get_revenue_by_day(start_date, end_date)
-            df = pd.DataFrame(list(data.items()), columns=['Ngày', 'Doanh thu'])
-            df['Ngày'] = pd.to_datetime(df['Ngày'], dayfirst=True, errors='coerce')
-            df = df.sort_values(by='Ngày', ascending=False)
-            df['Ngày'] = df['Ngày'].dt.strftime('%d/%m/%Y')
-            df.to_excel(writer, sheet_name='Doanh thu ngày', index=False)
+            for sheet_name, data in report_results.items():
+                if data:
+                    df = pd.DataFrame(data)
+                else:
+                    df = pd.DataFrame([["Không có dữ liệu trong khoảng thời gian này"]], columns=["Thông báo"])
 
-        # ===== DOANH THU THEO THÁNG =====
-        if 'revenue_month' in sections:
-            data = dao.get_revenue_by_month(start_date, end_date)
-            df = pd.DataFrame(list(data.items()), columns=['Tháng', 'Doanh thu'])
-            df['Tháng'] = pd.to_datetime(df['Tháng'], format='%m/%Y', errors='coerce')
-            df = df.sort_values(by='Tháng', ascending=False)
-            df['Tháng'] = df['Tháng'].dt.strftime('%m/%Y')
-            df.to_excel(writer, sheet_name='Doanh thu tháng', index=False)
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
 
-        # ===== TỶ LỆ XE =====
-        if 'vehicle_stats' in sections:
-            data = dao.get_vehicle_stats(start_date, end_date)
-            sorted_data = sorted(data.items(), key=lambda x: x[1], reverse=True)
-            df = pd.DataFrame(sorted_data, columns=['Loại xe', 'Số lượng'])
-            df.to_excel(writer, sheet_name='Tỷ lệ xe', index=False)
+                worksheet = writer.sheets[sheet_name]
+                for i, col in enumerate(df.columns):
+                    worksheet.set_column(i, i, max(len(str(col)), 20))
 
-        # ===== LỖI THƯỜNG GẶP =====
-        if 'error_stats' in sections:
-            data = dao.get_error_stats(start_date, end_date)
-            sorted_data = sorted(data.items(), key=lambda x: x[1], reverse=True)
-            df = pd.DataFrame(sorted_data, columns=['Lỗi', 'Số lần'])
-            df.to_excel(writer, sheet_name='Lỗi thường gặp', index=False)
-
-        writer.close()
         output.seek(0)
-
-        filename = f"bao_cao_{start_date}_den_{end_date}.xlsx"
+        filename = f"Bao_cao_Garage_{start_date}_den_{end_date}.xlsx"
 
         return send_file(
             output,
@@ -704,8 +731,8 @@ class StatsView(BaseView):
         return jsonify({
             'revenue_day': dao.get_revenue_by_day(start_date, end_date),
             'revenue_month': dao.get_revenue_by_month(start_date, end_date),
-            'vehicle_stats': dao.get_vehicle_stats(start_date, end_date), # Thêm ở đây
-            'error_stats': dao.get_error_stats(start_date, end_date)      # Thêm ở đây
+            'vehicle_stats': dao.get_vehicle_stats(start_date, end_date),
+            'error_stats': dao.get_error_stats(start_date, end_date)
         })
 
     @expose('/', methods=['GET', 'POST'])
@@ -799,7 +826,7 @@ admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
 admin.add_view(CustomerAdmin(Customer, db.session,name='KHÁCH HÀNG'))
 admin.add_view(EmployeeAdmin(Employee, db.session,name='NHÂN VIÊN'))
 admin.add_view(AppointmentAdmin(Appointment, db.session,name='LỊCH HẸN'))
-admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN'))
+admin.add_view(ReceptionFormAdmin(ReceptionForm, db.session,name='PHIẾU TIẾP NHẬN',endpoint='receptionform'))
 admin.add_view(RepairFormAdmin(RepairForm, db.session,name='PHIẾU SỬA CHỮA'))
 admin.add_view(VehicleAdmin(Vehicle, db.session,name='XE'))
 admin.add_view(ServiceAdmin(Service, db.session,name='DỊCH VỤ'))
@@ -811,6 +838,7 @@ admin.add_view(StatsView(name='BÁO CÁO THỐNG KÊ', endpoint='statistical-rep
 admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
 admin.add_view(ReceiptDetailAdmin(name='CHI TIẾT HOÁ ĐƠN', endpoint='receipt_detail'))
 admin.add_view(RepairPayView(name="Thanh toán phiếu", endpoint="repair_pay"))
+
 
 
 

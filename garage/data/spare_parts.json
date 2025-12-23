@@ -1,74 +1,203 @@
 [
-    {
-        "name": "Lọc nhớt động cơ Bosch",
-        "unit_price": 185000.0,
-        "unit": "Cái",
-        "supplier": "Công ty TNHH Phụ tùng Bình Minh",
-        "inventory": 5,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Dầu động cơ Castrol EDGE 5W-40",
-        "unit_price": 1150000.0,
-        "unit": "Can 4 Lít",
-        "supplier": "Đại lý dầu nhớt Á Châu",
-        "inventory": 5,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Má phanh Ceramic trước",
-        "unit_price": 950000.0,
-        "unit": "Bộ",
-        "supplier": "Nhà cung cấp Phanh Việt",
-        "inventory": 11,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Bugi bạch kim Denso",
-        "unit_price": 150000.0,
-        "unit": "Cái",
-        "supplier": "N/A",
-        "inventory": 56,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Ắc quy GS 12V-60AH",
-        "unit_price": 1900000.0,
-        "unit": "Bình",
-        "supplier": "Ắc quy chính hãng Miền Nam",
-        "inventory": 16,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Cần gạt nước Silicone (2 chiếc)",
-        "unit_price": 380000.0,
-        "unit": "Bộ",
-        "supplier": "Công ty Phụ kiện xe hơi 3A",
-        "inventory": 56,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Nước làm mát Blue (2L)",
-        "unit_price": 250000.0,
-        "unit": "Chai",
-        "supplier": "N/A",
-        "inventory": 56,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Đèn pha Halogen H4 Philips",
-        "unit_price": 550000.0,
-        "unit": "Cái",
-        "supplier": "Nhà phân phối đèn xe Quang Phát",
-        "inventory": 526,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    },
-    {
-        "name": "Cao su chân máy",
-        "unit_price": 1250000.0,
-        "unit": "Cái",
-        "supplier": "Phụ tùng máy Vĩnh Phát",
-        "inventory": 5116,
-        "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    }
+  {
+    "name": "Lọc gió động cơ",
+    "unit_price": 180000.0,
+    "unit": "Cái",
+    "supplier": "Phụ tùng Bình Minh",
+    "inventory": 40,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Dầu nhớt Motul 5100 10W40",
+    "unit_price": 320000.0,
+    "unit": "Chai 1L",
+    "supplier": "Motul Việt Nam",
+    "inventory": 100,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Bố thắng sau",
+    "unit_price": 220000.0,
+    "unit": "Bộ",
+    "supplier": "Phanh Việt",
+    "inventory": 60,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Bugi NGK Iridium",
+    "unit_price": 280000.0,
+    "unit": "Cái",
+    "supplier": "NGK Việt Nam",
+    "inventory": 120,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Dây curoa xe tay ga",
+    "unit_price": 650000.0,
+    "unit": "Sợi",
+    "supplier": "Bando Việt Nam",
+    "inventory": 45,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Bộ nồi xe ga",
+    "unit_price": 1800000.0,
+    "unit": "Bộ",
+    "supplier": "Yamaha Genuine Parts",
+    "inventory": 20,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Nước làm mát đỏ Honda",
+    "unit_price": 180000.0,
+    "unit": "Chai",
+    "supplier": "Honda Việt Nam",
+    "inventory": 70,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Ắc quy Yuasa 12V",
+    "unit_price": 1650000.0,
+    "unit": "Bình",
+    "supplier": "Yuasa Việt Nam",
+    "inventory": 25,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Bóng đèn xi nhan LED",
+    "unit_price": 120000.0,
+    "unit": "Cặp",
+    "supplier": "LED Auto",
+    "inventory": 200,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Lốp trước Michelin",
+    "unit_price": 1350000.0,
+    "unit": "Cái",
+    "supplier": "Michelin Việt Nam",
+    "inventory": 30,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+
+  {
+    "name": "Lốp sau Michelin",
+    "unit_price": 1550000.0,
+    "unit": "Cái",
+    "supplier": "Michelin Việt Nam",
+    "inventory": 28,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Van lốp xe",
+    "unit_price": 35000.0,
+    "unit": "Cái",
+    "supplier": "Phụ tùng An Phát",
+    "inventory": 300,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Nhớt láp xe tay ga",
+    "unit_price": 95000.0,
+    "unit": "Chai",
+    "supplier": "Castrol Việt Nam",
+    "inventory": 90,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Cao su giảm chấn",
+    "unit_price": 220000.0,
+    "unit": "Cặp",
+    "supplier": "Phụ tùng Vĩnh Phát",
+    "inventory": 55,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Bạc đạn bánh xe",
+    "unit_price": 180000.0,
+    "unit": "Cái",
+    "supplier": "SKF Việt Nam",
+    "inventory": 80,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Lọc xăng động cơ",
+    "unit_price": 160000.0,
+    "unit": "Cái",
+    "supplier": "Phụ tùng Bình Minh",
+    "inventory": 70,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Bơm xăng điện",
+    "unit_price": 1450000.0,
+    "unit": "Cái",
+    "supplier": "Honda Genuine Parts",
+    "inventory": 18,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Cảm biến oxy",
+    "unit_price": 2200000.0,
+    "unit": "Cái",
+    "supplier": "Denso Việt Nam",
+    "inventory": 12,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Dây ga",
+    "unit_price": 120000.0,
+    "unit": "Sợi",
+    "supplier": "Phụ tùng An Phát",
+    "inventory": 95,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Dây thắng trước",
+    "unit_price": 135000.0,
+    "unit": "Sợi",
+    "supplier": "Phanh Việt",
+    "inventory": 88,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Piston động cơ",
+    "unit_price": 2500000.0,
+    "unit": "Bộ",
+    "supplier": "Yamaha Genuine Parts",
+    "inventory": 10,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Xupap nạp – xả",
+    "unit_price": 900000.0,
+    "unit": "Bộ",
+    "supplier": "Phụ tùng động cơ Minh Phát",
+    "inventory": 22,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Bộ gioăng động cơ",
+    "unit_price": 650000.0,
+    "unit": "Bộ",
+    "supplier": "Athena Việt Nam",
+    "inventory": 35,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Nhông sên dĩa",
+    "unit_price": 1100000.0,
+    "unit": "Bộ",
+    "supplier": "DID Việt Nam",
+    "inventory": 40,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  },
+  {
+    "name": "Cổ pô xe máy",
+    "unit_price": 480000.0,
+    "unit": "Cái",
+    "supplier": "Phụ tùng pô xe Sài Gòn",
+    "inventory": 27,
+    "image_url": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+  }
 ]

@@ -162,7 +162,6 @@ def unauthorized_callback():
     flash("Bạn cần đăng nhập để tiếp tục!", "warning")
     return redirect('/login?next=' + request.path)
 
-
 @app.route("/bookrepair", methods=["GET", "POST"])
 @login_required
 def booking():
@@ -190,7 +189,11 @@ def booking():
             description = form_data['description']
             time_slot = form_data['scheduleTime']
 
-            if not vehicle_type or not license_plate:
+            slot_check = dao.check_slot_available(check_date=selected_date)
+            if not slot_check["success"]:
+                flash(f"Hôm nay đã đủ số lượt tiếp nhận [ {slot_check['max_slot']} xe ],"
+                      f" quay lại vào ngày mai!","danger")
+            elif not vehicle_type or not license_plate:
                 flash("Vui lòng nhập đầy đủ loại xe và biển số!", "warning")
             else:
                 ok = dao.add_appointment(
@@ -202,6 +205,7 @@ def booking():
                 )
 
                 if ok:
+                    flash("Đặt lịch thành công!", "success")
                     return redirect(url_for("index"))
                 else:
                     flash(
@@ -521,9 +525,8 @@ def pay_repair(repair_id):
     return jsonify({'code': 200, 'pay_url': pay_url})
 
 
-
-
 @app.route('/billing/vnpay_return')
+@login_required
 def vnpay_return():
     response_code = request.args.get('vnp_ResponseCode')
     txn_ref = request.args.get('vnp_TxnRef')
@@ -607,6 +610,20 @@ def vnpay_return():
                         unit_price=d.service_price,
                         total_price=d.service_price
                     ))
+    elif type == "REPAIR":
+        repair = payment.repair
+        for d in repair.details:
+
+            if d.service_price and d.service_price > 0:
+                db.session.add(ReceiptItem(
+                    receipt_id=receipt.id,
+                    repair_detail_id=d.id,
+                    item_type=ReceiptItemType.SERVICE,
+                    service_id=d.service_id,
+                    quantity=1,
+                    unit_price=d.service_price,
+                    total_price=d.service_price
+                ))
 
                 if d.spare_part_id and d.spare_part_price:
                     db.session.add(ReceiptItem(

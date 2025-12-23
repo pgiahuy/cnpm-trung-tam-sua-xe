@@ -452,49 +452,6 @@ def receipt_detail(receipt_id):
     return render_template('user/receipt_detail.html', receipt=receipt)
 
 
-
-#
-#
-# @app.route('/api/pay_spare_part', methods=['POST'])
-# @login_required
-# def pay():
-#     cart = session.get('cart')
-#     if not cart:
-#         return jsonify({'code': 400, 'msg': 'Cart rỗng'})
-#     txn_ref = f"{current_user.id}_{int(time.time())}"
-#
-#     vat_rate = 0 #dao.get_vat_value()
-#
-#     total = utils.count_cart(cart)['total_amount']
-#     total += vat_rate*total
-#
-#     payment = Payment(
-#         user_id=current_user.id,
-#         amount=total,
-#         vat_rate=vat_rate,
-#         method='VNPAY',
-#         type='BUY',
-#         transaction_ref=txn_ref,
-#         status=PaymentStatus.PENDING,
-#         cart_snapshot=json.dumps(cart)
-#     )
-#     db.session.add(payment)
-#     db.session.commit()
-#
-#     pay_url = build_vnpay_url(total, txn_ref)
-#
-#     return jsonify({
-#         'code': 200,
-#         'pay_url': pay_url
-#     })
-
-
-
-
-
-
-
-
 @app.route('/api/pay_repair/<int:repair_id>', methods=['POST'])
 @login_required
 def pay_repair(repair_id):

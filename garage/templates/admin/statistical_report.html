@@ -280,27 +280,45 @@
     }
 
     function initSecondaryCharts() {
-        if (charts.vehicle) charts.vehicle.destroy();
-        charts.vehicle = new Chart(document.getElementById('vehicleChart'), {
-            type: 'doughnut',
-            data: {
-                labels: Object.keys(dataStore.vehicle),
-                datasets: [{ data: Object.values(dataStore.vehicle), backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'] }]
-            },
-            options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
-        });
+    if (charts.vehicle) charts.vehicle.destroy();
+    charts.vehicle = new Chart(document.getElementById('vehicleChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(dataStore.vehicle),
+            datasets: [{ data: Object.values(dataStore.vehicle), backgroundColor: ['#4e73df', '#f6c23e', '#e74a3b'] }]
+        },
+        options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+    });
 
-        const sortedErrors = Object.entries(dataStore.error).sort((a, b) => b[1] - a[1]);
-        if (charts.error) charts.error.destroy();
-        charts.error = new Chart(document.getElementById('errorChart'), {
-            type: 'bar',
-            data: {
-                labels: sortedErrors.map(i => i[0]),
-                datasets: [{ data: sortedErrors.map(i => i[1]), backgroundColor: '#94a3b8', borderRadius: 10 }]
-            },
-            options: { indexAxis: 'y', plugins: { legend: { display: false } } }
-        });
+    let errorEntries = Object.entries(dataStore.error);
+    const otherLabel = "Các lỗi khác";
+    const otherItem = errorEntries.find(item => item[0] === otherLabel);
+    const specificErrors = errorEntries.filter(item => item[0] !== otherLabel);
+
+    specificErrors.sort((a, b) => b[1] - a[1]);
+    if (otherItem) {
+        specificErrors.push(otherItem);
     }
+
+    if (charts.error) charts.error.destroy();
+    charts.error = new Chart(document.getElementById('errorChart'), {
+        type: 'bar',
+        data: {
+            labels: specificErrors.map(i => i[0]),
+            datasets: [{
+                data: specificErrors.map(i => i[1]),
+                backgroundColor: '#94a3b8',
+                borderRadius: 10
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
 
     function syncExportDates() {
     document.getElementById('exportStartDate').value = document.getElementById('startDate').value;

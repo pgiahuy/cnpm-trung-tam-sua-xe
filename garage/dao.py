@@ -8,7 +8,7 @@ from datetime import datetime, date, time
 from flask_login import current_user
 import re
 from flask import flash
-from sqlalchemy import func
+from sqlalchemy import func, desc
 
 def md5_hash(password: str):
     return hashlib.md5(password.encode("utf-8")).hexdigest()
@@ -360,38 +360,56 @@ def get_vehicle_stats(start_date=None, end_date=None):
     return {r[0]: r[1] for r in results if r[0]}
 
 
-def get_error_stats(start_date=None, end_date=None):
+def get_error_stats(start_date=None, end_date=None, limit=5):
     start, end = get_date_range(start_date, end_date)
     results = db.session.query(
         Service.error,
         func.count(RepairDetail.id).label('count')
     ).join(RepairDetail, Service.id == RepairDetail.service_id) \
-     .join(RepairForm, RepairDetail.repair_id == RepairForm.id) \
-     .filter(RepairForm.created_date >= start, RepairForm.created_date <= end) \
-     .group_by(Service.error) \
-     .order_by(func.count(RepairDetail.id).desc()) \
-     .limit(5).all()
+        .join(RepairForm, RepairDetail.repair_id == RepairForm.id) \
+        .filter(RepairForm.created_date >= start, RepairForm.created_date <= end) \
+        .group_by(Service.error) \
+        .order_by(desc('count')).all()
 
-    return {r.error: r.count for r in results if r.error}
+    if not results: return {}
 
+    if limit is None:
+        return {r.error: r.count for r in results if r.error}
+    top_n = results[:limit]
+    others = results[limit:]
+    data = {}
+
+    for r in top_n:
+        if r.error:
+            data[r.error] = r.count
+
+    if others:
+        others_count = sum(r.count for r in others)
+        if others_count > 0:
+            data["Các lỗi khác"] = others_count
+
+    return data
 
 def get_report_data(start_date_str=None, end_date_str=None, sections=None):
     report_results = {}
     if not sections: return report_results
+    start, end = start_date_str, end_date_str
 
-    mapping = {
-        'revenue_day': ('Doanh Thu Ngay', get_revenue_by_day, 'Ngày', 'Doanh Thu (VNĐ)'),
-        'revenue_month': ('Doanh Thu Thang', get_revenue_by_month, 'Tháng', 'Doanh Thu (VNĐ)'),
-        'vehicle_stats': ('Thống Kê Lượt Xe', get_vehicle_stats, 'Loại xe', 'Số lượt đến sửa'),
-        'error_stats': ('Lỗi Thường Gặp', get_error_stats, 'Mô tả lỗi', 'Số lần sửa')
-    }
+    if 'revenue_day' in sections:
+        raw = get_revenue_by_day(start, end)
+        report_results['Doanh Thu Ngay'] = [{'Ngày': k, 'Doanh Thu (VNĐ)': v} for k, v in raw.items()]
 
-    for key, (sheet_name, func_ptr, col1, col2) in mapping.items():
-        if key in sections:
-            raw_data = func_ptr(start_date_str, end_date_str)
-            report_results[sheet_name] = [
-                {col1: k, col2: v} for k, v in raw_data.items()
-            ]
+    if 'revenue_month' in sections:
+        raw = get_revenue_by_month(start, end)
+        report_results['Doanh Thu Thang'] = [{'Tháng': k, 'Doanh Thu (VNĐ)': v} for k, v in raw.items()]
+
+    if 'vehicle_stats' in sections:
+        raw = get_vehicle_stats(start, end)
+        report_results['Thống Kê Lượt Xe'] = [{'Loại xe': k, 'Số lượt đến sửa': v} for k, v in raw.items()]
+
+    if 'error_stats' in sections:
+        raw = get_error_stats(start, end, limit=None)
+        report_results['Lỗi Thường Gặp'] = [{'Mô tả lỗi': k, 'Số lần sửa': v} for k, v in raw.items()]
 
     return report_results
 

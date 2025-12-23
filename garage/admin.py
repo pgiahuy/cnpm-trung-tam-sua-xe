@@ -10,7 +10,7 @@ from flask_login import current_user, login_required
 from markupsafe import Markup
 from sqlalchemy import func
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField
-from wtforms.validators import DataRequired, NumberRange, Optional
+from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
 from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
@@ -265,14 +265,16 @@ class ReceptionFormAdmin(MyAdminModelView):
     }
 
     def create_form(self):
+
         form = super().create_form()
         self._populate_choices(form)
         return form
 
-    def edit_form(self):
-        form = super().edit_form()
-        self._populate_choices(form)
-        return form
+    # def edit_form(self,obj=None):
+    #     form = super().edit_form(obj)
+    #     self._populate_choices(form)
+    #     return form
+    can_edit = False
 
     def _populate_choices(self, form):
         form.customer_id.choices = [('', '-- Chọn khách hàng --')] + [
@@ -290,9 +292,24 @@ class ReceptionFormAdmin(MyAdminModelView):
 
         return form
 
+
     def on_model_change(self, form, model, is_created):
         try:
             with db.session.no_autoflush:
+                if is_created:
+                    max_slot_obj = SystemConfig.query.get('MAX_SLOT_PER_DAY')
+                    max_slot = int(max_slot_obj.value) if max_slot_obj else 30
+
+                    today = date.today()
+                    slots_today = ReceptionForm.query.filter(
+                        func.date(ReceptionForm.created_date) == today
+                    ).count()
+
+                    if slots_today >= max_slot:
+                        raise ValidationError(
+                            "Hôm nay đã đủ số lượt tiếp nhận, quay lại vào ngày mai!"
+                        )
+
                 receive_type = form.receive_type.data
                 model.employee_id = form.employee.data.id
                 model.error_description = form.error_description.data or ""
@@ -332,7 +349,7 @@ class ReceptionFormAdmin(MyAdminModelView):
                         customer = db.session.get(Customer, int(form.customer_id.data))
 
 
-                    # === Xe ===
+                    #  Xe
                     if form.is_new_vehicle.data:
                         if not form.new_vehicle_plate.data or not form.new_vehicle_type.data:
                             raise ValueError("Vui lòng nhập biển số và loại xe mới!")
@@ -352,20 +369,20 @@ class ReceptionFormAdmin(MyAdminModelView):
                         if not form.vehicle_id.data:
                             raise ValueError("Vui lòng chọn xe!")
                         vehicle = db.session.get(Vehicle, int(form.vehicle_id.data))
-                        # if not vehicle:
-                        #     raise ValueError("Xe không tồn tại!")
-                        # if vehicle.customer_id != customer.id:
-                        #     raise ValueError("Xe không thuộc khách hàng này!")
 
                         vehicle.vehicle_status = VehicleStatus.RECEIVED
                         db.session.add(vehicle)
 
-                # === QUAN TRỌNG NHẤT: Gán object vehicle cho model ===
-                model.vehicle = vehicle  # <--- Dòng này fix tất cả!
+                model.vehicle = vehicle
+
+
+        except ValidationError:
+            db.session.rollback()
+            raise
 
         except Exception as e:
             db.session.rollback()
-            raise ValueError(f"Lỗi tạo phiếu: {str(e)}")
+            raise ValidationError(f"Lỗi tạo phiếu: {str(e)}")
 
 
 
@@ -430,7 +447,7 @@ class RepairFormAdmin(MyAdminModelView):
         with db.session.no_autoflush:
 
             if not model.reception_form or not model.reception_form.vehicle:
-                raise ValueError("Phiếu tiếp nhận chưa gắn xe")
+                raise ValidationError("Vui lòng chọn phiếu tiếp nhận!")
 
             if is_created:
                 model.vehicle = model.reception_form.vehicle
@@ -467,10 +484,11 @@ class RepairFormAdmin(MyAdminModelView):
             'reception_form': QuerySelectField(
         'Chọn phiếu tiếp nhận',
         query_factory=lambda: db.session.query(ReceptionForm).filter(ReceptionForm.repair_form == None).all(),
+                #.filter(ReceptionForm.repair_form == None)
         get_label=lambda r: f"[{r.vehicle.license_plate}] - [{r.created_date}] - [{r.vehicle.customer.full_name}]"
                             if r.vehicle else f"PTN {r.id}",
         allow_blank=True,
-        validators=[DataRequired()]
+        validators=[Optional()]
         ),
     }
 

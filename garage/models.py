@@ -79,7 +79,7 @@ class User(Base, UserMixin):
 class Customer(Base):
     full_name = Column(String(255))
     phone = Column(String(10), nullable=False, unique=True)
-    email = Column(String(100), nullable=False, unique=True)
+    email = Column(String(100), nullable=True, unique=True)
     address = Column(String(255))
     vehicles = relationship("Vehicle", backref="customer", lazy=True)
     user_id = Column(Integer, ForeignKey("user.id"), unique=True)
@@ -163,6 +163,7 @@ class SparePart(Base):
 
 class Service(Base):
     name = Column(String(255), nullable=False)
+    error = Column(String(600))
     description = Column(String(500))
     price = Column(DOUBLE, nullable=False, default=0)
     image = Column(

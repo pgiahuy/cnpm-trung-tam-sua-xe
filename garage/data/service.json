@@ -1,62 +1,212 @@
 [
   {
     "name": "Thay nhớt",
-    "description": "Thay dầu nhớt động cơ, kiểm tra mức nhớt và vệ sinh lọc.",
+    "description": "Thay dầu nhớt động cơ.",
     "price": 150000,
+    "error": "Hết nhớt",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   },
   {
     "name": "Bảo dưỡng phanh",
-    "description": "Kiểm tra má phanh, đĩa phanh và hệ thống dẫn động phanh.",
+    "description": "Kiểm tra và vệ sinh hệ thống phanh.",
     "price": 250000,
+    "error": "Phanh kêu",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   },
   {
     "name": "Vệ sinh kim phun",
-    "description": "Làm sạch kim phun nhiên liệu giúp tối ưu hiệu suất động cơ.",
+    "description": "Làm sạch kim phun nhiên liệu.",
     "price": 400000,
+    "error": "Xe hao xăng",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   },
   {
     "name": "Thay bugi",
-    "description": "Thay bugi mới và kiểm tra hệ thống đánh lửa.",
+    "description": "Thay bugi mới cho động cơ.",
     "price": 120000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
-  },
-  {
-    "name": "Cân lửa động cơ",
-    "description": "Điều chỉnh thời điểm đánh lửa tối ưu.",
-    "price": 300000,
+    "error": "Khó nổ máy",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   },
   {
     "name": "Thay lọc gió",
-    "description": "Thay lọc gió buồng đốt giúp tăng hiệu suất động cơ.",
+    "description": "Thay lọc gió buồng đốt.",
     "price": 100000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
-  },
-  {
-    "name": "Bảo dưỡng hệ thống làm mát",
-    "description": "Kiểm tra nước mát, vệ sinh két nước và ống dẫn.",
-    "price": 350000,
+    "error": "Xe yếu",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   },
   {
     "name": "Kiểm tra ắc quy",
-    "description": "Đo dung lượng ắc quy và kiểm tra hệ thống sạc.",
+    "description": "Đo dung lượng và hệ thống sạc.",
     "price": 80000,
+    "error": "Xe không đề",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Bảo dưỡng làm mát",
+    "description": "Kiểm tra nước mát và két nước.",
+    "price": 350000,
+    "error": "Xe nóng máy",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Cân chỉnh xích",
+    "description": "Căn chỉnh và bôi trơn xích.",
+    "price": 90000,
+    "error": "Xích kêu",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay bố thắng",
+    "description": "Thay bố thắng trước hoặc sau.",
+    "price": 200000,
+    "error": "Thắng yếu",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Cân lửa động cơ",
+    "description": "Điều chỉnh thời điểm đánh lửa.",
+    "price": 300000,
+    "error": "Máy rung",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay dây curoa",
+    "description": "Thay dây curoa xe tay ga.",
+    "price": 450000,
+    "error": "Xe hụt ga",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   },
   {
     "name": "Thay bố nồi",
-    "description": "Thay bộ nồi mới cho xe số hoặc xe ga.",
-    "price": 450000,
+    "description": "Thay bộ bố nồi mới.",
+    "price": 500000,
+    "error": "Xe giật",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Kiểm tra hệ thống điện",
+    "description": "Kiểm tra đèn, còi, điện xe.",
+    "price": 120000,
+    "error": "Đèn yếu",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Vệ sinh nồi xe ga",
+    "description": "Vệ sinh bộ nồi xe tay ga.",
+    "price": 300000,
+    "error": "Xe rung khi chạy",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay dầu láp",
+    "description": "Thay dầu láp xe tay ga.",
+    "price": 90000,
+    "error": "Kêu láp",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Kiểm tra lốp",
+    "description": "Kiểm tra áp suất và độ mòn lốp.",
+    "price": 50000,
+    "error": "Lốp mòn",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay van xe",
+    "description": "Thay van lốp xe mới.",
+    "price": 40000,
+    "error": "Xì hơi",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Vệ sinh lọc nhớt",
+    "description": "Làm sạch lọc nhớt động cơ.",
+    "price": 70000,
+    "error": "Nhớt bẩn",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Kiểm tra cổ lái",
+    "description": "Kiểm tra và căn chỉnh cổ lái.",
+    "price": 200000,
+    "error": "Lái nặng",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   },
   {
     "name": "Bảo dưỡng tổng quát",
-    "description": "Kiểm tra toàn bộ xe: phanh, lốp, nhớt, động cơ, đèn, điện.",
+    "description": "Kiểm tra tổng thể toàn bộ xe.",
     "price": 600000,
+    "error": "Xe xuống cấp",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay lọc gió",
+    "description": "Thay lọc gió mới giúp động cơ hoạt động hiệu quả.",
+    "price": 120000,
+    "error": "Xe yếu, hao xăng",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay dầu láp",
+    "description": "Thay dầu láp cho xe tay ga.",
+    "price": 90000,
+    "error": "Kêu láp",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Vệ sinh nồi xe ga",
+    "description": "Vệ sinh bộ nồi giúp xe bốc và êm hơn.",
+    "price": 300000,
+    "error": "Xe rung, giật",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Cân chỉnh xích",
+    "description": "Căn chỉnh và bôi trơn xích xe.",
+    "price": 80000,
+    "error": "Xích kêu",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay bố thắng",
+    "description": "Thay bố thắng trước hoặc sau.",
+    "price": 200000,
+    "error": "Thắng yếu",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Kiểm tra hệ thống điện",
+    "description": "Kiểm tra đèn, còi, đề, sạc.",
+    "price": 100000,
+    "error": "Đèn yếu, đề khó",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay dây curoa",
+    "description": "Thay dây curoa cho xe tay ga.",
+    "price": 450000,
+    "error": "Xe hụt ga",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Thay ắc quy",
+    "description": "Thay bình ắc quy mới.",
+    "price": 1900000,
+    "error": "Xe không đề",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Kiểm tra lốp xe",
+    "description": "Kiểm tra độ mòn và áp suất lốp.",
+    "price": 50000,
+    "error": "Lốp mòn, non hơi",
+    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+  },
+  {
+    "name": "Cân chỉnh cổ lái",
+    "description": "Căn chỉnh cổ lái giúp lái nhẹ và an toàn.",
+    "price": 200000,
+    "error": "Lái nặng, đảo tay lái",
     "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
   }
 ]

@@ -1,5 +1,3 @@
-# vnpay.py
-
 import hmac
 import hashlib
 import urllib.parse
@@ -14,7 +12,6 @@ VNPAY_PAYMENT_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
 
 def get_client_ip():
     return request.headers.get('X-Forwarded-For', request.remote_addr)
-
 
 def build_vnpay_url(amount, txn_ref, order_info='Thanh toan don hang'):
     vnp_amount = int(amount * 100)

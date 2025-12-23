@@ -516,9 +516,8 @@ def pay_repair(repair_id):
     return jsonify({'code': 200, 'pay_url': pay_url})
 
 
-
-
 @app.route('/billing/vnpay_return')
+@login_required
 def vnpay_return():
     response_code = request.args.get('vnp_ResponseCode')
     txn_ref = request.args.get('vnp_TxnRef')
@@ -572,10 +571,6 @@ def vnpay_return():
             )
             db.session.add(item)
         session.pop('cart', None)
-
-
-
-
 
     elif type == "REPAIR":
         repair = payment.repair

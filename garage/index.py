@@ -610,20 +610,6 @@ def vnpay_return():
                         unit_price=d.service_price,
                         total_price=d.service_price
                     ))
-    elif type == "REPAIR":
-        repair = payment.repair
-        for d in repair.details:
-
-            if d.service_price and d.service_price > 0:
-                db.session.add(ReceiptItem(
-                    receipt_id=receipt.id,
-                    repair_detail_id=d.id,
-                    item_type=ReceiptItemType.SERVICE,
-                    service_id=d.service_id,
-                    quantity=1,
-                    unit_price=d.service_price,
-                    total_price=d.service_price
-                ))
 
                 if d.spare_part_id and d.spare_part_price:
                     db.session.add(ReceiptItem(

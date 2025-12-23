@@ -3,61 +3,57 @@
     "name": "Thay nhớt",
     "description": "Thay dầu nhớt động cơ.",
     "price": 150000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Hết nhớt",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Hết nhớt"
   },
   {
     "name": "Bảo dưỡng phanh",
     "description": "Kiểm tra và vệ sinh hệ thống phanh.",
     "price": 250000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Phanh kêu",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Phanh kêu"
   },
   {
     "name": "Vệ sinh kim phun",
     "description": "Làm sạch kim phun nhiên liệu.",
     "price": 400000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Xe hao xăng",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Xe hao xăng"
   },
   {
     "name": "Thay bugi",
     "description": "Thay bugi mới cho động cơ.",
     "price": 120000,
+    "error": "Xe hao xăng",
     "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Cân lửa động cơ",
     "description": "Điều chỉnh thời điểm đánh lửa tối ưu.",
     "price": 300000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Khó nổ máy",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Khó nổ máy"
   },
   {
     "name": "Thay lọc gió",
     "description": "Thay lọc gió buồng đốt.",
     "price": 100000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Hỏng lọc gió"
   },
   {
     "name": "Bảo dưỡng hệ thống làm mát",
     "description": "Kiểm tra nước mát, vệ sinh két nước và ống dẫn.",
     "price": 350000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Xe yếu",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Xe yếu"
   },
   {
     "name": "Kiểm tra ắc quy",
     "description": "Đo dung lượng và hệ thống sạc.",
     "price": 80000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Xe không đề",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Xe không đề"
   },
   {
     "name": "Bảo dưỡng làm mát",
@@ -91,9 +87,8 @@
     "name": "Thay dây curoa",
     "description": "Thay dây curoa xe tay ga.",
     "price": 450000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Xe hụt ga",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Xe hụt ga"
   },
   {
     "name": "Thay bố nồi",
@@ -155,9 +150,8 @@
     "name": "Bảo dưỡng tổng quát",
     "description": "Kiểm tra tổng thể toàn bộ xe.",
     "price": 600000,
-    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
-    "error": "Xe xuống cấp",
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg",
+    "error": "Xe xuống cấp"
   },
   {
     "name": "Thay lọc gió",

@@ -8,7 +8,7 @@ from flask_admin.contrib.sqla.filters import DateBetweenFilter, FilterEqual
 
 from flask_login import current_user, login_required
 from markupsafe import Markup
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField
 from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
 from garage import db, app, dao
@@ -456,7 +456,7 @@ class RepairFormAdmin(MyAdminModelView):
     def on_model_change(self, form, model, is_created):
         with db.session.no_autoflush:
 
-            if not model.reception_form or not model.reception_form.vehicle:
+            if not model.reception_form :
                 raise ValidationError("Vui lòng chọn phiếu tiếp nhận!")
 
             if is_created:
@@ -489,19 +489,32 @@ class RepairFormAdmin(MyAdminModelView):
         'reception_form': lambda v, c, m, p: f"PTN {m.reception_form.id}" if m.reception_form else '-'
     }
 
+    def _reception_label(self, r):
+        return (
+            f"[{r.vehicle.license_plate}] - "
+            f"[{r.created_date.strftime('%d/%m/%Y %H:%M')}] - "
+            f"[{r.vehicle.customer.full_name}]"
+            if r.vehicle else f"PTN {r.id}"
+        )
 
-    form_extra_fields = {
-            'reception_form': QuerySelectField(
-        'Chọn phiếu tiếp nhận',
-        query_factory=lambda: db.session.query(ReceptionForm).filter(ReceptionForm.repair_form == None).all(),
-                #.filter(ReceptionForm.repair_form == None)
-        get_label=lambda r: f"[{r.vehicle.license_plate}] - [{r.created_date}] - [{r.vehicle.customer.full_name}]"
-                            if r.vehicle else f"PTN {r.id}",
-        allow_blank=True,
-        validators=[Optional()]
-        ),
-    }
+    def create_form(self):
+        form = super().create_form()
+        form.reception_form.query_factory = lambda: (
+            db.session.query(ReceptionForm)
+            .filter(ReceptionForm.repair_form == None)
+            .order_by(ReceptionForm.created_date.desc())
+        )
+        form.reception_form.get_label = self._reception_label
+        return form
 
+    def edit_form(self,obj):
+        form = super().create_form()
+        form.reception_form.query_factory = lambda: (
+            db.session.query(ReceptionForm)
+            .filter(ReceptionForm.repair_form.has(id=obj.id))
+        )
+        form.reception_form.get_label = self._reception_label
+        return form
 
     #khoá repair PAID
     def on_form_prefill(self, form, id):

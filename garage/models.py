@@ -156,6 +156,7 @@ class SparePart(Base):
         back_populates="spare_part",
         lazy=True
     )
+
     def __str__(self):
         return self.name
 

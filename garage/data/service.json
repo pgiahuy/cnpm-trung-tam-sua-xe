@@ -3,60 +3,60 @@
     "name": "Thay nhớt",
     "description": "Thay dầu nhớt động cơ, kiểm tra mức nhớt và vệ sinh lọc.",
     "price": 150000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Bảo dưỡng phanh",
     "description": "Kiểm tra má phanh, đĩa phanh và hệ thống dẫn động phanh.",
     "price": 250000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Vệ sinh kim phun",
     "description": "Làm sạch kim phun nhiên liệu giúp tối ưu hiệu suất động cơ.",
     "price": 400000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Thay bugi",
     "description": "Thay bugi mới và kiểm tra hệ thống đánh lửa.",
     "price": 120000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Cân lửa động cơ",
     "description": "Điều chỉnh thời điểm đánh lửa tối ưu.",
     "price": 300000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Thay lọc gió",
     "description": "Thay lọc gió buồng đốt giúp tăng hiệu suất động cơ.",
     "price": 100000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Bảo dưỡng hệ thống làm mát",
     "description": "Kiểm tra nước mát, vệ sinh két nước và ống dẫn.",
     "price": 350000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Kiểm tra ắc quy",
     "description": "Đo dung lượng ắc quy và kiểm tra hệ thống sạc.",
     "price": 80000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Thay bố nồi",
     "description": "Thay bộ nồi mới cho xe số hoặc xe ga.",
     "price": 450000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   },
   {
     "name": "Bảo dưỡng tổng quát",
     "description": "Kiểm tra toàn bộ xe: phanh, lốp, nhớt, động cơ, đèn, điện.",
     "price": 600000,
-    "image": "https://icons.iconarchive.com/icons/papirus-team/papirus-status/256/avatar-default-icon.png"
+    "image": "https://res.cloudinary.com/dbxtbus46/image/upload/v1765352904/360_F_641732036_if4Eq4gHSoPiDmmxIcim0FDPkjWGYlOq_htvlsc.jpg"
   }
 ]

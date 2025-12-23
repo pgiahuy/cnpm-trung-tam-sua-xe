@@ -321,7 +321,7 @@ def site_spareparts():
                                page=page,
                                page_of_spareparts=page_of_spareparts)
 
-    # Bình thường → render full page
+    # Bình thường thì render cả page
     return render_template("sparepart.html",
                            spare_parts=spare_parts,
                            page=page,
@@ -387,21 +387,29 @@ def change_password():
 
     return render_template("user/change-password.html")
 
-
 @app.route("/api/carts", methods=['post'])
+@login_required
 def add_to_cart():
-    cart = session.get('cart')
+    cart = session.get('cart', {})
 
-    if not cart:
-        cart = {}
+    sparepart_id = str(request.json.get('id'))
+    sparepart = dao.get_sparepart_by_id(int(sparepart_id))
 
-    id = str(request.json.get('id'))
+    if not sparepart:
+        return jsonify({'error': 'Sản phẩm không tồn tại'}), 404
 
-    if id in cart:
-        cart[id]["quantity"] += 1
+    if sparepart.inventory <= 0:
+        return jsonify({'error': 'Sản phẩm đã hết hàng'}), 400
+
+    current_quantity = cart.get(sparepart_id, {"quantity": 0})["quantity"]
+    if current_quantity + 1 > sparepart.inventory:
+        return jsonify({'error': f'Chỉ còn {sparepart.inventory} sản phẩm trong kho'}), 400
+
+    if sparepart_id in cart:
+        cart[sparepart_id]["quantity"] += 1
     else:
-        cart[id] = {
-            "id": id,
+        cart[sparepart_id] = {
+            "id": sparepart_id,
             "name": request.json.get('name'),
             "unit_price": request.json.get('unit_price'),
             "quantity": 1
@@ -409,10 +417,7 @@ def add_to_cart():
 
     session['cart'] = cart
 
-    print(session['cart'])
-
     return jsonify(utils.count_cart(cart=cart))
-
 
 @app.route('/cart')
 def cart():
@@ -461,7 +466,7 @@ def pay():
         return jsonify({'code': 400, 'msg': 'Cart rỗng'})
     txn_ref = f"{current_user.id}_{int(time.time())}"
 
-    vat_rate = 0 #dao.get_vat_value()
+    vat_rate = 0
 
     total = utils.count_cart(cart)['total_amount']
     total += vat_rate*total
@@ -537,79 +542,100 @@ def vnpay_return():
         db.session.commit()
         return render_template("payment_failed.html")
 
-    # Thanh toán thành công
-    payment.status = PaymentStatus.SUCCESS
-    payment.vnp_transaction_no = vnp_trans_no
-    type = getattr(payment, 'type')
-    subtotal = payment.amount/(1+payment.vat_rate)
-    receipt = Receipt(
-        customer_id=payment.user.customer.id,
-        subtotal=subtotal,
-        vat_rate=payment.vat_rate,
-        total_paid=payment.amount,
-        payment_method="VNPAY",
-        type=type  # BUY hoặc REPAIR
-    )
-    db.session.add(receipt)
-    db.session.flush()  # để có receipt.id
+    try:
+        # Thanh toán thành công
+        payment.status = PaymentStatus.SUCCESS
+        payment.vnp_transaction_no = vnp_trans_no
+        type = payment.type
 
+        subtotal = payment.amount / (1 + payment.vat_rate)
+        receipt = Receipt(
+            customer_id=payment.user.customer.id,
+            subtotal=subtotal,
+            vat_rate=payment.vat_rate,
+            total_paid=payment.amount,
+            payment_method="VNPAY",
+            type=type
+        )
+        db.session.add(receipt)
+        db.session.flush()
 
-    # Tạo receipt item
-    if type == "BUY":
+        if type == "BUY":
+            cart = json.loads(payment.cart_snapshot or '{}')
 
-        cart = json.loads(payment.cart_snapshot)
+            if not cart:
+                raise ValueError("Giỏ hàng trống hoặc dữ liệu bị lỗi")
 
-        if not cart:
-            return jsonify({'code': 400, 'msg': 'Cart rỗng'})
+            for item_id, item in cart.items():
+                sparepart = SparePart.query.get(int(item_id))
+                if not sparepart:
+                    raise ValueError(f"Sản phẩm ID {item_id} không tồn tại")
+                if sparepart.inventory < item['quantity']:
+                    raise ValueError(f"Sản phẩm '{sparepart.name}' chỉ còn {sparepart.inventory} trong kho")
 
-        for c in cart.values():
-            item = ReceiptItem(
-                receipt_id=receipt.id,
-                spare_part_id=int(c['id']),
-                quantity=c['quantity'],
-                unit_price=c['unit_price'],
-                total_price=c['quantity'] * c['unit_price']
-            )
-            db.session.add(item)
-        session.pop('cart', None)
-
-
-
-
-
-    elif type == "REPAIR":
-        repair = payment.repair
-        for d in repair.details:
-
-            if d.service_price and d.service_price > 0:
-                db.session.add(ReceiptItem(
+            receipt_items = []
+            for item_id, item in cart.items():
+                sparepart = SparePart.query.get(int(item_id))
+                receipt_item = ReceiptItem(
                     receipt_id=receipt.id,
-                    repair_detail_id=d.id,
-                    item_type=ReceiptItemType.SERVICE,
-                    service_id=d.service_id,
-                    quantity=1,
-                    unit_price=d.service_price,
-                    total_price=d.service_price
-                ))
-
-            if d.spare_part_id and d.spare_part_price:
-                db.session.add(ReceiptItem(
-                    receipt_id=receipt.id,
-                    repair_detail_id=d.id,
+                    spare_part_id=sparepart.id,
                     item_type=ReceiptItemType.SPARE_PART,
-                    spare_part_id=d.spare_part_id,
-                    quantity=d.quantity,
-                    unit_price=d.spare_part_price,
-                    total_price=d.quantity * d.spare_part_price
-                ))
-        repair.repair_status = RepairStatus.PAID
-        repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
+                    quantity=item['quantity'],
+                    unit_price=item['unit_price'],
+                    total_price=item['quantity'] * item['unit_price']
+                )
+                receipt_items.append(receipt_item)
+                db.session.add(receipt_item)
+
+            for item_id, item in cart.items():
+                sparepart = SparePart.query.get(int(item_id))
+                sparepart.inventory -= item['quantity']
 
 
-    payment.receipt_id = receipt.id
-    db.session.commit()
+            session.pop('cart', None)
 
-    return render_template("payment_success.html", receipt=receipt)
+        elif type == "REPAIR":
+            repair = payment.repair
+            for d in repair.details:
+                if d.service_price and d.service_price > 0:
+                    db.session.add(ReceiptItem(
+                        receipt_id=receipt.id,
+                        repair_detail_id=d.id,
+                        item_type=ReceiptItemType.SERVICE,
+                        service_id=d.service_id,
+                        quantity=1,
+                        unit_price=d.service_price,
+                        total_price=d.service_price
+                    ))
+
+                if d.spare_part_id and d.spare_part_price:
+                    db.session.add(ReceiptItem(
+                        receipt_id=receipt.id,
+                        repair_detail_id=d.id,
+                        item_type=ReceiptItemType.SPARE_PART,
+                        spare_part_id=d.spare_part_id,
+                        quantity=d.quantity,
+                        unit_price=d.spare_part_price,
+                        total_price=d.quantity * d.spare_part_price
+                    ))
+
+            repair.repair_status = RepairStatus.PAID
+            repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
+
+        payment.receipt_id = receipt.id
+
+
+        db.session.commit()
+
+        return render_template("payment_success.html", receipt=receipt)
+
+    except ValueError as ve:
+        db.session.rollback()
+        return render_template("payment_failed.html", error_message=str(ve)), 400
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error in vnpay_return: {e}")
+        return render_template("payment_failed.html", error_message="Có lỗi xảy ra khi xử lý đơn hàng"), 500
 
 
 @app.route("/user/appointments/<int:appointment_id>/cancel", methods=["POST"])
@@ -786,7 +812,7 @@ def flash_login_required():
 @app.route("/search")
 def search():
     kw = request.args.get("kw", "").strip()
-    scope = request.args.get("scope", "all")  # all, service, sparepart
+    scope = request.args.get("scope", "all")
 
     services = []
     spare_parts = []
@@ -918,10 +944,10 @@ def forgot_password():
         user.reset_token_expiry = datetime.utcnow() + timedelta(hours=1)
         db.session.commit()
 
-        # Link reset
+
         reset_url = url_for('reset_password', token=token, _external=True)
 
-        # Gửi email
+
         msg = Message("Đặt lại mật khẩu - Garage Center",
                       recipients=[user.customer.email])
         msg.html = f"""

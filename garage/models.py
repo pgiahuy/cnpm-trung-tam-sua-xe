@@ -144,7 +144,7 @@ class ReceptionForm(Base):
 
 
 class RepairForm(Base):
-    reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False)
+    reception_id = Column(Integer, ForeignKey("reception_form.id"), nullable=False, unique=True)
     vehicle_id = Column(Integer, ForeignKey("vehicle.id"), nullable=False)
     employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
     repair_status = Column(SQLEnum(RepairStatus), default=RepairStatus.QUOTED)
@@ -251,7 +251,7 @@ class Receipt(Base):
 
 class ReceiptItem(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
-    repair_detail_id = Column(Integer, ForeignKey("repair_detail.id"), nullable=True)
+    repair_detail_id = Column(Integer, ForeignKey("repair_detail.id"), nullable=True, unique=True)
 
     item_type = Column(SQLEnum(ReceiptItemType), default=ReceiptItemType.SPARE_PART)
 
@@ -265,7 +265,7 @@ class ReceiptItem(Base):
 
 class Payment(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
+    receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True , unique=True)
     repair_id = Column(Integer, ForeignKey("repair_form.id"), nullable=True)
     type = Column(SQLEnum("REPAIR", "BUY"), default="REPAIR")
     amount = Column(DOUBLE, nullable=False)

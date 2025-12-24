@@ -34,9 +34,13 @@ def load_customer_by_id(id):
 def get_user_by_repairform(repair):
 
     vehicle = Vehicle.query.filter_by(id=repair.vehicle_id).first()
-    customer = Customer.query.filter_by(id=vehicle.customer_id).first()
-    user = User.query.filter_by(id=customer.user_id).first()
+    print(vehicle)
 
+    customer = Customer.query.filter_by(id=vehicle.customer_id).first()
+    print(customer.full_name)
+    user = User.query.filter_by(id=customer.user_id).first()
+    print("--------------")
+    print(user.id)
 
     return user
 
@@ -50,7 +54,7 @@ def check_slot_available(check_date=None):
 
     recepted_today = ReceptionForm.query.filter(
         func.date(ReceptionForm.created_date) == check_date,
-        ReceptionForm.receive_type == 'walk-in'
+        ReceptionForm.receive_type == 'walk_in'
     ).count()
     print(f"recepted_today: {recepted_today}")
 
@@ -301,10 +305,11 @@ def update_appointment_note(appointment: Appointment, note: str):
     appointment.note = note
     db.session.commit()
 
-CAR_PLATE_REGEX = r"^\d{2}[A-Z]{1,2}-\d{4,5}$"
-MOTOR_PLATE_REGEX = r"^\d{2}[A-Z][A-Z0-9]-\d{4,5}$"
+
 
 def validate_license_plate(plate, vehicle_type):
+    CAR_PLATE_REGEX = r"^\d{2}[A-Z]{1,2}-\d{4,5}$"
+    MOTOR_PLATE_REGEX = r"^\d{2}[A-Z][A-Z0-9]-\d{4,5}$"
     plate = plate.upper().strip()
 
     if vehicle_type == "Ô tô" or vehicle_type=="Xe tải":

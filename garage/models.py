@@ -251,7 +251,7 @@ class Receipt(Base):
 
 class ReceiptItem(Base):
     receipt_id = Column(Integer, ForeignKey("receipt.id"), nullable=True)
-    repair_detail_id = Column(Integer, ForeignKey("repair_detail.id"), nullable=True, unique=True)
+    repair_detail_id = Column(Integer, ForeignKey("repair_detail.id"), nullable=True)
 
     item_type = Column(SQLEnum(ReceiptItemType), default=ReceiptItemType.SPARE_PART)
 

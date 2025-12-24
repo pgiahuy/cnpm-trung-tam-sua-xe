@@ -1,5 +1,6 @@
 from datetime import date, datetime
 
+import cloudinary
 from flask import url_for, render_template, redirect, request, send_file, flash, abort, jsonify
 from flask_admin import Admin, AdminIndexView, expose, BaseView
 from flask_admin.contrib.sqla import ModelView
@@ -12,6 +13,7 @@ from sqlalchemy import func, or_
 from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField
 from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
 from garage import db, app, dao
+from garage.dao import md5_hash
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
                            VehicleStatus, SystemConfig, RepairStatus, Receipt, ReceiptItem, ReceiptItemType, Payment)
@@ -19,6 +21,16 @@ import json
 import pandas as pd
 import io
 
+def _image_formatter(view, context, model, name):
+    img = (
+        getattr(model, "image", None)
+        or getattr(model, "image_url", None)
+        or getattr(model, "avatar", None)
+    )
+
+    if img:
+        return Markup(f'<img src="{img}" style="height:80px;">')
+    return ''
 
 class AdminAccessMixin:
     def is_accessible(self):
@@ -39,8 +51,10 @@ class MyAdminHome(AdminIndexView):
         today = date.today()
         recepted_today = ReceptionForm.query.filter(
             func.date(ReceptionForm.created_date) == today,
-            ReceptionForm.receive_type == 'walk-in'
+            ReceptionForm.receive_type == 'walk_in'
         ).count()
+
+
         appointed_today = Appointment.query.filter(
             func.date(Appointment.schedule_time) == today
         ).count()
@@ -76,49 +90,33 @@ class MyAdminModelView(ModelView):
     def inaccessible_callback(self, name, **kwargs):
         return render_template('errors/403.html'), 403
 
+class ServiceAdmin(AdminAccessMixin, MyAdminModelView):
+    column_list = ['name', 'description', 'active', 'price', 'image','created_date']
 
-class ServiceAdmin(AdminAccessMixin,MyAdminModelView):
-    column_list = ['name', 'description', 'active', 'price','created_date']
     column_labels = {
         'name': 'Tên dịch vụ',
-        'description' : 'Mô tả',
+        'description': 'Mô tả',
         'active': 'Trạng thái',
-        'price':'Giá',
-        'created_date':'Ngày tạo'
+        'price': 'Giá',
+        'created_date': 'Ngày tạo'
     }
-    form_columns = ['name', 'description',  'price', 'image','active']
-    column_searchable_list = [
-        'name',
-    ]
+
+    form_columns = ['name', 'description', 'price', 'image', 'active']
+
+    column_searchable_list = ['name']
+
     column_formatters = {
-        'price': lambda v, c, m, p: f"{m.price:,.0f} ₫" if m.price else "0 ₫"
+        'price': lambda v, c, m, p: f"{m.price:,.0f} ₫" if m.price else "0 ₫",
+        'image': _image_formatter
     }
-    def create_form(self):
-        form = super().create_form()
-        self._populate_choices(form)
-        return form
 
-    def edit_form(self):
-        form = super().edit_form()
-        self._populate_choices(form)
-        return form
-
-    def _populate_choices(self, form):
-        pass
-        # form.customer_id.choices = [('', '-- Chọn khách hàng --')] + [
-        #     (c.id, f"{c.full_name} - {c.phone}")
-        #     for c in Customer.query.order_by(Customer.full_name).all()
-        # ]
-        #
-        # appointments = Appointment.query.filter_by(status=AppointmentStatus.CONFIRMED).all()
-        # form.appointment_id.choices = [('', '-- Chọn lịch hẹn --')] + [
-        #     (a.id, f"{a.vehicle.license_plate} - {a.customer.full_name} ({a.schedule_time.strftime('%d/%m %H:%M')})")
-        #     for a in appointments
-        # ]
-        #
-        # form.vehicle_id.choices = [('', '-- Chọn xe --')]
-        #
-        # return form
+    def on_model_change(self, form, model, is_created):
+        if form.image.data:
+            upload_result = cloudinary.uploader.upload(
+                form.image.data,
+                folder="services"
+            )
+            model.image = upload_result.get("secure_url")
 
 
 class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
@@ -159,22 +157,38 @@ class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
         'full_name',
         'phone',
     ]
+class UserAdmin(AdminAccessMixin, MyAdminModelView):
+    column_list = ['username', 'active', 'role','avatar', 'created_date']
 
-class UserAdmin(AdminAccessMixin,MyAdminModelView):
-    column_list = ['username',  'active', 'role','created_date']
     column_labels = {
         'username': 'Tên đăng nhập',
-        'active':'Trạng thái',
-        'role':'Vai trò',
+        'active': 'Trạng thái',
+        'role': 'Vai trò',
         'created_date': 'Ngày tạo'
     }
-    form_columns = ['username','password','avatar', 'role','customer','employee', 'active']
-    column_searchable_list = [
-        'username',
-    ]
+    column_formatters = {
+        'avatar': _image_formatter
+    }
+    form_columns = ['username', 'password', 'avatar', 'role', 'active']
+
+    column_searchable_list = ['username']
+
     column_filters = [
         FilterEqual(User.role, 'role', options=[(r.name, r.name) for r in UserRole])
     ]
+
+    def on_model_change(self, form, model, is_created):
+        if form.avatar.data:
+            upload_result = cloudinary.uploader.upload(
+                form.avatar.data,
+                folder="services"
+            )
+            model.avatar = upload_result.get("secure_url")
+
+        if form.password.data:
+            # Tránh hash lại password đã hash
+            if not model.password or len(form.password.data) < 32:
+                model.password = md5_hash(form.password.data)
 
 class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
     can_create = False
@@ -267,7 +281,6 @@ class ReceptionFormAdmin(MyAdminModelView):
         'error_description'
     ]
 
-
     form_extra_fields = {
 
         'receive_type': RadioField(
@@ -308,7 +321,16 @@ class ReceptionFormAdmin(MyAdminModelView):
         'new_customer_phone': StringField('SĐT khách mới'),
 
         'new_vehicle_plate': StringField('Biển số xe mới'),
-        'new_vehicle_type': StringField('Loại xe mới'),
+
+        'new_vehicle_type': SelectField(
+        'Loại xe mới',
+        choices=[
+            ('Ô tô', 'Ô tô'),
+            ('Xe máy', 'Xe máy'),
+            ('Xe tải', 'Xe tải')
+        ],
+        validators=[Optional()]
+    ),
 
         'error_description': StringField('Mô tả lỗi'),
     }
@@ -346,19 +368,12 @@ class ReceptionFormAdmin(MyAdminModelView):
         try:
             with db.session.no_autoflush:
                 if is_created:
-                    if not getattr(form, "appointment_id", None):
-                        result = dao.check_slot_available()
 
-                        if not result["success"]:
-                            raise ValidationError(
-                                f"Hôm nay đã đủ số lượt tiếp nhận "
-                                f"[ {result['max_slot']} xe ], quay lại vào ngày mai!"
-                            )
 
-                receive_type = form.receive_type.data
-                model.employee_id = form.employee.data.id
-                model.error_description = form.error_description.data or ""
-                model.receive_type = receive_type
+                    receive_type = form.receive_type.data
+                    model.employee_id = form.employee.data.id
+                    model.error_description = form.error_description.data or ""
+                    model.receive_type = receive_type
 
                 if receive_type == "appointment": # có lịch hẹn
                     if not form.appointment_id.data:
@@ -378,6 +393,13 @@ class ReceptionFormAdmin(MyAdminModelView):
                     db.session.add(vehicle)
 
                 else:  # walk_in
+                    result = dao.check_slot_available()
+                    print(result)
+                    if not result["success"]:
+                        raise ValidationError(
+                            f"Hôm nay đã đủ số lượt tiếp nhận "
+                            f"[ {result['max_slot']} xe ], quay lại vào ngày mai!"
+                        )
                     if form.is_new_customer.data:
                         if not form.new_customer_name.data or not form.new_customer_phone.data:
                             raise ValueError("Vui lòng nhập tên và số điện thoại khách mới!")
@@ -396,6 +418,13 @@ class ReceptionFormAdmin(MyAdminModelView):
 
                     #  Xe
                     if form.is_new_vehicle.data:
+                        print(form.new_vehicle_type.data)
+                        print(form.new_vehicle_plate.data)
+                        if not dao.validate_license_plate(form.new_vehicle_plate.data, form.new_vehicle_type.data):
+                            raise ValueError("Biển số xe không hợp lệ!")
+
+
+
                         if not form.new_vehicle_plate.data or not form.new_vehicle_type.data:
                             raise ValueError("Vui lòng nhập biển số và loại xe mới!")
 
@@ -447,6 +476,18 @@ class RepairFormAdmin(MyAdminModelView):
 
 
     form_columns = ['employee', 'reception_form','repair_status', 'details']
+
+    form_args = {
+        'repair_status': {
+            'choices': lambda form, model: [
+                (status.value, status.value)
+                for status in RepairStatus
+                if status != RepairStatus.PAID
+            ]
+        }
+    }
+
+
     inline_models = [
         (RepairDetail, dict(
             form_columns=['id', 'task', 'service', 'spare_part', 'quantity'],
@@ -532,23 +573,40 @@ class RepairFormAdmin(MyAdminModelView):
             if r.vehicle else f"PTN {r.id}"
         )
 
-    def create_form(self):
-        form = super().create_form()
+    def create_form(self, obj=None):
+        form = super().create_form(obj)
         form.reception_form.query_factory = lambda: (
             db.session.query(ReceptionForm)
             .filter(ReceptionForm.repair_form == None)
             .order_by(ReceptionForm.created_date.desc())
         )
         form.reception_form.get_label = self._reception_label
+
+        form.repair_status.choices = [
+            (status.value, status.value)
+            for status in RepairStatus
+            if status != RepairStatus.PAID
+        ]
         return form
 
-    def edit_form(self,obj):
-        form = super().create_form()
+    def edit_form(self, obj):
+        form = super().edit_form(obj)
+
         form.reception_form.query_factory = lambda: (
             db.session.query(ReceptionForm)
             .filter(ReceptionForm.repair_form.has(id=obj.id))
         )
         form.reception_form.get_label = self._reception_label
+
+        form.repair_status.choices = [
+            (status.value, status.value)
+            for status in RepairStatus
+            if status != RepairStatus.PAID
+        ]
+
+        if obj.repair_status == RepairStatus.PAID:
+            form.repair_status.render_kw = {'disabled': True}
+
         return form
 
     #khoá repair PAID
@@ -644,7 +702,7 @@ class RepairDetailView(BaseView):
 
 
 class SparePartAdmin(AdminAccessMixin,MyAdminModelView):
-    column_list = ['name','unit_price', 'unit','supplier','inventory']
+    column_list = ['name','unit_price', 'unit','supplier','image_url','inventory']
     column_labels = {
         'name' : 'Tên',
         'unit_price': 'Giá',
@@ -654,9 +712,17 @@ class SparePartAdmin(AdminAccessMixin,MyAdminModelView):
     }
     form_columns = ['name', 'unit_price', 'unit','supplier','inventory','image_url','active']
     column_formatters = {
-        'unit_price': lambda v, c, m, p: f"{m.unit_price:,.0f} ₫" if m.unit_price else "0 ₫"
+        'unit_price': lambda v, c, m, p: f"{m.unit_price:,.0f} ₫" if m.unit_price else "0 ₫",
+        'image_url' : _image_formatter
     }
     column_searchable_list = ['name','unit','supplier']
+    def on_model_change(self, form, model, is_created):
+        if form.image_url.data:
+            upload_result = cloudinary.uploader.upload(
+                form.image_url.data,
+                folder="services"
+            )
+            model.image_url = upload_result.get("secure_url")
 
 class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['id','value']
@@ -699,7 +765,7 @@ class ReceiptDetailAdmin(BaseView):
             enumerate=enumerate
         )
 
-class StatsView(BaseView):
+class StatsView(AdminAccessMixin,BaseView):
     @expose('/export-excel', methods=['POST'])
     def export_excel(self):
         start_date = request.form.get('startDate')

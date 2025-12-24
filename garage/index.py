@@ -469,6 +469,8 @@ def pay_repair(repair_id):
 
     txn_ref = f"REPAIR_{repair.id}_{int(time.time())}"
     user = dao.get_user_by_repairform(repair)
+    print(repair)
+    print(user)
 
     payment = Payment(
         user_id=user.id,
@@ -604,7 +606,7 @@ def checkout():
 @login_required
 def choose_payment(payment_id):
     payment = Payment.query.get_or_404(payment_id)
-    is_admin = current_user.role.name == 'ADMIN'
+    is_admin = current_user.role in {UserRole.ADMIN,UserRole.TECHNICIAN,UserRole.CASHIER,UserRole.RECEPTIONIST}
 
     if request.method == "POST":
         method = request.form.get("payment_method")

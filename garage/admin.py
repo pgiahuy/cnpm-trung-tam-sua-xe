@@ -10,7 +10,8 @@ from flask_admin.contrib.sqla.filters import DateBetweenFilter, FilterEqual
 from flask_login import current_user, login_required
 from markupsafe import Markup
 from sqlalchemy import func, or_
-from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField
+from wtforms import DateTimeLocalField, IntegerField, DecimalField, SelectField, StringField, RadioField, BooleanField, \
+    FileField
 from wtforms.validators import DataRequired, NumberRange, Optional, ValidationError
 from garage import db, app, dao
 from garage.dao import md5_hash
@@ -91,33 +92,41 @@ class MyAdminModelView(ModelView):
         return render_template('errors/403.html'), 403
 
 class ServiceAdmin(AdminAccessMixin, MyAdminModelView):
-    column_list = ['name', 'description', 'active', 'price', 'image','created_date']
+    column_list = ['name', 'description', 'active', 'price', 'image', 'created_date']
 
     column_labels = {
         'name': 'Tên dịch vụ',
         'description': 'Mô tả',
         'active': 'Trạng thái',
         'price': 'Giá',
+        'image': 'Hình ảnh',
         'created_date': 'Ngày tạo'
     }
-
-    form_columns = ['name', 'description', 'price', 'image', 'active']
-
-    column_searchable_list = ['name']
 
     column_formatters = {
         'price': lambda v, c, m, p: f"{m.price:,.0f} ₫" if m.price else "0 ₫",
         'image': _image_formatter
     }
 
+    form_excluded_columns = ('image',)
+
+    form_columns = [
+        'name', 'description', 'price', 'image_upload', 'active'
+    ]
+
+    form_extra_fields = {
+        'image_upload': FileField('Hình ảnh')
+    }
+
+    column_searchable_list = ['name']
+
     def on_model_change(self, form, model, is_created):
-        if form.image.data:
+        if form.image_upload.data:
             upload_result = cloudinary.uploader.upload(
-                form.image.data,
+                form.image_upload.data,
                 folder="services"
             )
             model.image = upload_result.get("secure_url")
-
 
 class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
     column_labels = {
@@ -158,35 +167,46 @@ class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
         'phone',
     ]
 class UserAdmin(AdminAccessMixin, MyAdminModelView):
-    column_list = ['username', 'active', 'role','avatar', 'created_date']
+    column_list = ['username', 'active', 'role', 'avatar', 'created_date']
 
     column_labels = {
         'username': 'Tên đăng nhập',
         'active': 'Trạng thái',
         'role': 'Vai trò',
-        'created_date': 'Ngày tạo'
+        'created_date': 'Ngày tạo',
+        'avatar': 'Avatar'
     }
+
     column_formatters = {
         'avatar': _image_formatter
     }
-    form_columns = ['username', 'password', 'avatar', 'role', 'active']
+    form_excluded_columns = ('avatar',)
+
+    form_columns = ['username', 'password', 'avatar_upload', 'role', 'active']
+
+    form_extra_fields = {
+        'avatar_upload': FileField('Avatar')
+    }
 
     column_searchable_list = ['username']
 
     column_filters = [
-        FilterEqual(User.role, 'role', options=[(r.name, r.name) for r in UserRole])
+        FilterEqual(
+            User.role,
+            'role',
+            options=[(r.name, r.name) for r in UserRole]
+        )
     ]
 
     def on_model_change(self, form, model, is_created):
-        if form.avatar.data:
+        if form.avatar_upload.data:
             upload_result = cloudinary.uploader.upload(
-                form.avatar.data,
+                form.avatar_upload.data,
                 folder="services"
             )
             model.avatar = upload_result.get("secure_url")
 
         if form.password.data:
-            # Tránh hash lại password đã hash
             if not model.password or len(form.password.data) < 32:
                 model.password = md5_hash(form.password.data)
 
@@ -700,26 +720,38 @@ class RepairDetailView(BaseView):
     #         db.session.rollback()
     #         raise e
 
+class SparePartAdmin(AdminAccessMixin, MyAdminModelView):
+    column_list = ['name', 'unit_price', 'unit', 'supplier', 'image_url', 'inventory']
 
-class SparePartAdmin(AdminAccessMixin,MyAdminModelView):
-    column_list = ['name','unit_price', 'unit','supplier','image_url','inventory']
     column_labels = {
-        'name' : 'Tên',
+        'name': 'Tên',
         'unit_price': 'Giá',
         'unit': 'Đơn vị',
         'supplier': 'Nhà cung cấp',
-        'inventory': 'Tồn kho'
+        'inventory': 'Tồn kho',
+        'image_url': 'Hình ảnh'
     }
-    form_columns = ['name', 'unit_price', 'unit','supplier','inventory','image_url','active']
+
     column_formatters = {
         'unit_price': lambda v, c, m, p: f"{m.unit_price:,.0f} ₫" if m.unit_price else "0 ₫",
-        'image_url' : _image_formatter
+        'image_url': _image_formatter
     }
-    column_searchable_list = ['name','unit','supplier']
+
+    form_excluded_columns = ('image_url',)
+
+    form_columns = [
+        'name', 'unit_price', 'unit', 'supplier',
+        'inventory', 'image_upload', 'active'
+    ]
+
+    form_extra_fields = {
+        'image_upload': FileField('Hình ảnh')
+    }
+    column_searchable_list = ['name', 'unit', 'supplier']
     def on_model_change(self, form, model, is_created):
-        if form.image_url.data:
+        if form.image_upload.data:
             upload_result = cloudinary.uploader.upload(
-                form.image_url.data,
+                form.image_upload.data,
                 folder="services"
             )
             model.image_url = upload_result.get("secure_url")

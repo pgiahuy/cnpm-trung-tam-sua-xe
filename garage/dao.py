@@ -31,7 +31,14 @@ def load_customers():
 def load_customer_by_id(id):
     return Customer.query.filter_by(id=id).first()
 
+def get_user_by_repairform(repair):
 
+    vehicle = Vehicle.query.filter_by(id=repair.vehicle_id).first()
+    customer = Customer.query.filter_by(id=vehicle.customer_id).first()
+    user = User.query.filter_by(id=customer.user_id).first()
+
+
+    return user
 
 def check_slot_available(check_date=None):
     if check_date is None:
@@ -40,9 +47,11 @@ def check_slot_available(check_date=None):
     max_slot_obj = SystemConfig.query.get('MAX_SLOT_PER_DAY') #3
     max_slot = int(max_slot_obj.value) if max_slot_obj else 30
     print(f'check_date: {check_date}')
+
     recepted_today = ReceptionForm.query.filter(
-        func.date(ReceptionForm.created_date) == check_date
-    ).count() #0
+        func.date(ReceptionForm.created_date) == check_date,
+        ReceptionForm.receive_type == 'walk-in'
+    ).count()
     print(f"recepted_today: {recepted_today}")
 
     appointed_today = Appointment.query.filter(

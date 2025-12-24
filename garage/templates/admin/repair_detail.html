@@ -16,11 +16,9 @@
         </button>
 
         {% if repair.repair_status.name == 'DONE' and not repair.receipt
-              and current_user.role.name in ['ADMIN','EMPLOYEE'] %}
-        <a href="{{ url_for('repair_pay.pay', repair_id=repair.id) }}"
-           class="btn btn-success no-print">
-            <i class="fa fa-credit-card"></i> Thanh toán
-        </a>
+              and current_user.role.name in ['ADMIN','TECHNICIAN','CASHIER','RECEPTIONIST'] %}
+
+        <input type="button" class="btn btn-success no-print" value="Thanh toán" onclick="payRepair({{ repair.id }})"/>
         {% elif repair.receipt %}
         <a href="{{ url_for('receipt_detail.detail', receipt_id=repair.receipt.id) }}"
            class="btn btn-info no-print">
@@ -132,4 +130,8 @@
 
 </style>
 
+{% endblock %}
+{% block tail %}
+    {{ super() }}
+    <script src="{{ url_for('static', filename='js/cart.js') }}"></script>
 {% endblock %}

@@ -114,7 +114,11 @@ class Appointment(Base):
 
     customer = relationship("Customer", backref="appointments")
     vehicle = relationship("Vehicle", backref="appointments")
-
+    reception = relationship(
+        "ReceptionForm",
+        back_populates="appointment",
+        uselist=False
+    )
     def __str__(self):
         return f"{self.vehicle.license_plate} - {self.schedule_time.strftime('%d/%m/%Y %H:%M')}"
 
@@ -125,7 +129,17 @@ class ReceptionForm(Base):
     vehicle_id = Column(Integer, ForeignKey("vehicle.id"), nullable=False)
     employee_id = Column(Integer, ForeignKey("employee.id"), nullable=False)
     repair_form = relationship("RepairForm", backref="reception_form", uselist=False)
+    appointment_id = Column(
+        Integer,
+        ForeignKey("appointment.id"),
+        unique=True,
+        nullable=True
+    )
 
+    appointment = relationship(
+        "Appointment",
+        back_populates="reception"
+    )
 
 
 

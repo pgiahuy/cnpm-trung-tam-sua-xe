@@ -26,16 +26,18 @@
                      alt="MoMo" style="width: 100%; border-radius:15px;">
             </button>
 
-            {% if is_admin %}
-
-            <button type="submit" name="payment_method" value="cash"
-                    class="btn btn-outline-success d-flex align-items-center justify-content-center"
-                    style="width: 120px; height: 120px; padding: 0;">
-                <i class="bi bi-cash fs-2"></i>
-            </button>
-            {% endif %}
 
         </form>
+        {% if is_admin %}
+        <!-- CASH form -->
+        <form method="POST" action="{{ url_for('repair_pay.pay', repair_id=payment.repair_id) }}"
+              class="d-flex justify-content-center">
+            <button type="submit" name="payment_method" value="cash"
+                    class="btn btn-outline-success cash-btn d-flex align-items-center justify-content-center">
+                <h3><b>CASH</b></h3>
+            </button>
+        </form>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

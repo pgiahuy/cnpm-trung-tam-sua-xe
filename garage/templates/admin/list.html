@@ -197,6 +197,7 @@
 
 {% endblock %}
 {% block tail %}
+
 {{ super() }}
 <script>
     document.querySelectorAll('tr').forEach(row => {
@@ -209,4 +210,6 @@
         }
     });
 </script>
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+
 {% endblock %}

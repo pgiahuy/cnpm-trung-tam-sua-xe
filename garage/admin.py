@@ -14,7 +14,7 @@ from wtforms.validators import DataRequired, NumberRange, Optional, ValidationEr
 from garage import db, app, dao
 from garage.models import (Service, Customer, Vehicle, User, Employee,
                            Appointment, RepairForm, ReceptionForm, SparePart, UserRole, RepairDetail, AppointmentStatus,
-                           VehicleStatus, SystemConfig, RepairStatus, Receipt, ReceiptItem, ReceiptItemType)
+                           VehicleStatus, SystemConfig, RepairStatus, Receipt, ReceiptItem, ReceiptItemType, Payment)
 import json
 import pandas as pd
 import io
@@ -38,7 +38,8 @@ class MyAdminHome(AdminIndexView):
             vat = 0.1
         today = date.today()
         recepted_today = ReceptionForm.query.filter(
-            func.date(ReceptionForm.created_date) == today
+            func.date(ReceptionForm.created_date) == today,
+            ReceptionForm.receive_type == 'walk-in'
         ).count()
         appointed_today = Appointment.query.filter(
             func.date(Appointment.schedule_time) == today
@@ -185,6 +186,12 @@ class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
         'customer': 'Khách hàng',
         'receptions': 'Phiếu tiếp nhận'
     }
+    column_searchable_list = [
+        'license_plate',
+    ]
+
+
+
 class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
     can_create = False
     column_list = ['customer', 'vehicle', 'schedule_time', 'status', 'note']
@@ -339,11 +346,14 @@ class ReceptionFormAdmin(MyAdminModelView):
         try:
             with db.session.no_autoflush:
                 if is_created:
-                    result = dao.check_slot_available()
-                    if not result["success"]:
-                        raise ValidationError(
-                            f"Hôm nay đã đủ số lượt tiếp nhận [ {result['max_slot']} xe ], quay lại vào ngày mai!"
-                        )
+                    if not getattr(form, "appointment_id", None):
+                        result = dao.check_slot_available()
+
+                        if not result["success"]:
+                            raise ValidationError(
+                                f"Hôm nay đã đủ số lượt tiếp nhận "
+                                f"[ {result['max_slot']} xe ], quay lại vào ngày mai!"
+                            )
 
                 receive_type = form.receive_type.data
                 model.employee_id = form.employee.data.id
@@ -466,11 +476,10 @@ class RepairFormAdmin(MyAdminModelView):
     }
 
 
-
     def _pay_formatter(view, context, model, name):
         if model.repair_status == RepairStatus.DONE and not model.receipt:
             return Markup(
-                f'<a class="btn btn-success btn-sm" href="{url_for("repair_pay.pay", repair_id=model.id)}">Thanh toán</a>')
+                f'<input type="button" class="btn btn-success no-print" value="Thanh toán" onclick="payRepair({model.id})"/>')
         elif model.receipt:
             return Markup(
                 f'<a class="btn btn-info btn-sm" href="{url_for("receipt_detail.detail", receipt_id=model.receipt.id)}">Xem hóa đơn</a>')
@@ -506,7 +515,8 @@ class RepairFormAdmin(MyAdminModelView):
         f'<a href="{url_for("repair_detail.detail", repair_id=m.id)}">{m.id}</a>'),
 
         'customer': lambda v, c, m, p:m.reception_form.vehicle.customer if m.reception_form else '',
-        'total_money': lambda v, c, m, p: f"{m.total_before_vat:,.0f} ₫" if m.total_before_vat else "0 ₫",
+        'total_money': lambda v, c, m, p: f"{m.total_before_vat*(dao.get_vat_value()+1):,.0f} ₫"
+        if m.total_before_vat*(dao.get_vat_value()+1) else "0 ₫",
         'vehicle_plate': lambda v, c, m, p: (
             m.reception_form.vehicle.license_plate
             if m.reception_form and m.reception_form.vehicle else '-'
@@ -772,57 +782,65 @@ class RepairPayView(BaseView):
     def index(self):
         return redirect(url_for('admin.index'))
 
-    @expose('/pay/<int:repair_id>')
+    @expose('/pay/<int:repair_id>', methods=["GET", "POST"])
     @login_required
     def pay(self, repair_id):
         repair = RepairForm.query.get_or_404(repair_id)
 
+        # Nếu đã có receipt → không tạo nữa
         if repair.receipt:
             flash("Phiếu này đã được thanh toán", "info")
             return redirect(url_for('receipt_detail.detail', receipt_id=repair.receipt.id))
 
-        receipt = Receipt(
-            type='REPAIR',
-            customer=repair.reception_form.vehicle.customer,
-            subtotal=repair.total_before_vat,
-            vat_rate=0.1,
-            total_paid=repair.total_before_vat * 1.1,
-            payment_method='CASH'
-        )
-        db.session.add(receipt)
-        db.session.flush()  # đảm bảo receipt.id có sẵn
+        # Logic CASH trực tiếp
+        try:
+            receipt = Receipt(
+                type='REPAIR',
+                customer=repair.reception_form.vehicle.customer,
+                subtotal=repair.total_before_vat,
+                vat_rate=0.1,
+                total_paid=repair.total_before_vat * 1.1,
+                payment_method='CASH'
+            )
+            db.session.add(receipt)
+            db.session.flush()
 
-        for d in repair.details:
-            if d.service_price and d.service_price > 0:
-                db.session.add(ReceiptItem(
-                    receipt_id=receipt.id,
-                    repair_detail_id=d.id,
-                    item_type=ReceiptItemType.SERVICE,
-                    service_id=d.service_id,
-                    quantity=1,
-                    unit_price=d.service_price,
-                    total_price=d.service_price
-                ))
+            for d in repair.details:
+                if d.service_price and d.service_price > 0:
+                    db.session.add(ReceiptItem(
+                        receipt_id=receipt.id,
+                        repair_detail_id=d.id,
+                        item_type=ReceiptItemType.SERVICE,
+                        service_id=d.service_id,
+                        quantity=1,
+                        unit_price=d.service_price,
+                        total_price=d.service_price
+                    ))
+                if d.spare_part_id and d.spare_part_price:
+                    db.session.add(ReceiptItem(
+                        receipt_id=receipt.id,
+                        repair_detail_id=d.id,
+                        item_type=ReceiptItemType.SPARE_PART,
+                        spare_part_id=d.spare_part_id,
+                        quantity=d.quantity,
+                        unit_price=d.spare_part_price,
+                        total_price=d.quantity * d.spare_part_price
+                    ))
 
-            if d.spare_part_id and d.spare_part_price:
-                db.session.add(ReceiptItem(
-                    receipt_id=receipt.id,
-                    repair_detail_id=d.id,
-                    item_type=ReceiptItemType.SPARE_PART,
-                    spare_part_id=d.spare_part_id,
-                    quantity=d.quantity,
-                    unit_price=d.spare_part_price,
-                    total_price=d.quantity * d.spare_part_price
-                ))
+            repair.repair_status = RepairStatus.PAID
+            repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
+            repair.receipt = receipt
 
-        repair.repair_status = RepairStatus.PAID
-        repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
-        repair.receipt = receipt
+            db.session.commit()
+            flash("Đã tạo hóa đơn thanh toán bằng CASH!", "success")
+            return redirect(url_for('receipt_detail.detail', receipt_id=receipt.id))
 
-        db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Thanh toán thất bại: {str(e)}", "danger")
+            return redirect(url_for('repairpayview.index'))
 
-        flash("Đã tạo hóa đơn thanh toán thành công!", "success")
-        return redirect(url_for('receipt_detail.detail', receipt_id=receipt.id))
+
 
 admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name='TRANG CHỦ'))
 
@@ -842,7 +860,7 @@ admin.add_view(ReceiptAdmin(Receipt, db.session,name='HOÁ ĐƠN'))
 admin.add_view(StatsView(name='BÁO CÁO THỐNG KÊ', endpoint='statistical-report'))
 admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
 admin.add_view(ReceiptDetailAdmin(name='CHI TIẾT HOÁ ĐƠN', endpoint='receipt_detail'))
-admin.add_view(RepairPayView(name="Thanh toán phiếu", endpoint="repair_pay"))
+admin.add_view(RepairPayView(name="THANH TOÁN PHIẾU", endpoint="repair_pay"))
 
 
 

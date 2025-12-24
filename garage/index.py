@@ -468,9 +468,10 @@ def pay_repair(repair_id):
     total = repair.total_before_vat * (1 + vat_rate)
 
     txn_ref = f"REPAIR_{repair.id}_{int(time.time())}"
+    user = dao.get_user_by_repairform(repair)
 
     payment = Payment(
-        user_id=current_user.id,
+        user_id=user.id,
         repair_id=repair.id,
         amount=total,
         vat_rate=vat_rate,
@@ -480,6 +481,7 @@ def pay_repair(repair_id):
     )
     db.session.add(payment)
     db.session.commit()
+
 
     return jsonify({
         "code": 200,
@@ -602,7 +604,7 @@ def checkout():
 @login_required
 def choose_payment(payment_id):
     payment = Payment.query.get_or_404(payment_id)
-    is_admin = current_user.role == 'ADMIN'
+    is_admin = current_user.role.name == 'ADMIN'
 
     if request.method == "POST":
         method = request.form.get("payment_method")
@@ -624,8 +626,14 @@ def choose_payment(payment_id):
             payment.status = PaymentStatus.SUCCESS
             db.session.commit()
             return create_receipt(payment)  # tạo Receipt ngay
+    print(is_admin)
+    print(current_user.role)
 
-    return render_template("choose_payment.html", payment=payment, is_admin=is_admin)
+    return render_template(
+        "choose_payment.html",
+        payment=payment,
+        is_admin=is_admin
+    )
 
 
 @app.route('/billing/vnpay_return')
@@ -688,9 +696,8 @@ def pay_momo(payment_id):
     redirectUrl = "http://127.0.0.1:5000/momo_return"
     ipnUrl = "https://preaortic-hokily-bayleigh.ngrok-free.dev/momo_ipn"
     extraData = ""
-    requestType = "captureWallet"  # Đúng cho thanh toán Ví MoMo (hoặc đổi thành "payWithATM" nếu muốn ATM)
+    requestType = "captureWallet"
 
-    # Tạo chữ ký theo đúng thứ tự MoMo yêu cầu (KHÔNG có paymentCode)
     rawSignature = (
         f"accessKey={accessKey}"
         f"&amount={amount}"

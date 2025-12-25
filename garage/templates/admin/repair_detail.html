@@ -20,7 +20,7 @@
 
         <input type="button" class="btn btn-success no-print" value="Thanh toán" onclick="payRepair({{ repair.id }})"/>
         {% elif repair.receipt %}
-        <a href="{{ url_for('receipt_detail.detail', receipt_id=repair.receipt.id) }}"
+        <a href="{{ url_for('receipt.detail', receipt_id=repair.receipt.id) }}"
            class="btn btn-info no-print">
             Xem hóa đơn
         </a>

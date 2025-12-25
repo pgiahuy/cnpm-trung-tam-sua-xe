@@ -632,7 +632,9 @@ def choose_payment(payment_id):
             payment.method = "CASH"
             payment.status = PaymentStatus.SUCCESS
             db.session.commit()
-            return create_receipt(payment)  # tạo Receipt ngay
+            receipt = create_receipt(payment)
+
+            return redirect(url_for("receipt.detail", receipt_id=receipt.id))
     print(is_admin)
     print(current_user.role)
 

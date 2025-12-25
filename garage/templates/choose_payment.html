@@ -61,19 +61,15 @@
                 <img src="{{ url_for('static', filename='images/momo.png') }}"
                      alt="MoMo" style="width: 100%; border-radius: 15px;">
             </button>
+            {% if is_admin %}
+            <button type="submit" name="payment_method" value="cash"
+                        class="btn btn-outline-success cash-btn d-flex align-items-center justify-content-center">
+                    <h4 class="m-0"><b>CASH</b></h4>
+            </button>
+            {% endif %}
         </form>
 
-        <!-- CASH (ADMIN ONLY) -->
-        {% if is_admin %}
-        <form method="POST"
-              action="{{ url_for('repair_pay.pay', repair_id=payment.repair_id) }}"
-              class="d-flex justify-content-center">
-            <button type="submit" name="payment_method" value="cash"
-                    class="btn btn-outline-success cash-btn d-flex align-items-center justify-content-center">
-                <h4 class="m-0"><b>CASH</b></h4>
-            </button>
-        </form>
-        {% endif %}
+
 
     </div>
 </div>

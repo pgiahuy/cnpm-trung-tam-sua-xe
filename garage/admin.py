@@ -483,6 +483,14 @@ class ReceptionFormAdmin(MyAdminModelView):
 
 
 class RepairFormAdmin(MyAdminModelView):
+    @expose('/<int:repair_id>')
+    def detail(self, repair_id, **kwargs):
+        repair = RepairForm.query.get_or_404(repair_id)
+        return self.render(
+            'admin/repair_detail.html',
+            repair=repair,
+            enumerate=enumerate
+        )
     column_list = ['id', 'employee','customer','vehicle_plate',  'reception_form', 'repair_status', 'total_money','created_date']
     column_labels = {
         'id': 'ID',
@@ -545,7 +553,7 @@ class RepairFormAdmin(MyAdminModelView):
                 f'<input type="button" class="btn btn-success no-print" value="Thanh toán" onclick="payRepair({model.id})"/>')
         elif model.receipt:
             return Markup(
-                f'<a class="btn btn-info btn-sm" href="{url_for("receipt_detail.detail", receipt_id=model.receipt.id)}">Xem hóa đơn</a>')
+                f'<a class="btn btn-info btn-sm" href="{url_for("receipt.detail", receipt_id=model.receipt.id)}">Xem hóa đơn</a>')
         return ""
 
     column_list.append('pay')
@@ -575,7 +583,7 @@ class RepairFormAdmin(MyAdminModelView):
     column_formatters = {
         'pay': _pay_formatter,
         'id': lambda v, c, m, p: Markup(
-        f'<a href="{url_for("repair_detail.detail", repair_id=m.id)}">{m.id}</a>'),
+        f'<a href="{url_for("repairform.detail", repair_id=m.id)}">{m.id}</a>'),
 
         'customer': lambda v, c, m, p:m.reception_form.vehicle.customer if m.reception_form else '',
         'total_money': lambda v, c, m, p: f"{m.total_before_vat*(dao.get_vat_value()+1):,.0f} ₫"
@@ -639,89 +647,6 @@ class RepairFormAdmin(MyAdminModelView):
 
 
 
-
-
-class RepairDetailView(BaseView):
-
-    @expose('/')
-    def index(self):
-        return redirect(url_for('admin.index'))
-
-    @expose('/<int:repair_id>')
-    def detail(self, repair_id, **kwargs):
-        repair = RepairForm.query.get_or_404(repair_id)
-        return self.render(
-            'admin/repair_detail.html',
-            repair=repair,
-            enumerate=enumerate
-        )
-
-
-    # def on_model_change(self, form, model, is_created):
-    #     try:
-    #         if form.appointment_id.data:
-    #
-    #             appointment = db.session.get(Appointment, form.appointment_id.data)
-    #             if not appointment:
-    #                 raise ValueError("Lịch không hợp lệ.")
-    #
-    #             vehicle = appointment.vehicle
-    #             customer = vehicle.customer
-    #
-    #             appointment.status = AppointmentStatus.COMPLETED
-    #             db.session.add(appointment)
-    #
-    #             vehicle.vehicle_status = VehicleStatus.RECEIVED
-    #             db.session.add(vehicle)
-    #
-    #         else:
-    #             # === khôgn có lịch (lại CH tiếp nhận) ===
-    #             if form.new_customer.data:
-    #                 customer = db.session.query(Customer).filter_by(phone=form.new_customer_phone.data).first()
-    #                 if not customer:
-    #                     customer = Customer(
-    #                         full_name=form.new_customer.data,
-    #                         phone=form.new_customer_phone.data
-    #                     )
-    #                     db.session.add(customer)
-    #                     db.session.flush()
-    #             elif form.customer_id.data:
-    #                 customer = db.session.get(Customer, form.customer_id.data)
-    #             else:
-    #                 raise ValueError("Phải chọn khách hàng hoặc nhập khách hàng mới.")
-    #
-    #             if form.new_vehicle_plate.data:
-    #                 vehicle = Vehicle(
-    #                     license_plate=form.new_vehicle_plate.data,
-    #                     vehicle_type=form.new_vehicle_type.data or "unknown",
-    #                     vehicle_status=VehicleStatus.RECEIVED,
-    #                     customer_id=customer.id
-    #                 )
-    #                 db.session.add(vehicle)
-    #                 db.session.flush()
-    #             elif form.vehicle_id.data:
-    #                 vehicle = db.session.get(Vehicle, form.vehicle_id.data)
-    #
-    #                 # xe chuyển sang RECEIVED
-    #                 vehicle.vehicle_status = VehicleStatus.RECEIVED
-    #                 db.session.add(vehicle)
-    #             else:
-    #                 raise ValueError("Phải chọn xe hoặc nhập xe mới.")
-    #
-    #         # Gán cho phiếu tiếp nhận
-    #         model.vehicle_id = vehicle.id
-    #         model.employee_id = (
-    #             current_user.employee.id
-    #             if hasattr(current_user, 'employee') and current_user.employee
-    #             else form.employee.data.id
-    #         )
-    #
-    #         db.session.add(model)
-    #
-    #     except Exception as e:
-    #         db.session.rollback()
-    #         raise e
-
 class SparePartAdmin(AdminAccessMixin, MyAdminModelView):
     column_list = ['name', 'unit_price', 'unit', 'supplier', 'image_url', 'inventory']
 
@@ -768,6 +693,14 @@ class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
     }
 
 class ReceiptAdmin(MyAdminModelView):
+    @expose('/<int:receipt_id>')
+    def detail(self, receipt_id, **kwargs):
+        receipt = Receipt.query.get_or_404(receipt_id)
+        return self.render(
+            'admin/receipt_details_admin.html',
+            receipt=receipt,
+            enumerate=enumerate
+        )
     column_list = ['id','customer_id','type','vat_rate','total_paid','payment_method']
     column_labels = {
         'id':'ID',
@@ -778,26 +711,14 @@ class ReceiptAdmin(MyAdminModelView):
         'payment_method':'Phương thức'
     }
     column_formatters = {
-        'id': lambda v, c, m, p: Markup(f'<a href="{url_for("receipt_detail.detail", receipt_id=m.id)}">{m.id}</a>'),
+        'id': lambda v, c, m, p: Markup(f'<a href="{url_for("receipt.detail", receipt_id=m.id)}">{m.id}</a>'),
         'total_paid': lambda v, c, m, p: f"{m.total_paid:,.0f} ₫" if m.total_paid else "0 ₫"
     }
 
     can_edit = False
     can_create = False
 
-class ReceiptDetailAdmin(BaseView):
-    @expose('/')
-    def index(self):
-        return redirect(url_for('admin.index'))
 
-    @expose('/<int:receipt_id>')
-    def detail(self, receipt_id, **kwargs):
-        receipt = Receipt.query.get_or_404(receipt_id)
-        return self.render(
-            'admin/receipt_details_admin.html',
-            receipt=receipt,
-            enumerate=enumerate
-        )
 
 class StatsView(AdminAccessMixin,BaseView):
     @expose('/export-excel', methods=['POST'])
@@ -877,74 +798,8 @@ class StatsView(AdminAccessMixin,BaseView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.role == UserRole.ADMIN
 
-class RepairPayView(BaseView):
-    @expose('/')
-    def index(self):
-        return redirect(url_for('admin.index'))
-
-    @expose('/pay/<int:repair_id>', methods=["GET", "POST"])
-    @login_required
-    def pay(self, repair_id):
-        repair = RepairForm.query.get_or_404(repair_id)
-
-        # Nếu đã có receipt → không tạo nữa
-        if repair.receipt:
-            flash("Phiếu này đã được thanh toán", "info")
-            return redirect(url_for('receipt_detail.detail', receipt_id=repair.receipt.id))
-
-        # Logic CASH trực tiếp
-        try:
-            receipt = Receipt(
-                type='REPAIR',
-                customer=repair.reception_form.vehicle.customer,
-                subtotal=repair.total_before_vat,
-                vat_rate=0.1,
-                total_paid=repair.total_before_vat * 1.1,
-                payment_method='CASH'
-            )
-            db.session.add(receipt)
-            db.session.flush()
-
-            for d in repair.details:
-                if d.service_price and d.service_price > 0:
-                    db.session.add(ReceiptItem(
-                        receipt_id=receipt.id,
-                        repair_detail_id=d.id,
-                        item_type=ReceiptItemType.SERVICE,
-                        service_id=d.service_id,
-                        quantity=1,
-                        unit_price=d.service_price,
-                        total_price=d.service_price
-                    ))
-                if d.spare_part_id and d.spare_part_price:
-                    db.session.add(ReceiptItem(
-                        receipt_id=receipt.id,
-                        repair_detail_id=d.id,
-                        item_type=ReceiptItemType.SPARE_PART,
-                        spare_part_id=d.spare_part_id,
-                        quantity=d.quantity,
-                        unit_price=d.spare_part_price,
-                        total_price=d.quantity * d.spare_part_price
-                    ))
-
-            repair.repair_status = RepairStatus.PAID
-            repair.vehicle.vehicle_status = VehicleStatus.DELIVERED
-            repair.receipt = receipt
-
-            db.session.commit()
-            flash("Đã tạo hóa đơn thanh toán bằng CASH!", "success")
-            return redirect(url_for('receipt_detail.detail', receipt_id=receipt.id))
-
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Thanh toán thất bại: {str(e)}", "danger")
-            return redirect(url_for('repairpayview.index'))
-
-
 
 admin = Admin(app=app, name='GARAGE ADMIN',index_view=MyAdminHome(name='TRANG CHỦ'))
-
-
 admin.add_view(UserAdmin(User, db.session,name='TÀI KHOẢN'))
 admin.add_view(CustomerAdmin(Customer, db.session,name='KHÁCH HÀNG'))
 admin.add_view(EmployeeAdmin(Employee, db.session,name='NHÂN VIÊN'))
@@ -958,9 +813,6 @@ admin.add_view(SystemConfigAdmin(SystemConfig, db.session,name='QUY ĐỊNH'))
 admin.add_view(ReceiptAdmin(Receipt, db.session,name='HOÁ ĐƠN'))
 
 admin.add_view(StatsView(name='BÁO CÁO THỐNG KÊ', endpoint='statistical-report'))
-admin.add_view(RepairDetailView(name="CHI TIẾT SỬA CHỮA", endpoint="repair_detail"))
-admin.add_view(ReceiptDetailAdmin(name='CHI TIẾT HOÁ ĐƠN', endpoint='receipt_detail'))
-admin.add_view(RepairPayView(name="THANH TOÁN PHIẾU", endpoint="repair_pay"))
 
 
 

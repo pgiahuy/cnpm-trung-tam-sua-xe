@@ -3,7 +3,7 @@ import json
 
 from garage import db, app
 from garage.models import (User, Service, SparePart, Customer, UserRole, Vehicle, Appointment, AppointmentStatus,
-                           Receipt, ReceptionForm, RepairForm, SystemConfig, RepairDetail)
+                           Receipt, ReceptionForm, RepairForm, SystemConfig, RepairDetail, VehicleStatus)
 from datetime import datetime, date, time
 from flask_login import current_user
 import re
@@ -43,6 +43,13 @@ def get_user_by_repairform(repair):
     print(user.id)
 
     return user
+
+def vehicle_in_process(license_plate):
+    v =  Vehicle.query.filter_by(license_plate=license_plate).first()
+    if v and v.vehicle_status != VehicleStatus.DELIVERED:
+        return True
+
+    return False
 
 def check_slot_available(check_date=None):
     if check_date is None:
@@ -170,6 +177,7 @@ def add_appointment(vehicle_type, license_plate, description, time_slot, selecte
 
         if vehicle:
             vehicle_id = vehicle.id
+            vehicle.vehicle_status = VehicleStatus.PENDING_APPOINTMENT
         else:
             new_vehicle = Vehicle(
                 license_plate=license_plate,

@@ -74,9 +74,8 @@ class MyAdminHome(AdminIndexView):
             UserRole.ADMIN, UserRole.RECEPTIONIST, UserRole.CASHIER, UserRole.TECHNICIAN
         )
     def inaccessible_callback(self, name, **kwargs):
-        # Nếu không có quyền, trả về trang 403
-        return render_template('errors/403.html'), 403
 
+        return render_template('errors/403.html'), 403
 
 
 
@@ -331,7 +330,8 @@ class ReceptionFormAdmin(MyAdminModelView):
         'vehicle_id': SelectField(
             'Chọn xe',
             coerce=lambda x: int(x) if x else None,
-            validators=[Optional()]
+            validators=[Optional()],
+            validate_choice = False
         ),
 
         'is_new_customer': BooleanField('Khách hàng mới'),
@@ -435,11 +435,11 @@ class ReceptionFormAdmin(MyAdminModelView):
                             raise ValueError("Vui lòng chọn khách hàng!")
                         customer = db.session.get(Customer, int(form.customer_id.data))
 
-
+                    is_new = bool(form.is_new_vehicle.data)
                     #  Xe
-                    if form.is_new_vehicle.data:
-                        print(form.new_vehicle_type.data)
-                        print(form.new_vehicle_plate.data)
+                    if is_new:
+                        # print(form.new_vehicle_type.data)
+                        # print(form.new_vehicle_plate.data)
                         if not dao.validate_license_plate(form.new_vehicle_plate.data, form.new_vehicle_type.data):
                             raise ValueError("Biển số xe không hợp lệ!")
 
@@ -463,6 +463,8 @@ class ReceptionFormAdmin(MyAdminModelView):
                         if not form.vehicle_id.data:
                             raise ValueError("Vui lòng chọn xe!")
                         vehicle = db.session.get(Vehicle, int(form.vehicle_id.data))
+                        if vehicle.vehicle_status != VehicleStatus.DELIVERED:
+                            raise ValueError("Xe đang trong tiến trình!")
 
                         vehicle.vehicle_status = VehicleStatus.RECEIVED
                         db.session.add(vehicle)

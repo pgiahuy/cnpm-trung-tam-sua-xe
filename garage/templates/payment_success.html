@@ -154,7 +154,7 @@
         </tr>
     </table>
 
-    {% if current_user.role.name == "CUSTOMER" %}
+    {% if current_user.role.name == "USER" %}
         <a href="/">Quay về trang chủ</a>
     {% else %}
         <a href="/admin/receipt_detail/{{ receipt.id }}">Quay về trang chủ</a>

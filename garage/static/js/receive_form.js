@@ -18,7 +18,7 @@
         if (group) group.style.display = '';
     }
 
-    // 1. Receive type
+    //Receive type
     function getReceiveType() {
         const el = qs('input[name="receive_type"]:checked');
         return el ? el.value : 'walk_in';
@@ -35,7 +35,7 @@
         }
     }
 
-    // 2. Khách cũ/mới
+    //Khách cũ/mới
     function isNewCustomer() {
         return qs('input[name="is_new_customer"]:checked')?.checked || false;
     }
@@ -52,7 +52,7 @@
         }
     }
 
-    // 3. Xe cũ/mới
+    //Xe cũ/mới
     function isNewVehicle() {
         return qs('input[name="is_new_vehicle"]:checked')?.checked || false;
     }
@@ -69,7 +69,7 @@
         }
     }
 
-    // 4. Load xe theo khách
+    // Load xe theo khách
     function loadVehicles(customerId, vehicleSelect, selectedVehicleId = null) {
         if (!customerId) {
             vehicleSelect.innerHTML = '<option value="">-- Chọn khách hàng trước --</option>';
@@ -104,7 +104,7 @@
             });
     }
 
-    // INIT
+
     document.addEventListener('DOMContentLoaded', function () {
         const receiveRadios = qsa('input[name="receive_type"]');
         const customerCheckbox = qsa('input[name="is_new_customer"]');
@@ -114,7 +114,6 @@
         customerCheckbox.forEach(el => el.addEventListener('change', toggleCustomerType));
         vehicleCheckbox.forEach(el => el.addEventListener('change', toggleVehicleType));
 
-        // Trạng thái ban đầu
         toggleReceiveType();
         toggleCustomerType();
         toggleVehicleType();
@@ -129,7 +128,7 @@
                 loadVehicles(this.value, vehicleSelect, selectedVehicleId);
             });
 
-            // === QUAN TRỌNG: Khi EDIT → lấy vehicle_id hiện tại từ form ===
+
             const currentVehicleId = vehicleSelect.value || qs('input[name="vehicle_id"][type="hidden"]')?.value;
 
             if (customerSelect.value) {

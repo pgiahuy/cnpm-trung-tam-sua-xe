@@ -36,7 +36,11 @@
     <h1>Thanh toán thất bại</h1>
     <p>Giao dịch không thành công hoặc đã bị hủy.</p>
 
-    <a href="/cart">Quay lại giỏ hàng</a>
+    {% if current_user.role.name == "USER" %}
+        <a href="/">Quay về trang chủ</a>
+    {% else %}
+        <a href="/admin/receipt_detail/{{ receipt.id }}">Quay về trang chủ</a>
+    {% endif %}
 </div>
 </body>
 </html>

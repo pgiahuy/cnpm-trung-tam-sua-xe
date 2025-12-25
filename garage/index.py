@@ -12,8 +12,8 @@ from flask_mail import Message
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.utils import redirect
 
-import dao
-from garage import app, login, db, utils, mail
+
+from garage import app, login, db, utils, mail, dao
 from garage.decorators import anonymous_required
 from garage.models import UserRole, AppointmentStatus, Service, SparePart, PaymentStatus, Receipt, Payment, ReceiptItem, \
     RepairForm, SystemConfig, Vehicle, Customer, User, VehicleStatus, RepairStatus, ReceiptItemType
@@ -188,6 +188,11 @@ def booking():
             license_plate = form_data['licensePlate']
             description = form_data['description']
             time_slot = form_data['scheduleTime']
+
+            if dao.vehicle_in_process(license_plate):
+                flash("Xe của bạn đang trong tiến trình!", "danger")
+                return redirect(url_for("booking"))
+
 
             slot_check = dao.check_slot_available(check_date=selected_date)
             if not slot_check["success"]:

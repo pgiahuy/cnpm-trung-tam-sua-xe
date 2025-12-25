@@ -547,7 +547,7 @@ def create_receipt(payment):
     elif payment.type == "REPAIR":
 
         repair = payment.repair
-
+        receipt.repair_id = repair.id
         for d in repair.details:
 
             if d.service_price and d.service_price > 0:

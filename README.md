@@ -151,7 +151,7 @@ pip install -r requirements.txt
 
 - Tạo database 'garage' trong MySQL
 
-5. Khởi chạy ứng dụng
+### 5. Khởi chạy ứng dụng
 ```
 python index.py
 ```
@@ -269,6 +269,6 @@ https://giahuy123.pythonanywhere.com/
 
 - Phan Gia Huy
 - Nguyễn Lý Mị Nương
-- Nguyễn Lý Kim Ngân
+- Nguyễn Thị Kim Ngân
 
-> Lưu ý: Các thông tin cấu hình chỉ là dữ liệu mẫu và không có giá trị sử dụng thực tế
+> Lưu ý: Các thông tin cấu hình chỉ là dữ liệu mẫu và không có giá trị sử dụng trên thực tế

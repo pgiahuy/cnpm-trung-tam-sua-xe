@@ -130,19 +130,19 @@
 
                     <td class="text-center">
                         {% if admin_view.__class__.__name__ == 'RepairFormAdmin'
-      and admin_view.can_edit
-      and row.repair_status.value != 'PAID' %}
-<a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
-   class="btn btn-warning btn-sm">
-    <i class="fa fa-edit"></i>
-</a>
-{% elif admin_view.__class__.__name__ != 'RepairFormAdmin'
-        and admin_view.can_edit %}
-<a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
-   class="btn btn-warning btn-sm">
-    <i class="fa fa-edit"></i>
-</a>
-{% endif %}
+                        and admin_view.can_edit
+                        and row.repair_status.value != 'PAID' %}
+                        <a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
+                           class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        {% elif admin_view.__class__.__name__ != 'RepairFormAdmin'
+                        and admin_view.can_edit %}
+                        <a href="{{ url_for(admin_view.endpoint + '.edit_view', id=row.id) }}"
+                           class="btn btn-warning btn-sm">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        {% endif %}
 
                         {% if admin_view.can_delete %}
                         <form action="{{ url_for(admin_view.endpoint + '.delete_view', id=row.id) }}" method="post"

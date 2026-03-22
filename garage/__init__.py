@@ -54,7 +54,8 @@ cloudinary.config(
 )
 
 db = SQLAlchemy(app)
-login = LoginManager(app)
+login = LoginManager()
+ # nếu bạn muốn redirect login
 mail = Mail(app)
 migrate = Migrate(app, db)
 

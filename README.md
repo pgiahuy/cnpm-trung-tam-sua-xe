@@ -3,6 +3,18 @@
 Nền tảng quản trị toàn diện dành cho **trung tâm sửa chữa xe**, tích hợp **E-commerce** và hệ thống theo dõi trạng thái dịch vụ
 
 ---
+## Mục lục
+- [Giới thiệu](#giới-thiệu)
+- [Các tính năng chính](#các-tính-năng-chính)
+- [Quy trình nghiệp vụ](#quy-trình-nghiệp-vụ)
+- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
+- [Lược đồ](#lược-đồ-cơ-sở-dữ-liệu)
+- [Hướng dẫn cài đặt](#hướng-dẫn-cài-đặt)
+- [Danh sách tài khoản demo](#danh-sách-tài-khoản-demo)
+- [Hình ảnh minh hoạ](#hình-ảnh-minh-hoạ)
+- [Web triển khai](#web-đã-được-triển-khai-tại)
+
+---
 
 ## Giới thiệu
 
@@ -106,8 +118,11 @@ Hệ thống giúp:
 
 
 ---
-## Ảnh Lược đồ cơ sở dữ liệu
+## Lược đồ cơ sở dữ liệu
+![ERD](docs/images/erd.png)
 
+## Lược đồ UseCase tổng quát
+![UC](docs/images/uc.png)
 ## Hướng dẫn cài đặt
 
 ### 1. Clone dự án
@@ -144,19 +159,116 @@ Truy cập:
 ```
 http://127.0.0.1:5000
 ```
-
+---
 ## Web đã được triển khai tại:
 ```
 https://giahuy123.pythonanywhere.com/
 ```
 
+---
 ## Danh sách tài khoản demo
 > Vui lòng không thay đổi các dữ liệu mẫu
 
-| Vai trò        | Username | Password |
-|---------------|----------|----------|
-| Admin     | `admin`  | `123`  |
-| Khách hàng | `Có thể đăng ký mới`  |  |
+| Vai trò        | Username             | Password |
+|---------------|----------------------|----------|
+| Admin     | `admin`              | `123`    |
+| Khách hàng | `huy`                | `123`    |
+| Khách hàng | `Có thể đăng ký mới` |          |
+
+---
+## Hình ảnh minh hoạ
+
+### Quản trị
+
+<table>
+<tr>
+<td align="center">
+<b>Trang chủ quản trị</b><br>
+<img src="docs/images/admin1.png" width="100%">
+</td>
+
+<td align="center">
+<b>Quản lý khách hàng</b><br>
+<img src="docs/images/admin2.png" width="100%">
+</td>
+</tr>
+
+<tr>
+<td align="center">
+<b>Quản lý phiếu sửa chữa</b><br>
+<img src="docs/images/admin3.png" width="100%">
+</td>
+
+<td align="center">
+<b>Quản lý xe</b><br>
+<img src="docs/images/admin4.png" width="100%">
+</td>
+</tr>
+
+<tr>
+<td align="center">
+<b>Thanh toán tại cửa hàng</b><br>
+<img src="docs/images/payment.png" width="100%">
+</td>
+
+<td align="center">
+<b>Thanh toán MOMO</b><br>
+<img src="docs/images/momo.png" width="100%">
+</td>
+</tr>
+
+<tr>
+<td align="center">
+<b>Xem phiếu sửa chữa</b><br>
+<img src="docs/images/repair_admin.png" width="100%">
+</td>
 
 
-một số ảnh minh hoạ
+</table>
+
+
+
+
+## Khách hàng
+
+
+<table>
+
+<tr>
+<td align="center">
+<b>Trang chủ</b><br>
+<img src="docs/images/index.png" width="100%">
+</td>
+
+<td align="center">
+
+<b>Xem lại hoá đơn thanh toán</b><br>
+<img src="docs/images/xem_hd.png" width="100%">
+</td>
+</tr>
+
+
+<tr>
+<td align="center">
+<b>Theo dõi tình trạng xe</b><br>
+<img src="docs/images/xem_xe.png" width="100%">
+</td>
+
+<td align="center">
+<b>Xem lịch sử thanh toán</b><br>
+<img src="docs/images/payment_history.png" width="100%">
+</td>
+</tr>
+
+
+</table>
+
+
+---
+## Danh sách thành viên
+
+- Phan Gia Huy
+- Nguyễn Lý Mị Nương
+- Nguyễn Lý Kim Ngân
+
+> Lưu ý: Các thông tin cấu hình chỉ là dữ liệu mẫu và không có giá trị sử dụng thực tế

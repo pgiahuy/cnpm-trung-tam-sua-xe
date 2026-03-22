@@ -78,7 +78,6 @@ class MyAdminHome(AdminIndexView):
         return render_template('errors/403.html'), 403
 
 
-
 class MyAdminModelView(ModelView):
     list_template = "admin/list.html"
 
@@ -89,6 +88,7 @@ class MyAdminModelView(ModelView):
 
     def inaccessible_callback(self, name, **kwargs):
         return render_template('errors/403.html'), 403
+
 
 class ServiceAdmin(AdminAccessMixin, MyAdminModelView):
     column_list = ['name', 'description', 'active', 'price', 'image', 'created_date']
@@ -127,6 +127,7 @@ class ServiceAdmin(AdminAccessMixin, MyAdminModelView):
             )
             model.image = upload_result.get("secure_url")
 
+
 class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
     column_labels = {
         'full_name': 'Họ tên',
@@ -147,6 +148,7 @@ class CustomerAdmin(AdminAccessMixin,MyAdminModelView):
         'phone',
     ]
 
+
 class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['full_name',  'phone','active', 'user']
     column_labels = {
@@ -165,6 +167,8 @@ class EmployeeAdmin(AdminAccessMixin,MyAdminModelView):
         'full_name',
         'phone',
     ]
+
+
 class UserAdmin(AdminAccessMixin, MyAdminModelView):
     column_list = ['username', 'active', 'role', 'avatar', 'created_date']
 
@@ -179,6 +183,8 @@ class UserAdmin(AdminAccessMixin, MyAdminModelView):
     column_formatters = {
         'avatar': _image_formatter
     }
+
+
     form_excluded_columns = ('avatar',)
 
     form_columns = ['username', 'password', 'avatar_upload', 'role', 'active']
@@ -209,6 +215,7 @@ class UserAdmin(AdminAccessMixin, MyAdminModelView):
             if not model.password or len(form.password.data) < 32:
                 model.password = md5_hash(form.password.data)
 
+
 class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
     can_create = False
     column_list = ['license_plate', 'vehicle_type', 'customer', 'vehicle_status', 'receptions']
@@ -222,7 +229,6 @@ class VehicleAdmin(AdminAccessMixin,MyAdminModelView):
     column_searchable_list = [
         'license_plate',
     ]
-
 
 
 class AppointmentAdmin(AdminAccessMixin,MyAdminModelView):
@@ -481,7 +487,6 @@ class ReceptionFormAdmin(MyAdminModelView):
             raise ValidationError(f"Lỗi tạo phiếu: {str(e)}")
 
 
-
 class RepairFormAdmin(MyAdminModelView):
     @expose('/<int:repair_id>')
     def detail(self, repair_id, **kwargs):
@@ -646,7 +651,6 @@ class RepairFormAdmin(MyAdminModelView):
             abort(403)
 
 
-
 class SparePartAdmin(AdminAccessMixin, MyAdminModelView):
     column_list = ['name', 'unit_price', 'unit', 'supplier', 'image_url', 'inventory']
 
@@ -683,6 +687,7 @@ class SparePartAdmin(AdminAccessMixin, MyAdminModelView):
             )
             model.image_url = upload_result.get("secure_url")
 
+
 class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
     column_list = ['id','value']
     form_columns = ['id', 'value']
@@ -691,6 +696,7 @@ class SystemConfigAdmin(AdminAccessMixin,MyAdminModelView):
         'id' : 'Quy định',
         'value' : 'Giá trị'
     }
+
 
 class ReceiptAdmin(MyAdminModelView):
     @expose('/<int:receipt_id>')
@@ -717,7 +723,6 @@ class ReceiptAdmin(MyAdminModelView):
 
     can_edit = False
     can_create = False
-
 
 
 class StatsView(AdminAccessMixin,BaseView):
